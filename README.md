@@ -15,8 +15,8 @@ Managers:
 Developers:
 
 -   [Dé Yi BANH](https://github.com/deyibanh)
--   Fabien FRICK
--   Damien SABOURAUD
+-   [Fabien FRICK](https://github.com/lostmind84)
+-   [Damien SABOURAUD](https://github.com/MB2M)
 
 ## Install
 
