@@ -1,6 +1,10 @@
-node_modules/
-.DS_Store
 .env
+.DS_Store
+.idea
+artifacts
+cache
 client/node_modules
-
-.idea/
+coverage
+coverage.json
+node_modules
+typechain
