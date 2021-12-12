@@ -15,8 +15,8 @@ Managers:
 Developers:
 
 -   [Dé Yi BANH](https://github.com/deyibanh)
--   Fabien FRICK
--   Damien SABOURAUD
+-   [Fabien FRICK](https://github.com/lostmind84)
+-   [Damien SABOURAUD](https://github.com/MB2M)
 
 ## Install
 
@@ -37,13 +37,13 @@ Then create your own `.env` file and add your parameters:
 We use Hardhat to deploy the smart contracts.
 
 To compile smart contracts:<br />
-`npx hardhat run scripts/deploy.js`
+`$> npx hardhat compile`
 
 To deploy smart contracts on local Hardhat network:<br />
-`npx hardhat run scripts/deploy.js`
+`$> npx hardhat run scripts/deploy.js`
 
 To deploy smart contracts on specific network (like ropsten or mainnet):<br />
-`npx hardhat run scripts/deploy.js --network <YOUR NETWORK NAME>`
+`$> npx hardhat run scripts/deploy.js --network <YOUR NETWORK NAME>`
 
 ## Docs
 
