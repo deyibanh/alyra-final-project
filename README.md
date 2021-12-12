@@ -16,10 +16,24 @@ Developers:
 - Fabien FRICK
 - Damien SABOURAUD
 
+## Install
+
+To install the project, just launch:<br />
+`$> npm install`
+
+## Configuration
+
+Configure the project by copying the variable environment from the `env.dist` file.<br />
+Then create your own `.env` file and add your parameters.
+
 ## Docs
 
-[Managers documentation](./docs/managers)<br />
-[Developers documentation](./docs/developers)
+Developers documentation:
+- [Avoiding Common Attacks](./docs/developers/avoiding_common_attacks.md)
+- [Deployed Addresses](./docs/developers/deployed_addresses.md)
+- [Design Pattern Decisions](./docs/developers/design_pattern_decisions.md)
+- [Natspec](./docs/developers/natspec.md)
+- [Test Explication](./docs/developers/test_explication.md)
 
 ## Copyright & License
 
