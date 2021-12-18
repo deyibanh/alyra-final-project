@@ -1,0 +1,112 @@
+//SPDX-License-Identifier: Unlicense
+pragma solidity ^0.8.9;
+
+import "./interfaces/IConops.sol";
+import "./Administrable.sol";
+
+/** 
+    @title Voting system
+    @author Damien
+    @notice This contract manage all the conops. Admins can add a simple Conop^s and activate/suspend it
+ */
+contract Conops is Administrable, IConops{
+
+    SimpleConops[] private simpleConopsList;
+
+    /**
+        @notice Add a Conops
+        @dev AirRisk is constructed with the lists _entities and _airRiskType.
+        @param _name Name of the conops,
+        @param _startingPoint Solution used to secure the starting point,
+        @param _endPoint Solution used to secure the arrivfal point,
+        @param _crossRoad Solution used to secure the road,
+        @param _exclusionZone Solution used to secure a specific zone,
+        @param _entities List of labels representing the risky entities,
+        @param _airRiskType List of uint whoes refer to the enum AirRiskType for the corresponding entity,
+        @param _grc Ground Risk score,
+        @param _arc Air Risk score,
+     */
+    function addConops(
+        string memory _name,
+        string memory _startingPoint,
+        string memory _endPoint,
+        string memory _crossRoad,
+        string memory _exclusionZone,
+        string[] memory _entities,
+        uint256[] memory _airRiskType,
+        uint8 _grc,
+        uint8 _arc
+    ) external onlyAdmins returns (uint256 conopsID) {
+        require(
+            _entities.length == _airRiskType.length,
+            "not same number of element in lists"
+        );
+        SimpleConops storage simpleConops = simpleConopsList.push();
+           
+        simpleConops.activated = true;
+        simpleConops.name = _name;
+        simpleConops.startingPoint = _startingPoint;
+        simpleConops.endPoint = _endPoint;
+        simpleConops.crossRoad = _crossRoad;
+        simpleConops.exclusionZone = _exclusionZone;
+        simpleConops.grc = _grc;
+        simpleConops.arc = _arc;
+
+        for (uint256 i = 0; i < _entities.length; i++) {
+            AirRisk memory airRisk = AirRisk(
+                _entities[i],
+                AirRiskType(_airRiskType[i])
+            );
+            simpleConops.airRiskList.push(airRisk);
+        }
+
+        conopsID = simpleConopsList.length - 1;
+
+        emit ConopsCreated(conopsID, _name);
+    }
+
+    /**
+        @notice Set a specific conops activated status to false
+        @param _conopsID Index of the conops in simpleConopsList array:
+     */
+    function suspend(uint256 _conopsID) external onlyAdmins {
+        require(
+            _conopsID < simpleConopsList.length,
+            "Conops does not exist"
+        );
+        require(
+            simpleConopsList[_conopsID].activated,
+            "Conops already suspended"
+        );
+        simpleConopsList[_conopsID].activated = false;
+
+        emit ConopsSuspended(_conopsID);
+    }
+
+    /**
+        @notice Set a specific conops activated status to true
+        @param _conopsID Index of the conops in simpleConopsList array:
+     */
+    function activate(uint256 _conopsID) external onlyAdmins {
+        require(
+            _conopsID < simpleConopsList.length,
+            "Conops does not exist"
+        );
+        require(
+            !simpleConopsList[_conopsID].activated,
+            "Conops already activated"
+        );
+        simpleConopsList[_conopsID].activated = true;
+
+        emit ConopsActivated(_conopsID);
+    }
+
+    function viewConops(uint _conopsID) external view returns(SimpleConops memory) {
+        return simpleConopsList[_conopsID];
+    }
+
+    function viewAllConops() external view returns(SimpleConops[] memory) {
+        return simpleConopsList;
+    }
+
+}
