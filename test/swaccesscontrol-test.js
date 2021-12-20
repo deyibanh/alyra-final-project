@@ -163,66 +163,66 @@ describe("SWAccessControl", function () {
         });
     });
 
-    // describe("setting role admin", function () {
-    //     beforeEach(async function () {
-    //         const receipt = await accessControl.setRoleAdmin(
-    //             ROLE,
-    //             OTHER_ROLE
-    //         );
-    //         // expectEvent(receipt, "RoleAdminChanged", {
-    //         //     role: ROLE,
-    //         //     previousAdminRole: DEFAULT_ADMIN_ROLE,
-    //         //     newAdminRole: OTHER_ROLE,
-    //         // });
+    describe("setting role admin", function () {
+        beforeEach(async function () {
+            const receipt = await accessControl.setRoleAdmin(
+                ROLE,
+                OTHER_ROLE
+            );
+            // expectEvent(receipt, "RoleAdminChanged", {
+            //     role: ROLE,
+            //     previousAdminRole: DEFAULT_ADMIN_ROLE,
+            //     newAdminRole: OTHER_ROLE,
+            // });
 
-    //         await accessControl.grantRole(OTHER_ROLE, otherAdmin.address);
-    //     });
+            await accessControl.grantRole(OTHER_ROLE, otherAdmin.address);
+        });
 
-    //     it("a role's admin role can be changed", async function () {
-    //         expect(await accessControl.getRoleAdmin(ROLE)).to.equal(
-    //             OTHER_ROLE
-    //         );
-    //     });
+        it("a role's admin role can be changed", async function () {
+            expect(await accessControl.getRoleAdmin(ROLE)).to.equal(
+                OTHER_ROLE
+            );
+        });
 
-    //     it("the new admin can grant roles", async function () {
-    //         const receipt = await accessControl.connect(otherAdmin).grantRole(
-    //             ROLE,
-    //             authorized.address
-    //         );
-    //         // expectEvent(receipt, "RoleGranted", {
-    //         //     account: authorized,
-    //         //     role: ROLE,
-    //         //     sender: otherAdmin,
-    //         // });
-    //     });
+        it("the new admin can grant roles", async function () {
+            const receipt = await accessControl.connect(otherAdmin).grantRole(
+                ROLE,
+                authorized.address
+            );
+            // expectEvent(receipt, "RoleGranted", {
+            //     account: authorized,
+            //     role: ROLE,
+            //     sender: otherAdmin,
+            // });
+        });
 
-    //     it("the new admin can revoke roles", async function () {
-    //         await accessControl.connect(otherAdmin).grantRole(ROLE, authorized.address);
-    //         const receipt = await accessControl.connect(otherAdmin).revokeRole(
-    //             ROLE,
-    //             authorized.address
-    //         );
-    //         // expectEvent(receipt, "RoleRevoked", {
-    //         //     account: authorized,
-    //         //     role: ROLE,
-    //         //     sender: otherAdmin,
-    //         // });
-    //     });
+        it("the new admin can revoke roles", async function () {
+            await accessControl.connect(otherAdmin).grantRole(ROLE, authorized.address);
+            const receipt = await accessControl.connect(otherAdmin).revokeRole(
+                ROLE,
+                authorized.address
+            );
+            // expectEvent(receipt, "RoleRevoked", {
+            //     account: authorized,
+            //     role: ROLE,
+            //     sender: otherAdmin,
+            // });
+        });
 
-    //     it("a role's previous admins no longer grant roles", async function () {
-    //         await expect(
-    //             accessControl.grantRole(ROLE, authorized.address)).to.be.revertedWith(
-    //             `AccessControl: account ${admin.address.toLowerCase()} is missing role ${OTHER_ROLE}`
-    //         );
-    //     });
+        it("a role's previous admins no longer grant roles", async function () {
+            await expect(
+                accessControl.grantRole(ROLE, authorized.address)).to.be.revertedWith(
+                `AccessControl: account ${admin.address.toLowerCase()} is missing role ${OTHER_ROLE}`
+            );
+        });
 
-    //     it("a role's previous admins no longer revoke roles", async function () {
-    //         await expect(
-    //             accessControl.revokeRole(ROLE, authorized.address)).to.be.revertedWith(
-    //             `AccessControl: account ${admin.address.toLowerCase()} is missing role ${OTHER_ROLE}`
-    //         );
-    //     });
-    // });
+        it("a role's previous admins no longer revoke roles", async function () {
+            await expect(
+                accessControl.revokeRole(ROLE, authorized.address)).to.be.revertedWith(
+                `AccessControl: account ${admin.address.toLowerCase()} is missing role ${OTHER_ROLE}`
+            );
+        });
+    });
     // describe("onlyRole modifier", function () {
     //     beforeEach(async function () {
     //         await accessControl.grantRole(ROLE, authorized.address);

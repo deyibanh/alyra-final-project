@@ -20,5 +20,9 @@ contract SWAccessControl is AccessControl{
     constructor() {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
+
+    function setRoleAdmin(bytes32 role, bytes32 adminRole) external onlyRole(getRoleAdmin(role)) {
+        _setRoleAdmin(role, adminRole);
+    }
     
 }
