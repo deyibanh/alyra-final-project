@@ -1,14 +1,30 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
+let conops, accessControl, owner, addr1, role_admin;
+
+const deploy = async () => {
+    [owner, addr1] = await ethers.getSigners();
+
+        const AccessControl = await ethers.getContractFactory(
+            "SWAccessControl"
+        );
+        accessControl = await AccessControl.deploy();
+        await accessControl.deployed();
+        role_admin = await accessControl.ADMIN_ROLE();        
+        await accessControl.grantRole(role_admin, owner.address);
+
+        const Conops = await ethers.getContractFactory("ConopsManager");
+        conops = await Conops.deploy(accessControl.address);
+        await conops.deployed();
+    
+    return [conops, accessControl]
+}
+
 describe("Conops", function () {
-    let conops, owner, addr1;
 
     beforeEach(async () => {
-        const Conops = await ethers.getContractFactory("Conops");
-        conops = await Conops.deploy();
-        await conops.deployed();
-        [owner, addr1] = await ethers.getSigners();
+        await deploy()
     });
 
     it("Should return the added conops", async () => {
@@ -61,18 +77,14 @@ describe("Conops", function () {
                     4,
                     5
                 )
-        ).to.be.revertedWith("not admin or owner");
+        ).to.be.revertedWith("you don't have the role");
     });
 });
 
 describe("Conops activation", () => {
-    let conops, owner, addr1;
 
     before(async () => {
-        const Conops = await ethers.getContractFactory("Conops");
-        conops = await Conops.deploy();
-        await conops.deployed();
-        [owner, addr1] = await ethers.getSigners();
+        await deploy()
         const addConopsTx = await conops.addConops(
             "test1",
             "with 4 plots",
@@ -88,15 +100,15 @@ describe("Conops activation", () => {
         await addConopsTx.wait();
     });
 
-    it("should suspend conops", async () => {
-        const disableConopsTx = await conops.suspend(0);
+    it("should disable conops", async () => {
+        const disableConopsTx = await conops.disable(0);
         await disableConopsTx.wait();
         expect((await conops.viewConops(0)).activated).to.be.false;
     });
 
-    it("should activate conops", async () => {
-        const activateConopsTx = await conops.activate(0);
-        await activateConopsTx.wait();
+    it("should enable conops", async () => {
+        const enableConopsTx = await conops.enable(0);
+        await enableConopsTx.wait();
         expect((await conops.viewConops(0)).activated).to.be.true;
     });
 });

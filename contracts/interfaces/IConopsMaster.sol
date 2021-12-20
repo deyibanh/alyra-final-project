@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.9;
 
-interface IConops {
+interface IConopsMaster {
 
     struct AirRisk {
         string name;
@@ -38,11 +38,13 @@ interface IConops {
         uint8 _arc
     ) external returns(uint _conopsID);
 
-    function suspend(uint _conopsID) external;
+    function disable(uint _conopsID) external;
 
-    function activate(uint _conopsID) external;
+    function enable(uint _conopsID) external;
 
     function viewConops(uint _conopsID) external view returns(SimpleConops memory);
+
+    function viewAllConops() external view returns (SimpleConops[] memory);
 
     /**
         @notice event emited when a conops is created
