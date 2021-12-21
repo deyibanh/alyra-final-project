@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 contract SWAccessControl is AccessControl{
     // Create a new role identifier for the minter role
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    bytes32 public constant PILOTE_ROLE = keccak256("PILOTE_ROLE");
+    bytes32 public constant PILOT_ROLE = keccak256("PILOT_ROLE");
     bytes32 public constant DRONE_ROLE = keccak256("DRONE_ROLE");
     bytes32 public constant EXTERNAL_LEVEL_1 = keccak256("EXTERNAL_LEVEL_1");
     bytes32 public constant EXTERNAL_LEVEL_2 = keccak256("EXTERNAL_LEVEL_2");

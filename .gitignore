@@ -152,3 +152,10 @@ blockchain/history
 #truffle
 yarn.lock
 package-lock.json
+
+#hardhat
+.idea
+artifacts
+client/node_modules
+typechain
+cache
