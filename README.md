@@ -25,8 +25,7 @@ To install the project, just launch:<br />
 
 ## Configuration
 
-Configure the project by copying the variable environment from the `env.dist` file.<br />
-Then create your own `.env` file and add your parameters:
+Create your own `.env` file and add your parameters:
 
 -   `ETHERSCAN_API_KEY`: The Etherscan API Key.
 -   `INFURA_ROPSTEN_URL`: Paste the Infura Ropsten URL and specify the Infura ID.
