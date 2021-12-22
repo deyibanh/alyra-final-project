@@ -5,6 +5,7 @@ pragma solidity 0.8.9;
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "./interfaces/IConopsMaster.sol";
 import "./interfaces/IDeliveryMaster.sol";
+import "./interfaces/IDroneFlightFactory.sol";
 
 /**
  * @title The StarwingsMaster contract.
@@ -174,5 +175,28 @@ contract StarwingsMaster {
      */
     function getPilotAuthorized(address _pilotAddress) external onlyRole("ADMIN_ROLE") view returns (bool) {
         return pilotAuthorizedMap[_pilotAddress];
+    }
+
+    /**
+     * @notice Add a DroneDelivery.
+     *
+     * @param _droneAddress The drone address.
+     * @param _conopsID The conops ID.
+     */
+    function addDroneDelivery(address _droneAddress, uint _conopsID) external onlyRole("PILOT_ROLE") {
+        IDroneFlightFactory droneFlightFactory = IDroneFlightFactory(droneFlightFactoryAddress);
+        droneFlightFactory.newDroneFlight(0);
+    }
+
+    /**
+     * @notice Add a DroneDelivery with .
+     *
+     * @param _droneAddress The drone address.
+     * @param _conopsID The conops ID.
+     * @param _deliveryID The develivery ID.
+     */
+    function addDroneDeliveryWithID(address _droneAddress, uint _conopsID, uint _deliveryID) external onlyRole("PILOT_ROLE") {
+        IDroneFlightFactory droneFlightFactory = IDroneFlightFactory(droneFlightFactoryAddress);
+        droneFlightFactory.newDroneFlight(0);
     }
 }
