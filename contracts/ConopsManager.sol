@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.9;
 
-import "./interfaces/IConopsMaster.sol";
+import "./interfaces/IConopsManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 
 /**
@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/access/IAccessControl.sol";
  *   @author Damien
  *  @notice This contract manage all the conops. Admins can add a simple Conop^s and enable/disable it
  */
-contract ConopsManager is IConopsMaster {
+contract ConopsManager is IConopsManager {
     SimpleConops[] private simpleConopsList;
     IAccessControl private accessControl;
 

@@ -32,6 +32,12 @@ module.exports = {
                     : [],
         },
     },
+    settings: {
+        optimizer: {
+            enabled: true,
+            runs: 1000,
+        },
+    },
     gasReporter: {
         enabled: process.env.REPORT_GAS !== undefined,
         currency: "USD",

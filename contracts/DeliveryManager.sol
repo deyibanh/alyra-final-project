@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "./interfaces/IDeliveryMaster.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
+import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 /**
  *   @title Delivery Master
@@ -18,12 +19,11 @@ contract DeliveryMaster is IDeliveryMaster {
         accessControl = IAccessControl(accessControlAddress);
     }
 
-    modifier onlyRole(string memory role) {
-        bytes32 byteRole = keccak256(abi.encodePacked(role));
-        require(
-            accessControl.hasRole(byteRole, msg.sender),
-            "you don't have the role"
-        );
+    /// @notice Modifier to restrict function to specific role
+    /// @dev Use the library to retrieve bytes32 values when calling the modifier
+    /// @param _role The role authorize to access the function
+    modifier onlyRole(bytes32 _role) {
+        require(accessControl.hasRole(_role, msg.sender), "Access refused");
         _;
     }
 
@@ -31,8 +31,12 @@ contract DeliveryMaster is IDeliveryMaster {
         string memory _client,
         uint256 _price,
         uint256 _hubID
-    ) external {
-        CommercialData memory data = _getCommercialData(_client, _price, _hubID);
+    ) external onlyRole(StarwingsDataLib.ADMIN_ROLE) {
+        CommercialData memory data = _getCommercialData(
+            _client,
+            _price,
+            _hubID
+        );
         Delivery memory delivery = Delivery(DeliveryState.noInfo, data);
         _newDelivery(delivery);
     }
