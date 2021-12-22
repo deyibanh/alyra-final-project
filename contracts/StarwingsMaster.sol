@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.9;
 
+import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "./interfaces/IConopsMaster.sol";
 import "./interfaces/IDeliveryMaster.sol";
 
@@ -49,6 +50,11 @@ contract StarwingsMaster {
     mapping(address => address[]) private droneFlightAddressesMap;
 
     /**
+     * @dev The IAccessControl contract.
+     */
+    IAccessControl private accessControl;
+
+    /**
      * @dev The ConopsManager contract.
      */
     IConopsMaster private conopsManager;
@@ -59,12 +65,30 @@ contract StarwingsMaster {
     IDeliveryMaster private deliveryMaster;
 
     /**
+     * @dev Check the msg.sender's role.
+     */
+    modifier onlyRole(string memory role) {
+        bytes32 byteRole = keccak256(abi.encodePacked(role));
+        require(
+            accessControl.hasRole(byteRole, msg.sender),
+            "you don't have the role"
+        );
+        _;
+    }
+
+    /**
      * @notice The constructor.
      *
+     * @param _accessControlAddress The IAccessControl address.
      * @param _conopsManagerAddress The ConopsManager address.
      * @param _deliveryMasterAddress The DeliveryMaster address.
      */
-    constructor(address _conopsManagerAddress, address _deliveryMasterAddress) {
+    constructor(
+        address _accessControlAddress,
+        address _conopsManagerAddress,
+        address _deliveryMasterAddress
+    ) {
+        accessControl = IAccessControl(_accessControlAddress);
         conopsManager = IConopsMaster(_conopsManagerAddress);
         deliveryMaster = IDeliveryMaster(_deliveryMasterAddress);
     }
@@ -74,7 +98,7 @@ contract StarwingsMaster {
      *
      * @return The DroneFlightFactory address.
      */
-    function getDroneFlightFactoryAddress() external view returns (address) {
+    function getDroneFlightFactoryAddress() external onlyRole("ADMIN_ROLE") view returns (address) {
         return droneFlightFactoryAddress;
     }
 
@@ -83,7 +107,7 @@ contract StarwingsMaster {
      *
      * @param _droneFlightFactoryAddress The DroneFlightFactory address to set.
      */
-    function setDroneFlightFactoryAddress(address _droneFlightFactoryAddress) external {
+    function setDroneFlightFactoryAddress(address _droneFlightFactoryAddress) external onlyRole("ADMIN_ROLE") {
         droneFlightFactoryAddress = _droneFlightFactoryAddress;
     }
 
@@ -92,7 +116,7 @@ contract StarwingsMaster {
      *
      * @return A list of DroneFlight address.
      */
-    function getDroneFlightAddressList() external view returns (address[] memory) {
+    function getDroneFlightAddressList() external onlyRole("ADMIN_ROLE") view returns (address[] memory) {
         return droneFlightAddressList;
     }
 
@@ -103,7 +127,7 @@ contract StarwingsMaster {
      *
      * @return The DroneFlight address.
      */
-    function getDroneFlightAddress(uint _droneFlightId) external view returns (address) {
+    function getDroneFlightAddress(uint _droneFlightId) external onlyRole("ADMIN_ROLE") view returns (address) {
         return droneFlightAddressList[_droneFlightId];
     }
 
@@ -112,7 +136,7 @@ contract StarwingsMaster {
      *
      * @return A list of pilot address.
      */
-    function getPilotAddressList() external view returns (address[] memory) {
+    function getPilotAddressList() external onlyRole("ADMIN_ROLE") view returns (address[] memory) {
         return pilotAddressList;
     }
 
@@ -121,7 +145,7 @@ contract StarwingsMaster {
      *
      * @return A list of drone address.
      */
-    function getDroneAddressList() external view returns (address[] memory) {
+    function getDroneAddressList() external onlyRole("ADMIN_ROLE") view returns (address[] memory) {
         return droneAddressList;
     }
 
@@ -130,7 +154,7 @@ contract StarwingsMaster {
      *
      * @return A list of DroneFlight address.
      */
-    function getPilotFlightAddresses(address _pilotAddress) external view returns (address[] memory) {
+    function getPilotFlightAddresses(address _pilotAddress) external onlyRole("ADMIN_ROLE") view returns (address[] memory) {
         return pilotFlightAddressesMap[_pilotAddress];
     }
 
@@ -139,7 +163,7 @@ contract StarwingsMaster {
      *
      * @return A list of DroneFlight address.
      */
-    function getDroneFlightAddresses(address _pilotAddress) external view returns (address[] memory) {
+    function getDroneFlightAddresses(address _pilotAddress) external onlyRole("ADMIN_ROLE") view returns (address[] memory) {
         return droneFlightAddressesMap[_pilotAddress];
     }
 
@@ -148,7 +172,7 @@ contract StarwingsMaster {
      *
      * @return The pilot flight authorization.
      */
-    function getPilotAuthorized(address _pilotAddress) external view returns (bool) {
+    function getPilotAuthorized(address _pilotAddress) external onlyRole("ADMIN_ROLE") view returns (bool) {
         return pilotAuthorizedMap[_pilotAddress];
     }
 }
