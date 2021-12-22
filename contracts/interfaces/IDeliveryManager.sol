@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.9;
 
-interface IDeliveryMaster {
+interface IDeliveryManager {
     enum DeliveryState {
         noInfo,
         registered,

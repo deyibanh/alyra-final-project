@@ -1,29 +1,20 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.9;
 
-import "./interfaces/IConopsMaster.sol";
+import "./interfaces/IConopsManager.sol";
+import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 contract DroneFlight {
+    using StarwingsDataLib for StarwingsDataLib.FlightData;
+
     // 1. State variables
-    IConopsMaster private conopsManager;
-
-    address public piloteAddr;
-    address public droneAddr;
-
-    uint256 private conopsId;
-    uint256 private flightDatetime;
-    uint256 private flightDuration;
+    IConopsManager private conopsManager;
 
     bool private engineCheck;
     bool private batteryCheck;
     bool private controlStationCheck;
 
-    string private pilotName;
-    string private droneType;
-    string private droneId;
-    string private depart;
-    string private destination;
-
+    StarwingsDataLib.FlightData private datas;
     FlightState private flightState;
 
     // 2. Events
@@ -75,28 +66,18 @@ contract DroneFlight {
     }
 
     // 5. Constructor
-    constructor(
-        address _conopsManager,
-        uint256 _conopsId,
-        address _drone,
-        address _pilot,
-        string memory _droneType,
-        string memory _droneId,
-        string memory _depart,
-        string memory _destination,
-        uint256 _flightDatetime,
-        uint256 _flightDuration
-    ) {
-        conopsManager = IConopsMaster(_conopsManager);
-        conopsId = _conopsId;
-        droneAddr = _drone;
-        piloteAddr = _pilot;
-        droneType = _droneType;
-        droneId = _droneId;
-        depart = _depart;
-        destination = _destination;
-        flightDuration = _flightDuration;
-        flightDatetime = _flightDatetime;
+    constructor(address _conopsManager, StarwingsDataLib.FlightData memory data)
+    {
+        conopsManager = IConopsManager(_conopsManager);
+        datas.conopsId = data.conopsId;
+        datas.droneAddr = data.droneAddr;
+        datas.piloteAddr = data.piloteAddr;
+        datas.droneType = data.droneType;
+        datas.droneId = data.droneId;
+        datas.depart = data.depart;
+        datas.destination = data.destination;
+        datas.flightDuration = data.flightDuration;
+        datas.flightDatetime = data.flightDatetime;
     }
 
     // 6. Fallback — Receive function
