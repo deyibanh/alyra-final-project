@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.9;
 
-import "./interfaces/IDeliveryMaster.sol";
+import "./interfaces/IDeliveryManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
@@ -10,7 +10,7 @@ import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
  *   @author Damien
  *  @notice This contract manage all the deliveries.
  */
-contract DeliveryMaster is IDeliveryMaster {
+contract DeliveryManager is IDeliveryManager {
     Delivery[] private deliveryList;
     IAccessControl private accessControl;
     CommercialData private commercialData;
