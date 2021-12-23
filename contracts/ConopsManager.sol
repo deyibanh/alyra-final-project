@@ -90,7 +90,8 @@ contract ConopsManager is IConopsManager {
         );
         simpleConopsList[_conopsID].activated = false;
 
-        emit ConopsSuspended(_conopsID);
+        emit ConopsDisable(_conopsID);
+        (_conopsID);
     }
 
     /**
@@ -105,7 +106,7 @@ contract ConopsManager is IConopsManager {
         );
         simpleConopsList[_conopsID].activated = true;
 
-        emit ConopsActivated(_conopsID);
+        emit ConopsEnable(_conopsID);
     }
 
     /**
