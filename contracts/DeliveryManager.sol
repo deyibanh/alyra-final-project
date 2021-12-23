@@ -70,4 +70,12 @@ contract DeliveryManager is IDeliveryManager {
         deliveryList[_deliveryID].state = _deliveryState;
         return true;
     }
+
+    function getDeliveries()
+        external
+        view
+        returns (Delivery[] memory)
+    {
+        return deliveryList;
+    }
 }

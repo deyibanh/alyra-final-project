@@ -5,7 +5,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "./interfaces/IConopsManager.sol";
 import "./interfaces/IDeliveryManager.sol";
-import "./interfaces/IDroneFlightFactory.sol";
+import "./interfaces/IStarwingsMaster.sol";
 
 /**
  * @title The StarwingsMaster contract.
@@ -14,7 +14,7 @@ import "./interfaces/IDroneFlightFactory.sol";
  *
  * @notice This contract manages drone flights creation from CONOPS.
  */
-contract StarwingsMaster {
+contract StarwingsMaster is IStarwingsMaster {
     /**
      * @dev The DroneFlightFactory address.
      */
@@ -61,9 +61,9 @@ contract StarwingsMaster {
     IConopsManager private conopsManager;
 
     /**
-     * @dev The DeliveryMaster contract.
+     * @dev The DeliveryManager contract.
      */
-    IDeliveryManager private deliveryMaster;
+    IDeliveryManager private deliveryManager;
 
     /**
      * @dev Check the msg.sender's role.
@@ -91,7 +91,7 @@ contract StarwingsMaster {
     ) {
         accessControl = IAccessControl(_accessControlAddress);
         conopsManager = IConopsManager(_conopsManagerAddress);
-        deliveryMaster = IDeliveryManager(_deliveryMasterAddress);
+        deliveryManager = IDeliveryManager(_deliveryMasterAddress);
     }
 
     /**
@@ -221,36 +221,27 @@ contract StarwingsMaster {
     }
 
     /**
-     * @notice Add a DroneDelivery.
-     *
-     * @param _droneAddress The drone address.
-     * @param _conopsID The conops ID.
+     * @notice Add a droneFlightAddress to the list
+     * @dev Only DroneFlightFactory contract is allowed to add a contract
      */
-    function addDroneDelivery(address _droneAddress, uint256 _conopsID)
-        external
-        onlyRole("PILOT_ROLE")
-    {
-        IDroneFlightFactory droneFlightFactory = IDroneFlightFactory(
-            droneFlightFactoryAddress
-        );
-        droneFlightFactory.newDroneFlight(0);
+    function addDroneFlightAddress(address droneFlightaddress) external {
+        require(msg.sender == droneFlightFactoryAddress, "not allowed");
+        droneFlightAddressList.push(droneFlightaddress);
     }
 
     /**
-     * @notice Add a DroneDelivery with .
-     *
-     * @param _droneAddress The drone address.
-     * @param _conopsID The conops ID.
-     * @param _deliveryID The develivery ID.
+     * @notice retrieve the deliveryManager addresse
+     * @return deliveryManager address
      */
-    function addDroneDeliveryWithID(
-        address _droneAddress,
-        uint256 _conopsID,
-        uint256 _deliveryID
-    ) external onlyRole("PILOT_ROLE") {
-        IDroneFlightFactory droneFlightFactory = IDroneFlightFactory(
-            droneFlightFactoryAddress
-        );
-        droneFlightFactory.newDroneFlight(0);
+    function getDeliveryManager() external view returns (address) {
+        return address(deliveryManager);
+    }
+
+    /**
+     * @notice retrieve the conopManager addresse
+     * @return conopManager address
+     */
+    function getConopsManager() external view returns (address) {
+        return address(conopsManager);
     }
 }
