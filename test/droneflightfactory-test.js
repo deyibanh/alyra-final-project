@@ -105,6 +105,19 @@ describe("DroneFlightFactory", function () {
 
         expect(addressesFromFactory).to.be.eql(addressesFromStarwingsMaster);
 
+        expect(
+            (await starwingsMaster.getPilotFlightAddresses(pilot.address))[0]
+        ).to.be.equal(addressesFromStarwingsMaster[0]);
+        expect(
+            (await starwingsMaster.getPilotFlightAddresses(pilot.address))[1]
+        ).to.be.equal(addressesFromStarwingsMaster[1]);
+        expect(
+            (await starwingsMaster.getDroneFlightAddresses(drone.address))[0]
+        ).to.be.equal(addressesFromStarwingsMaster[0]);
+        expect(
+            (await starwingsMaster.getDroneFlightAddresses(drone.address))[1]
+        ).to.be.equal(addressesFromStarwingsMaster[1]);
+
         // Verify contracts deployement
         const DroneDelivery = await ethers.getContractFactory("DroneDelivery");
         const droneDelivery0 = await DroneDelivery.attach(

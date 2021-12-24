@@ -30,10 +30,7 @@ contract DroneFlightFactory {
     }
 
     modifier onlyRole(bytes32 _role) {
-        require(
-            accessControl.hasRole(_role, msg.sender),
-            "you don't have the role"
-        );
+        require(accessControl.hasRole(_role, msg.sender), "Access refused");
         _;
     }
 
@@ -59,7 +56,11 @@ contract DroneFlightFactory {
 
         droneDeliveryAddress = address(droneDelivery);
         deployedContracts.push(droneDeliveryAddress);
-        starwingsMaster.addDroneFlightAddress(droneDeliveryAddress);
+        starwingsMaster.addDroneFlight(
+            droneDeliveryAddress,
+            flightData.piloteAddr,
+            flightData.droneAddr
+        );
     }
 
     function getDeployedContracts() external view returns (address[] memory) {
