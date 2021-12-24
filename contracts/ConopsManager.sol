@@ -14,9 +14,6 @@ contract ConopsManager is IConopsManager {
     SimpleConops[] private simpleConopsList;
     IAccessControl private accessControl;
 
-    constructor(address accessControlAddress) {
-        accessControl = IAccessControl(accessControlAddress);
-    }
 
     // modifier onlyRole(string memory role) {
     //     bytes32 byteRole = keccak256(abi.encodePacked(role));
@@ -34,6 +31,11 @@ contract ConopsManager is IConopsManager {
         require(accessControl.hasRole(_role, msg.sender), "Access refused");
         _;
     }
+
+    constructor(address accessControlAddress) {
+        accessControl = IAccessControl(accessControlAddress);
+    }
+    
     /**
      *  @notice Add a Conops
      *  @dev AirRisk is constructed with the lists _entities and _airRiskType.
