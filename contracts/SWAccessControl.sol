@@ -10,8 +10,9 @@ import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
     @notice This contract manage all the access.
  */
 contract SWAccessControl is AccessControl {
-    // Create a new role identifier for the minter role
-    // bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public ADMIN_ROLE = StarwingsDataLib.ADMIN_ROLE;
+    bytes32 public PILOT_ROLE = StarwingsDataLib.PILOT_ROLE;
+    bytes32 public DRONE_ROLE = StarwingsDataLib.DRONE_ROLE;
     // bytes32 public constant PILOT_ROLE = keccak256("PILOT_ROLE");
     // bytes32 public constant DRONE_ROLE = keccak256("DRONE_ROLE");
     // bytes32 public constant EXTERNAL_LEVEL_1 = keccak256("EXTERNAL_LEVEL_1");

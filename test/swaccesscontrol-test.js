@@ -1,4 +1,4 @@
-const { expect, expectRevert, expectEvent } = require("chai");
+const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 const DEFAULT_ADMIN_ROLE =
@@ -9,10 +9,10 @@ const OTHER_ROLE = ethers.utils.keccak256(
 );
 
 describe("SWAccessControl", function () {
-    let accessControl, admin, authorized, other, otherAdmin, otherAuthorized;
+    let accessControl, admin, authorized, other, otherAdmin;
 
     beforeEach(async () => {
-        [admin, authorized, other, otherAdmin, otherAuthorized] = await ethers.getSigners();
+        [admin, authorized, other, otherAdmin] = await ethers.getSigners();
         const AccessControl = await ethers.getContractFactory(
             "SWAccessControl"
         );
@@ -47,32 +47,29 @@ describe("SWAccessControl", function () {
 
         it("non-admin cannot grant role to other accounts", async function () {
             await expect(
-                accessControl.connect(other).grantRole(ROLE, authorized.address)).to.be.revertedWith(
+                accessControl.connect(other).grantRole(ROLE, authorized.address)
+            ).to.be.revertedWith(
                 `AccessControl: account ${other.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
             );
         });
 
         it("accounts can be granted a role multiple times", async function () {
             await accessControl.grantRole(ROLE, authorized.address);
-            const receipt = await accessControl.grantRole(
-                ROLE,
-                authorized.address
-            );
-            // expectEvent.notEmitted(receipt, "RoleGranted");
+            await expect(
+                accessControl.grantRole(ROLE, authorized.address)
+            ).to.not.emit(accessControl, "RoleGranted");
         });
     });
 
     describe("revoking", function () {
         it("roles that are not had can be revoked", async function () {
-            expect(await accessControl.hasRole(ROLE, authorized.address)).to.equal(
-                false
-            );
+            expect(
+                await accessControl.hasRole(ROLE, authorized.address)
+            ).to.equal(false);
 
-            const receipt = await accessControl.revokeRole(
-                ROLE,
-                authorized.address
-            );
-            // expectEvent.notEmitted(receipt, "RoleRevoked");
+            await expect(
+                accessControl.revokeRole(ROLE, authorized.address)
+            ).to.not.emit(accessControl, "RoleRevoked");
         });
 
         context("with granted role", function () {
@@ -81,15 +78,9 @@ describe("SWAccessControl", function () {
             });
 
             it("admin can revoke role", async function () {
-                const receipt = await accessControl.revokeRole(
-                    ROLE,
-                    authorized.address
-                );
-                // expectEvent(receipt, "RoleRevoked", {
-                //     account: authorized,
-                //     role: ROLE,
-                //     sender: admin,
-                // });
+                await expect(accessControl.revokeRole(ROLE, authorized.address))
+                    .to.emit(accessControl, "RoleRevoked")
+                    .withArgs(ROLE, authorized.address, admin.address);
 
                 expect(
                     await accessControl.hasRole(ROLE, authorized.address)
@@ -98,7 +89,10 @@ describe("SWAccessControl", function () {
 
             it("non-admin cannot revoke role", async function () {
                 await expect(
-                    accessControl.connect(other).revokeRole(ROLE, authorized.address)).to.be.revertedWith(
+                    accessControl
+                        .connect(other)
+                        .revokeRole(ROLE, authorized.address)
+                ).to.be.revertedWith(
                     `AccessControl: account ${other.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
                 );
             });
@@ -106,21 +100,20 @@ describe("SWAccessControl", function () {
             it("a role can be revoked multiple times", async function () {
                 await accessControl.revokeRole(ROLE, authorized.address);
 
-                const receipt = await accessControl.revokeRole(
-                    ROLE,
-                    authorized.address
-                );
-                // expectEvent.notEmitted(receipt, "RoleRevoked");
+                await expect(
+                    accessControl.revokeRole(ROLE, authorized.address)
+                ).to.not.emit(accessControl, "RoleRevoked");
             });
         });
     });
 
     describe("renouncing", function () {
         it("roles that are not had can be renounced", async function () {
-            const receipt = await accessControl.connect(authorized).renounceRole(
-                ROLE,
-                authorized.address);
-            // expectEvent.notEmitted(receipt, "RoleRevoked");
+            await expect(
+                accessControl
+                    .connect(authorized)
+                    .renounceRole(ROLE, authorized.address)
+            ).to.not.emit(accessControl, "RoleRevoked");
         });
 
         context("with granted role", function () {
@@ -129,15 +122,13 @@ describe("SWAccessControl", function () {
             });
 
             it("bearer can renounce role", async function () {
-                const receipt = await accessControl.connect(authorized).renounceRole(
-                    ROLE,
-                    authorized.address
-                );
-                // expectEvent(receipt, "RoleRevoked", {
-                //     account: authorized,
-                //     role: ROLE,
-                //     sender: authorized,
-                // });
+                await expect(
+                    accessControl
+                        .connect(authorized)
+                        .renounceRole(ROLE, authorized.address)
+                )
+                    .to.emit(accessControl, "RoleRevoked")
+                    .withArgs(ROLE, authorized.address, authorized.address);
 
                 expect(
                     await accessControl.hasRole(ROLE, authorized.address)
@@ -146,104 +137,77 @@ describe("SWAccessControl", function () {
 
             it("only the sender can renounce their roles", async function () {
                 await expect(
-                    accessControl.renounceRole(ROLE, authorized.address)).to.be.revertedWith(
+                    accessControl.renounceRole(ROLE, authorized.address)
+                ).to.be.revertedWith(
                     `AccessControl: can only renounce roles for self`
                 );
             });
 
             it("a role can be renounced multiple times", async function () {
-                await accessControl.connect(authorized).renounceRole(ROLE, authorized.address);
+                await accessControl
+                    .connect(authorized)
+                    .renounceRole(ROLE, authorized.address);
 
-                const receipt = await accessControl.connect(authorized).renounceRole(
-                    ROLE,
-                    authorized.address
-                );
-                // expectEvent.notEmitted(receipt, "RoleRevoked");
+                await expect(
+                    accessControl
+                        .connect(authorized)
+                        .renounceRole(ROLE, authorized.address)
+                ).to.not.emit(accessControl, "RoleRevoked");
             });
         });
     });
 
     describe("setting role admin", function () {
         beforeEach(async function () {
-            const receipt = await accessControl.setRoleAdmin(
-                ROLE,
-                OTHER_ROLE
-            );
-            // expectEvent(receipt, "RoleAdminChanged", {
-            //     role: ROLE,
-            //     previousAdminRole: DEFAULT_ADMIN_ROLE,
-            //     newAdminRole: OTHER_ROLE,
-            // });
+            await expect(accessControl.setRoleAdmin(ROLE, OTHER_ROLE))
+                .to.emit(accessControl, "RoleAdminChanged")
+                .withArgs(ROLE, DEFAULT_ADMIN_ROLE, OTHER_ROLE);
 
             await accessControl.grantRole(OTHER_ROLE, otherAdmin.address);
         });
 
         it("a role's admin role can be changed", async function () {
-            expect(await accessControl.getRoleAdmin(ROLE)).to.equal(
-                OTHER_ROLE
-            );
+            expect(await accessControl.getRoleAdmin(ROLE)).to.equal(OTHER_ROLE);
         });
 
         it("the new admin can grant roles", async function () {
-            const receipt = await accessControl.connect(otherAdmin).grantRole(
-                ROLE,
-                authorized.address
-            );
-            // expectEvent(receipt, "RoleGranted", {
-            //     account: authorized,
-            //     role: ROLE,
-            //     sender: otherAdmin,
-            // });
+            await expect(
+                accessControl
+                    .connect(otherAdmin)
+                    .grantRole(ROLE, authorized.address)
+            )
+                .to.emit(accessControl, "RoleGranted")
+                .withArgs(ROLE, authorized.address, otherAdmin.address);
         });
 
         it("the new admin can revoke roles", async function () {
-            await accessControl.connect(otherAdmin).grantRole(ROLE, authorized.address);
-            const receipt = await accessControl.connect(otherAdmin).revokeRole(
-                ROLE,
-                authorized.address
-            );
-            // expectEvent(receipt, "RoleRevoked", {
-            //     account: authorized,
-            //     role: ROLE,
-            //     sender: otherAdmin,
-            // });
+            await accessControl
+                .connect(otherAdmin)
+                .grantRole(ROLE, authorized.address);
+
+            await expect(
+                accessControl
+                    .connect(otherAdmin)
+                    .revokeRole(ROLE, authorized.address)
+            )
+                .to.emit(accessControl, "RoleRevoked")
+                .withArgs(ROLE, authorized.address, otherAdmin.address);
         });
 
         it("a role's previous admins no longer grant roles", async function () {
             await expect(
-                accessControl.grantRole(ROLE, authorized.address)).to.be.revertedWith(
+                accessControl.grantRole(ROLE, authorized.address)
+            ).to.be.revertedWith(
                 `AccessControl: account ${admin.address.toLowerCase()} is missing role ${OTHER_ROLE}`
             );
         });
 
         it("a role's previous admins no longer revoke roles", async function () {
             await expect(
-                accessControl.revokeRole(ROLE, authorized.address)).to.be.revertedWith(
+                accessControl.revokeRole(ROLE, authorized.address)
+            ).to.be.revertedWith(
                 `AccessControl: account ${admin.address.toLowerCase()} is missing role ${OTHER_ROLE}`
             );
         });
     });
-    // describe("onlyRole modifier", function () {
-    //     beforeEach(async function () {
-    //         await accessControl.grantRole(ROLE, authorized.address);
-    //     });
-
-    //     it("do not revert if sender has role", async function () {
-    //         await accessControl.connect(authorized).senderProtected(ROLE);
-    //     });
-
-    //     it("revert if sender doesn't have role #1", async function () {
-    //         await expectRevert(
-    //             accessControl.connect(other).senderProtected(ROLE),
-    //             `AccessControl: account ${other.address.toLowerCase()} is missing role ${ROLE}`
-    //         );
-    //     });
-
-    //     it("revert if sender doesn't have role #2", async function () {
-    //         await expectRevert(
-    //             accessControl.connect(authorized).senderProtected(OTHER_ROLE),
-    //             `AccessControl: account ${authorized.address.toLowerCase()} is missing role ${OTHER_ROLE}`
-    //         );
-    //     });
-    // });
 });

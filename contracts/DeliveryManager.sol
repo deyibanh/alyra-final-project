@@ -124,4 +124,11 @@ contract DeliveryManager is IDeliveryManager {
     // 8. Public visible functions
     // 9. Internal visible functions
     // 10. Private visible functions
+    // function getDeliveries()
+    //     external
+    //     view
+    //     returns (Delivery[] memory)
+    // {
+    //     return deliveryList;
+    // }
 }
