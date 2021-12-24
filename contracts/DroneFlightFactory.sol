@@ -2,8 +2,8 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/IAccessControl.sol";
-import "./interfaces/IDroneFlightFactory.sol";
 import "./DroneDelivery.sol";
+import "./interfaces/IStarwingsMaster.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 /**
@@ -11,10 +11,11 @@ import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
  *   @author Damien
  *  @notice This contract serve as a factory for deploying new DroneFlight contract of different types.
  */
-contract DroneFlightFactory is IDroneFlightFactory {
+contract DroneFlightFactory {
     using StarwingsDataLib for StarwingsDataLib.FlightData;
 
     IAccessControl private accessControl;
+    IStarwingsMaster private starwingsMaster;
     address[] public deployedContracts;
 
     enum FlightType {
@@ -23,12 +24,12 @@ contract DroneFlightFactory is IDroneFlightFactory {
         taxi
     }
 
-    constructor(address accessControlAddress) {
+    constructor(address accessControlAddress, address starwingsMasterAddress) {
         accessControl = IAccessControl(accessControlAddress);
+        starwingsMaster = IStarwingsMaster(starwingsMasterAddress);
     }
 
     modifier onlyRole(bytes32 _role) {
-        //bytes32 byteRole = keccak256(abi.encodePacked(_role));
         require(
             accessControl.hasRole(_role, msg.sender),
             "you don't have the role"
@@ -36,41 +37,29 @@ contract DroneFlightFactory is IDroneFlightFactory {
         _;
     }
 
-    modifier isAllowedTypeFlight(uint8 _type) {
-        require(
-            _type <= uint256(type(FlightType).max),
-            "type of flight not allowed"
-        );
-        _;
-    }
+    // modifier isAllowedTypeFlight(FlightType _type) {
+    //     require(_type <= type(FlightType).max, "type of flight not allowed");
+    //     _;
+    // }
 
-    function newDroneFlight(uint8 _type)
-        external
-        isAllowedTypeFlight(_type)
-        onlyRole(StarwingsDataLib.PILOT_ROLE)
-        returns (address newContract)
-    {
-        // if (_type == uint256(FlightType.delivery)) {
-        //     newContract = _newDroneDelivery();
-        // }
-    }
-
-    function _newDroneDelivery(
-        address _deliveryManager,
+    function newDroneDelivery(
         uint256 _deliveryId,
-        // DroneFlight
-        address _conopsManager,
-        StarwingsDataLib.FlightData memory data
-    ) internal returns (address) {
+        StarwingsDataLib.FlightData memory flightData
+    )
+        external
+        onlyRole(StarwingsDataLib.PILOT_ROLE)
+        returns (address droneDeliveryAddress)
+    {
         DroneDelivery droneDelivery = new DroneDelivery(
-            _deliveryManager,
+            starwingsMaster.getDeliveryManager(),
             _deliveryId,
-            _conopsManager,
-            data
+            starwingsMaster.getConopsManager(),
+            flightData
         );
-        deployedContracts.push(address(droneDelivery));
 
-        return address(droneDelivery);
+        droneDeliveryAddress = address(droneDelivery);
+        deployedContracts.push(droneDeliveryAddress);
+        starwingsMaster.addDroneFlightAddress(droneDeliveryAddress);
     }
 
     function getDeployedContracts() external view returns (address[] memory) {

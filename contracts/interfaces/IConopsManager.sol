@@ -59,11 +59,11 @@ interface IConopsManager {
         @notice event emited when the conops activated status switch to false
         @param _conopsID Index of the conops in simpleConopsList array:
      */
-    event ConopsSuspended(uint256 _conopsID);
+    event ConopsDisable(uint256 _conopsID);
 
     /**
         @notice event emited when the conops activated status switch to true
         @param _conopsID Index of the conops in simpleConopsList array:
      */
-    event ConopsActivated(uint256 _conopsID);
+    event ConopsEnable(uint256 _conopsID);
 }
