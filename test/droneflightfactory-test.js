@@ -73,7 +73,7 @@ describe("DroneFlightFactory", function () {
         expect((await factory.getDeployedContracts()).length).to.equal(0);
         await expect(
             factory.connect(owner).newDroneDelivery(0, droneFlightDataSample)
-        ).to.be.revertedWith("you don't have the role");
+        ).to.be.revertedWith("Access refused");
     });
 
     it("Should deploy 2 new DroneDelivery contract", async () => {

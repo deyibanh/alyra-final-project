@@ -75,7 +75,7 @@ describe("Conops", function () {
                     4,
                     5
                 )
-        ).to.be.revertedWith("you don't have the role");
+        ).to.be.revertedWith("Access refused");
     });
 });
 

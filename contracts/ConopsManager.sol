@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "./interfaces/IConopsManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
+import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 /**
  *   @title Conops
@@ -17,15 +18,22 @@ contract ConopsManager is IConopsManager {
         accessControl = IAccessControl(accessControlAddress);
     }
 
-    modifier onlyRole(string memory role) {
-        bytes32 byteRole = keccak256(abi.encodePacked(role));
-        require(
-            accessControl.hasRole(byteRole, msg.sender),
-            "you don't have the role"
-        );
+    // modifier onlyRole(string memory role) {
+    //     bytes32 byteRole = keccak256(abi.encodePacked(role));
+    //     require(
+    //         accessControl.hasRole(byteRole, msg.sender),
+    //         "you don't have the role"
+    //     );
+    //     _;
+    // }
+
+     /// @notice Modifier to restrict function to specific role
+    /// @dev Use the library to retrieve bytes32 values when calling the modifier
+    /// @param _role The role authorize to access the function
+    modifier onlyRole(bytes32 _role) {
+        require(accessControl.hasRole(_role, msg.sender), "Access refused");
         _;
     }
-
     /**
      *  @notice Add a Conops
      *  @dev AirRisk is constructed with the lists _entities and _airRiskType.
@@ -49,7 +57,7 @@ contract ConopsManager is IConopsManager {
         uint256[] memory _airRiskType,
         uint8 _grc,
         uint8 _arc
-    ) external onlyRole("ADMIN_ROLE") returns (uint256 conopsID) {
+    ) external onlyRole(StarwingsDataLib.ADMIN_ROLE) returns (uint256 conopsID) {
         require(
             _entities.length == _airRiskType.length,
             "lists error: number of elements"
@@ -82,7 +90,7 @@ contract ConopsManager is IConopsManager {
      *  @notice Set a specific conops activated status to false
      *  @param _conopsID Index of the conops in simpleConopsList array:
      */
-    function disable(uint256 _conopsID) external onlyRole("ADMIN_ROLE") {
+    function disable(uint256 _conopsID) external onlyRole(StarwingsDataLib.ADMIN_ROLE) {
         require(_conopsID < simpleConopsList.length, "Conops does not exist");
         require(
             simpleConopsList[_conopsID].activated,
@@ -98,7 +106,7 @@ contract ConopsManager is IConopsManager {
      *  @notice Set a specific conops activated status to true
      *  @param _conopsID Index of the conops in simpleConopsList array:
      */
-    function enable(uint256 _conopsID) external onlyRole("ADMIN_ROLE") {
+    function enable(uint256 _conopsID) external onlyRole(StarwingsDataLib.ADMIN_ROLE) {
         require(_conopsID < simpleConopsList.length, "Conops does not exist");
         require(
             !simpleConopsList[_conopsID].activated,
