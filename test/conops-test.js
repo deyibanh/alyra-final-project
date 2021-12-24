@@ -75,7 +75,7 @@ describe("Conops", function () {
                     4,
                     5
                 )
-        ).to.be.revertedWith("you don't have the role");
+        ).to.be.revertedWith("Access refused");
     });
 });
 
@@ -98,11 +98,11 @@ describe("Conops activation", () => {
     });
 
     it("should disable conops", async () => {
-        const disableConopsTx = await conops.disable(0);
-        await disableConopsTx.wait();
-        // await expect(conops.disable(0))
-        //     .to.emit(conops, "ConopsEnable")
-        //     .withArgs(0);
+        // const disableConopsTx = await conops.disable(0);
+        // await disableConopsTx.wait();
+        await expect(conops.disable(0))
+            .to.emit(conops, "ConopsDisable")
+            .withArgs(0);
         // eslint-disable-next-line no-unused-expressions
         expect((await conops.viewConops(0)).activated).to.be.false;
     });

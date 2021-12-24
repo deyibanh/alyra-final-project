@@ -18,6 +18,11 @@ contract DroneFlightFactory {
     IStarwingsMaster private starwingsMaster;
     address[] public deployedContracts;
 
+    modifier onlyRole(bytes32 _role) {
+        require(accessControl.hasRole(_role, msg.sender), "Access refused");
+        _;
+    }
+
     enum FlightType {
         delivery,
         photo,
@@ -29,13 +34,6 @@ contract DroneFlightFactory {
         starwingsMaster = IStarwingsMaster(starwingsMasterAddress);
     }
 
-    modifier onlyRole(bytes32 _role) {
-        require(
-            accessControl.hasRole(_role, msg.sender),
-            "you don't have the role"
-        );
-        _;
-    }
 
     // modifier isAllowedTypeFlight(FlightType _type) {
     //     require(_type <= type(FlightType).max, "type of flight not allowed");
@@ -59,7 +57,11 @@ contract DroneFlightFactory {
 
         droneDeliveryAddress = address(droneDelivery);
         deployedContracts.push(droneDeliveryAddress);
-        starwingsMaster.addDroneFlightAddress(droneDeliveryAddress);
+        starwingsMaster.addDroneFlight(
+            droneDeliveryAddress,
+            flightData.piloteAddr,
+            flightData.droneAddr
+        );
     }
 
     function getDeployedContracts() external view returns (address[] memory) {
