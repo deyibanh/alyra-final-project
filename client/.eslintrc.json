@@ -6,7 +6,7 @@
         "node": true
     },
     "extends": [
-        "standard",
+        "plugin:react/recommended",
         "prettier"
     ],
     "plugins": [
@@ -27,7 +27,9 @@
     ],
     "rules": {
         "prettier/prettier": "error",
-        "indent": ["error", 4]
+        "indent": ["error", 4],
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
     },
     "root": true
 }
