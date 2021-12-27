@@ -224,9 +224,15 @@ contract StarwingsMaster is IStarwingsMaster {
      * @notice Add a droneFlightAddress to the list
      * @dev Only DroneFlightFactory contract is allowed to add a contract
      */
-    function addDroneFlightAddress(address droneFlightaddress) external {
+    function addDroneFlight(
+        address _droneFlightaddress,
+        address _pilot,
+        address _drone
+    ) external {
         require(msg.sender == droneFlightFactoryAddress, "not allowed");
-        droneFlightAddressList.push(droneFlightaddress);
+        droneFlightAddressList.push(_droneFlightaddress);
+        pilotFlightAddressesMap[_pilot].push(_droneFlightaddress);
+        droneFlightAddressesMap[_drone].push(_droneFlightaddress);
     }
 
     /**

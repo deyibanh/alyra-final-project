@@ -11,29 +11,35 @@ interface IDeliveryManager {
         delivered
     }
 
-    struct CommercialData {
-        string client;
-        uint256 price;
-        uint256 hubID;
-    }
+    // struct CommercialData {
+    //     string client;
+    //     uint256 price;
+    //     uint256 hubID;
+    // }
 
     struct Delivery {
+        string deliveryId; // DeliveryId, self generated
+        string supplierOrderId; // OrderId provided by supplier
         DeliveryState state;
-        CommercialData commercialData;
+        string from;
+        address fromAddr;
+        string to;
+        address toAddr;
+        uint16 fromHubId;
+        uint16 toHubId;
     }
 
-    function newDelivery(
-        string memory _client,
-        uint256 _price,
-        uint256 _hubID
-    ) external;
+    function newDelivery(Delivery memory _delivery)
+        external
+        returns (string memory);
 
-    function getDelivery(uint256 _deliveryID)
+    function getDelivery(string memory _deliveryId)
         external
         view
         returns (Delivery memory);
 
-    function setDeliveryState(uint256 _deliveryID, DeliveryState _deliveryState)
-        external
-        returns (bool);
+    function setDeliveryState(
+        string memory _deliveryId,
+        DeliveryState _deliveryState
+    ) external returns (bool);
 }

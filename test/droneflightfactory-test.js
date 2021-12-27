@@ -73,7 +73,7 @@ describe("DroneFlightFactory", function () {
         expect((await factory.getDeployedContracts()).length).to.equal(0);
         await expect(
             factory.connect(owner).newDroneDelivery(0, droneFlightDataSample)
-        ).to.be.revertedWith("you don't have the role");
+        ).to.be.revertedWith("Access refused");
     });
 
     it("Should deploy 2 new DroneDelivery contract", async () => {
@@ -104,6 +104,19 @@ describe("DroneFlightFactory", function () {
             await starwingsMaster.getDroneFlightAddressList();
 
         expect(addressesFromFactory).to.be.eql(addressesFromStarwingsMaster);
+
+        expect(
+            (await starwingsMaster.getPilotFlightAddresses(pilot.address))[0]
+        ).to.be.equal(addressesFromStarwingsMaster[0]);
+        expect(
+            (await starwingsMaster.getPilotFlightAddresses(pilot.address))[1]
+        ).to.be.equal(addressesFromStarwingsMaster[1]);
+        expect(
+            (await starwingsMaster.getDroneFlightAddresses(drone.address))[0]
+        ).to.be.equal(addressesFromStarwingsMaster[0]);
+        expect(
+            (await starwingsMaster.getDroneFlightAddresses(drone.address))[1]
+        ).to.be.equal(addressesFromStarwingsMaster[1]);
 
         // Verify contracts deployement
         const DroneDelivery = await ethers.getContractFactory("DroneDelivery");

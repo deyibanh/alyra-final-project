@@ -7,7 +7,11 @@ pragma solidity ^0.8.9;
  *  @notice This contract manage all the conops. Admins can add a simple Conop^s and enable/disable it
  */
 interface IStarwingsMaster {
-    function addDroneFlightAddress(address droneFlightaddress) external;
+    function addDroneFlight(
+        address _droneFlightaddress,
+        address _pilot,
+        address _drone
+    ) external;
 
     function getDeliveryManager() external view returns (address);
 
