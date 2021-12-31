@@ -4,6 +4,8 @@ import App from "./App";
 import reportWebVitals from "./utils/reportWebVitals";
 import * as serviceWorker from "./utils/serviceWorker";
 import "./index.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.min.js";
 
 // import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap/dist/js/bootstrap.min.js';

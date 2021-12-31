@@ -26,10 +26,23 @@
         }
     ],
     "rules": {
-        "prettier/prettier": "error",
-        "indent": ["error", 4],
+        "prettier/prettier": [
+            "error",
+            {
+               "printWidth": 120
+            }
+        ],
+        "indent": ["error", 4,
+            {
+                "SwitchCase": 1,
+                "ignoredNodes": ["ConditionalExpression"],
+                "offsetTernaryExpressions": true,
+                "flatTernaryExpressions": true
+            }
+        ],
         "react/react-in-jsx-scope": "off",
-        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+        "react/prop-types": "off"
     },
     "root": true
 }

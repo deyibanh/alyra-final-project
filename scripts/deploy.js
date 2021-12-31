@@ -14,12 +14,14 @@ async function main() {
     // await hre.run('compile');
 
     // We get the contract to deploy
-    const Greeter = await hre.ethers.getContractFactory("Greeter");
-    const greeter = await Greeter.deploy("Hello, Hardhat!");
+    const SWAccessControlArtifact = await hre.ethers.getContractFactory(
+        "SWAccessControl"
+    );
+    const SWAccessControl = await SWAccessControlArtifact.deploy();
 
-    await greeter.deployed();
+    await SWAccessControl.deployed();
 
-    console.log("Greeter deployed to:", greeter.address);
+    console.log("SWAccessControl deployed to:", SWAccessControl.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

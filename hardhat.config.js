@@ -27,6 +27,9 @@ module.exports = {
         artifacts: "./client/src/artifacts",
     },
     networks: {
+        hardhat: {
+            chainId: 1337,
+        },
         ropsten: {
             url: process.env.INFURA_ROPSTEN_URL || "",
             accounts:
