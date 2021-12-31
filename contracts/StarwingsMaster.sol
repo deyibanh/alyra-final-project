@@ -68,12 +68,8 @@ contract StarwingsMaster is IStarwingsMaster {
     /**
      * @dev Check the msg.sender's role.
      */
-    modifier onlyRole(string memory role) {
-        bytes32 byteRole = keccak256(abi.encodePacked(role));
-        require(
-            accessControl.hasRole(byteRole, msg.sender),
-            "you don't have the role"
-        );
+    modifier onlyRole(bytes32 _role) {
+        require(accessControl.hasRole(_role, msg.sender), "Access refused");
         _;
     }
 
