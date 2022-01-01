@@ -223,6 +223,15 @@ contract StarwingsMaster is IStarwingsMaster {
     }
 
     /**
+     * @notice Get the AccessControl address.
+     *
+     * @return The AccessControl address.
+     */
+    function getAccessControlAddress() external view returns (address) {
+        return address(accessControl);
+    }
+
+    /**
      * @notice Get the ConopsManager address.
      *
      * @return The ConopsManager address.

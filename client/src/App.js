@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import StarwingsMasterArtifact from "./artifacts/contracts/StarwingsMaster.sol/StarwingsMaster.json";
+import SWAccessControlArtifact from "./artifacts/contracts/SWAccessControl.sol/SWAccessControl.json";
 import Header from "./components/Header";
+import getEthersProvider from "./utils/getEthers";
 import "./App.css";
 
-import getEthersProvider from "./utils/getEthers";
-// import StarwingsMasterArtifact from "./artifacts/contracts/StarwingsMaster.sol/StarwingsMaster.json";
-import SWAccessControlArtifact from "./artifacts/contracts/SWAccessControl.sol/SWAccessControl.json";
-import { ethers } from "ethers";
-
-const SWAccessControlAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const StarwingsMasterAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+// const SWAccessControlAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero;
 const ADMIN_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ADMIN_ROLE"));
 const PILOT_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("PILOT_ROLE"));
@@ -20,6 +20,7 @@ function App() {
         accounts: null,
         roles: null,
     });
+    const [StarwingsMaster, setStarwingsMaster] = useState();
     const [SWAccessControl, setSWAccessControl] = useState();
 
     useEffect(() => {
@@ -28,6 +29,14 @@ function App() {
                 const provider = await getEthersProvider();
                 const signer = provider.getSigner();
                 const accounts = await provider.listAccounts();
+                const StarwingsMasterInstance = new ethers.Contract(
+                    StarwingsMasterAddress,
+                    StarwingsMasterArtifact.abi,
+                    provider
+                );
+                setStarwingsMaster(StarwingsMasterInstance);
+
+                const SWAccessControlAddress = StarwingsMasterInstance.getAccessControlAddress();
                 const SWAccessControlInstance = new ethers.Contract(
                     SWAccessControlAddress,
                     SWAccessControlArtifact.abi,
