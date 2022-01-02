@@ -14,7 +14,7 @@ function Header(props) {
                     <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                     <Navbar.Collapse id="responsive-navbar-nav">
                         <Nav className="me-auto">
-                            <Nav.Link href="#access-control">Access Control</Nav.Link>
+                            <Nav.Link href="/access-control">Access Control</Nav.Link>
                         </Nav>
                         <Nav>
                             <NavDropdown

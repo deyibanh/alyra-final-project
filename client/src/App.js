@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { ethers } from "ethers";
 import StarwingsMasterArtifact from "./artifacts/contracts/StarwingsMaster.sol/StarwingsMaster.json";
 import SWAccessControlArtifact from "./artifacts/contracts/SWAccessControl.sol/SWAccessControl.json";
 import Header from "./components/Header";
+import AccessControl from "./pages/AccessControl";
 import getEthersProvider from "./utils/getEthers";
 import "./App.css";
 
@@ -74,9 +76,15 @@ function App() {
     }, []);
 
     return (
-        <div className="App">
-            <Header state={state} />
-        </div>
+        <HashRouter>
+            <div className="App">
+                <Header state={state} />
+                <Routes>
+                    <Route path="/" element={<AccessControl state={state} />} />
+                    <Route path="/access-control" element={<AccessControl state={state} />} />
+                </Routes>
+            </div>
+        </HashRouter>
     );
 }
 
