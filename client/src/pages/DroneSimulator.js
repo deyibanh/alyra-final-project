@@ -6,7 +6,7 @@ function DroneSimulator(props) {
 
     return (
         <div className="DroneSimulator">
-            <span>Drone Simulator</span>
+            <h1>Drone Simulator</h1>
         </div>
     );
 }

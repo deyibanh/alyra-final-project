@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import DroneSimulator from "./pages/DroneSimulator";
 import getEthersProvider from "./utils/getEthers";
 import "./App.css";
+import { Container } from "react-bootstrap";
 
 const StarwingsMasterAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
 // const SWAccessControlAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
@@ -83,14 +84,16 @@ function App() {
         <BrowserRouter>
             <div className="App">
                 <Header state={state} />
-                <Routes>
-                    <Route exact path="/" element={<Deliveries state={state} />} />
-                    <Route path="/deliveries" element={<Deliveries state={state} />} />
-                    <Route path="/flights" element={<Flights state={state} />} />
-                    <Route path="/drone-simulator" element={<DroneSimulator state={state} />} />
-                    <Route path="/access-control" element={<AccessControl state={state} />} />
-                    <Route path="*" element={<NotFound />} />
-                </Routes>
+                <Container>
+                    <Routes>
+                        <Route exact path="/" element={<Deliveries state={state} />} />
+                        <Route path="/deliveries" element={<Deliveries state={state} />} />
+                        <Route path="/flights" element={<Flights state={state} />} />
+                        <Route path="/drone-simulator" element={<DroneSimulator state={state} />} />
+                        <Route path="/access-control" element={<AccessControl state={state} />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </Container>
             </div>
         </BrowserRouter>
     );

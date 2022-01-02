@@ -6,7 +6,7 @@ function AccessControl(props) {
 
     return (
         <div className="AccessControl">
-            <span>AccessControl</span>
+            <h1>Access Control</h1>
         </div>
     );
 }

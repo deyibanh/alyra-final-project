@@ -6,7 +6,7 @@ function Deliveries(props) {
 
     return (
         <div className="Deliveries">
-            <span>Deliveries</span>
+            <h1>Deliveries</h1>
         </div>
     );
 }
