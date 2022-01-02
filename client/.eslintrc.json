@@ -26,6 +26,15 @@
         }
     ],
     "rules": {
+        "no-tabs": ["error", {"allowIndentationTabs": true}],
+        "max-len": [
+            "error",
+            {
+                "code": 120,
+                "tabWidth": 4,
+                "ignoreUrls": true
+            }
+        ],
         "prettier/prettier": [
             "error",
             {

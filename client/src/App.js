@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ethers } from "ethers";
 import StarwingsMasterArtifact from "./artifacts/contracts/StarwingsMaster.sol/StarwingsMaster.json";
 import SWAccessControlArtifact from "./artifacts/contracts/SWAccessControl.sol/SWAccessControl.json";
 import Header from "./components/Header";
 import AccessControl from "./pages/AccessControl";
+import Deliveries from "./pages/Deliveries";
+import Flights from "./pages/Flights";
+import NotFound from "./pages/NotFound";
+import DroneSimulator from "./pages/DroneSimulator";
 import getEthersProvider from "./utils/getEthers";
 import "./App.css";
 
@@ -76,15 +80,19 @@ function App() {
     }, []);
 
     return (
-        <HashRouter>
+        <BrowserRouter>
             <div className="App">
                 <Header state={state} />
                 <Routes>
-                    <Route path="/" element={<AccessControl state={state} />} />
+                    <Route exact path="/" element={<Deliveries state={state} />} />
+                    <Route path="/deliveries" element={<Deliveries state={state} />} />
+                    <Route path="/flights" element={<Flights state={state} />} />
+                    <Route path="/drone-simulator" element={<DroneSimulator state={state} />} />
                     <Route path="/access-control" element={<AccessControl state={state} />} />
+                    <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>
-        </HashRouter>
+        </BrowserRouter>
     );
 }
 
