@@ -45,7 +45,7 @@ function App() {
                 const StarwingsMasterSignerInstance = new ethers.Contract(
                     StarwingsMasterAddress,
                     StarwingsMasterArtifact.abi,
-                    provider
+                    signer
                 );
                 setStarwingsMasterProvider(StarwingsMasterProviderInstance);
                 setStarwingsMasterProvider(StarwingsMasterSignerInstance);
