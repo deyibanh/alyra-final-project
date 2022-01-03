@@ -27,7 +27,8 @@ function App() {
         accounts: null,
         roles: null,
     });
-    const [StarwingsMaster, setStarwingsMaster] = useState();
+    const [StarwingsMasterProvider, setStarwingsMasterProvider] = useState();
+    const [StarwingsMasterSigner, setStarwingsMasterSigner] = useState();
     const [SWAccessControl, setSWAccessControl] = useState();
 
     useEffect(() => {
@@ -36,14 +37,20 @@ function App() {
                 const provider = await getEthersProvider();
                 const signer = provider.getSigner();
                 const accounts = await provider.listAccounts();
-                const StarwingsMasterInstance = new ethers.Contract(
+                const StarwingsMasterProviderInstance = new ethers.Contract(
                     StarwingsMasterAddress,
                     StarwingsMasterArtifact.abi,
                     provider
                 );
-                setStarwingsMaster(StarwingsMasterInstance);
+                const StarwingsMasterSignerInstance = new ethers.Contract(
+                    StarwingsMasterAddress,
+                    StarwingsMasterArtifact.abi,
+                    provider
+                );
+                setStarwingsMasterProvider(StarwingsMasterProviderInstance);
+                setStarwingsMasterProvider(StarwingsMasterSignerInstance);
 
-                const SWAccessControlAddress = StarwingsMasterInstance.getAccessControlAddress();
+                const SWAccessControlAddress = await StarwingsMasterProviderInstance.getAccessControlAddress();
                 const SWAccessControlInstance = new ethers.Contract(
                     SWAccessControlAddress,
                     SWAccessControlArtifact.abi,
@@ -88,7 +95,16 @@ function App() {
                     <Routes>
                         <Route exact path="/" element={<Deliveries state={state} />} />
                         <Route path="/deliveries" element={<Deliveries state={state} />} />
-                        <Route path="/flights" element={<Flights state={state} />} />
+                        <Route
+                            path="/flights"
+                            element={
+                                <Flights
+                                    state={state}
+                                    StarwingsMasterProvider={StarwingsMasterProvider}
+                                    StarwingsMasterSigner={StarwingsMasterSigner}
+                                />
+                            }
+                        />
                         <Route path="/drone-simulator" element={<DroneSimulator state={state} />} />
                         <Route path="/access-control" element={<AccessControl state={state} />} />
                         <Route path="*" element={<NotFound />} />

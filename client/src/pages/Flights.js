@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Col, Nav, Row, Tab } from "react-bootstrap";
+import PilotsContent from "../components/Flights/PilotsContent";
 import "./Flights.css";
 
 function Flights(props) {
     const state = props.state;
+    const StarwingsMasterProvider = props.StarwingsMasterProvider;
+    const StarwingsMasterSigner = props.StarwingsMasterSigner;
 
     return (
         <div className="Flights">
@@ -34,7 +37,11 @@ function Flights(props) {
                                     <div>There is no CONOPS yet.</div>
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="pilots">
-                                    <div>There is no pilots yet.</div>
+                                    <PilotsContent
+                                        state={state}
+                                        StarwingsMasterProvider={StarwingsMasterProvider}
+                                        StarwingsMasterSigner={StarwingsMasterSigner}
+                                    ></PilotsContent>
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="drones">
                                     <div>There is no drones yet.</div>
