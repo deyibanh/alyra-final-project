@@ -92,6 +92,25 @@ describe("== DeliveryManager", function () {
 
     it("should get delivery", async () => {
         const result = await deliveryManager.getDelivery(currentDeliveryId);
-        // console.log(result);
+        expect(result.deliveryId).to.equal(currentDeliveryId);
+    });
+
+    it("should updateStatus", async () => {
+        const result = await deliveryManager.getDelivery(currentDeliveryId);
+        const oldStatus = result.state;
+        const newStatus = 1;
+
+        const result2 = await deliveryManager
+            .connect(owner)
+            .setDeliveryState(currentDeliveryId, newStatus);
+
+        expect(result2)
+            .to.emit(deliveryManager, "DeliveryStatusUpdated")
+            .withArgs(currentDeliveryId, oldStatus, newStatus);
+    });
+
+    it("should get all deliveries", async () => {
+        const result = await deliveryManager.getAllDeliveries();
+        expect(result.length).to.be.greaterThan(0);
     });
 });

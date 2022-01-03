@@ -29,6 +29,13 @@ interface IDeliveryManager {
         uint16 toHubId;
     }
 
+    event DeliveryCreated(string deliveryId);
+    event DeliveryStatusUpdated(
+        string deliveryId,
+        DeliveryState oldStatus,
+        DeliveryState newStatus
+    );
+
     function newDelivery(Delivery memory _delivery)
         external
         returns (string memory);
@@ -41,5 +48,7 @@ interface IDeliveryManager {
     function setDeliveryState(
         string memory _deliveryId,
         DeliveryState _deliveryState
-    ) external returns (bool);
+    ) external;
+
+    function getAllDeliveries() external view returns (Delivery[] memory);
 }
