@@ -13,6 +13,9 @@ contract DroneFlight {
     bool private engineCheck;
     bool private batteryCheck;
     bool private controlStationCheck;
+    // Drone events
+    bool private droneParcelPickUp;
+    bool private droneTakeOff;
 
     StarwingsDataLib.FlightData private datas;
     FlightState private flightState;
@@ -22,6 +25,7 @@ contract DroneFlight {
 
     // 4. Structs, arrays, enums
     Event[] private riskEvent;
+    // Drone checkpoints
     Checkpoint[] private checkpoints;
     AirRisk[] private airRisks;
 
