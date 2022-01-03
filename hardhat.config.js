@@ -23,7 +23,13 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  */
 module.exports = {
     solidity: "0.8.9",
+    paths: {
+        artifacts: "./client/src/artifacts",
+    },
     networks: {
+        hardhat: {
+            chainId: 1337,
+        },
         ropsten: {
             url: process.env.INFURA_ROPSTEN_URL || "",
             accounts:
