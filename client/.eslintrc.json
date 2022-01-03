@@ -1,0 +1,57 @@
+{
+    "env": {
+        "browser": false,
+        "es2021": true,
+        "mocha": true,
+        "node": true
+    },
+    "extends": [
+        "plugin:react/recommended",
+        "prettier"
+    ],
+    "plugins": [
+        "prettier",
+        "node"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 12,
+        "sourceType": "module"
+    },
+    "overrides": [
+        {
+            "files": ["hardhat.config.js"],
+            "globals": {
+                "task": true
+            }
+        }
+    ],
+    "rules": {
+        "no-tabs": ["error", {"allowIndentationTabs": true}],
+        "max-len": [
+            "error",
+            {
+                "code": 120,
+                "tabWidth": 4,
+                "ignoreUrls": true
+            }
+        ],
+        "prettier/prettier": [
+            "error",
+            {
+               "printWidth": 120
+            }
+        ],
+        "indent": ["error", 4,
+            {
+                "SwitchCase": 1,
+                "ignoredNodes": ["ConditionalExpression"],
+                "offsetTernaryExpressions": true,
+                "flatTernaryExpressions": true
+            }
+        ],
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+        "react/prop-types": "off"
+    },
+    "root": true
+}

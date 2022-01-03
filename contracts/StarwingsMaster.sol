@@ -68,12 +68,8 @@ contract StarwingsMaster is IStarwingsMaster {
     /**
      * @dev Check the msg.sender's role.
      */
-    modifier onlyRole(string memory role) {
-        bytes32 byteRole = keccak256(abi.encodePacked(role));
-        require(
-            accessControl.hasRole(byteRole, msg.sender),
-            "you don't have the role"
-        );
+    modifier onlyRole(bytes32 _role) {
+        require(accessControl.hasRole(_role, msg.sender), "Access refused");
         _;
     }
 
@@ -82,16 +78,16 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @param _accessControlAddress The IAccessControl address.
      * @param _conopsManagerAddress The ConopsManager address.
-     * @param _deliveryMasterAddress The DeliveryMaster address.
+     * @param _deliveryManagerAddress The DeliveryManager address.
      */
     constructor(
         address _accessControlAddress,
         address _conopsManagerAddress,
-        address _deliveryMasterAddress
+        address _deliveryManagerAddress
     ) {
         accessControl = IAccessControl(_accessControlAddress);
         conopsManager = IConopsManager(_conopsManagerAddress);
-        deliveryManager = IDeliveryManager(_deliveryMasterAddress);
+        deliveryManager = IDeliveryManager(_deliveryManagerAddress);
     }
 
     /**
@@ -179,7 +175,25 @@ contract StarwingsMaster is IStarwingsMaster {
     }
 
     /**
+     * @notice Get the pilot flight authorization from a pilot address.
+     *
+     * @param _pilotAddress The pilot address.
+     *
+     * @return The pilot flight authorization.
+     */
+    function getPilotAuthorized(address _pilotAddress)
+        external
+        view
+        onlyRole("ADMIN_ROLE")
+        returns (bool)
+    {
+        return pilotAuthorizedMap[_pilotAddress];
+    }
+
+    /**
      * @notice Get a list of DroneFlight address from a pilot address.
+     *
+     * @param _pilotAddress The pilot address.
      *
      * @return A list of DroneFlight address.
      */
@@ -195,59 +209,63 @@ contract StarwingsMaster is IStarwingsMaster {
     /**
      * @notice Get a list of DroneFlight address from a drone address.
      *
+     * @param _droneAddress The drone address.
+     *
      * @return A list of DroneFlight address.
      */
-    function getDroneFlightAddresses(address _pilotAddress)
+    function getDroneFlightAddresses(address _droneAddress)
         external
         view
         onlyRole("ADMIN_ROLE")
         returns (address[] memory)
     {
-        return droneFlightAddressesMap[_pilotAddress];
+        return droneFlightAddressesMap[_droneAddress];
     }
 
     /**
-     * @notice Get the pilot flight authorization from a pilot address.
+     * @notice Get the AccessControl address.
      *
-     * @return The pilot flight authorization.
+     * @return The AccessControl address.
      */
-    function getPilotAuthorized(address _pilotAddress)
-        external
-        view
-        onlyRole("ADMIN_ROLE")
-        returns (bool)
-    {
-        return pilotAuthorizedMap[_pilotAddress];
+    function getAccessControlAddress() external view returns (address) {
+        return address(accessControl);
     }
 
     /**
-     * @notice Add a droneFlightAddress to the list
-     * @dev Only DroneFlightFactory contract is allowed to add a contract
+     * @notice Get the ConopsManager address.
+     *
+     * @return The ConopsManager address.
      */
-    function addDroneFlight(
-        address _droneFlightaddress,
-        address _pilot,
-        address _drone
-    ) external {
-        require(msg.sender == droneFlightFactoryAddress, "not allowed");
-        droneFlightAddressList.push(_droneFlightaddress);
-        pilotFlightAddressesMap[_pilot].push(_droneFlightaddress);
-        droneFlightAddressesMap[_drone].push(_droneFlightaddress);
+    function getConopsManager() external view returns (address) {
+        return address(conopsManager);
     }
 
     /**
-     * @notice retrieve the deliveryManager addresse
-     * @return deliveryManager address
+     * @notice Get the DeliveryManager address.
+     *
+     * @return The DeliveryManager address.
      */
     function getDeliveryManager() external view returns (address) {
         return address(deliveryManager);
     }
 
     /**
-     * @notice retrieve the conopManager addresse
-     * @return conopManager address
+     * @notice Add a DroneFlight from the address.
+     *
+     * @dev Only DroneFlightFactory contract is allowed to add a contract.
+     *
+     * @param _droneFlightAddress The DroneFlight address.
+     * @param _pilotAddress The pilot address.
+     * @param _droneAddress The drone address.
      */
-    function getConopsManager() external view returns (address) {
-        return address(conopsManager);
+    function addDroneFlight(
+        address _droneFlightAddress,
+        address _pilotAddress,
+        address _droneAddress
+    ) external {
+        require(msg.sender == droneFlightFactoryAddress, "not allowed");
+        droneFlightAddressList.push(_droneFlightAddress);
+        pilotFlightAddressesMap[_pilotAddress].push(_droneFlightAddress);
+        droneFlightAddressesMap[_droneAddress].push(_droneFlightAddress);
     }
 }
