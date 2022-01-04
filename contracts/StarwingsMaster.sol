@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "./interfaces/IConopsManager.sol";
 import "./interfaces/IDeliveryManager.sol";
 import "./interfaces/IStarwingsMaster.sol";
+import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 /**
  * @title The StarwingsMaster contract.
@@ -116,7 +117,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneFlightFactoryAddress()
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address)
     {
         return droneFlightFactoryAddress;
@@ -129,7 +130,7 @@ contract StarwingsMaster is IStarwingsMaster {
      */
     function setDroneFlightFactoryAddress(address _droneFlightFactoryAddress)
         external
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
     {
         droneFlightFactoryAddress = _droneFlightFactoryAddress;
     }
@@ -142,7 +143,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneFlightAddressList()
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address[] memory)
     {
         return droneFlightAddressList;
@@ -158,7 +159,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneFlightAddress(uint256 _droneFlightId)
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address)
     {
         return droneFlightAddressList[_droneFlightId];
@@ -169,7 +170,7 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @return A list of Pilot.
      */
-    function getPilotList() external view onlyRole("ADMIN_ROLE") returns (Pilot[] memory) {
+    function getPilotList() external view onlyRole(StarwingsDataLib.ADMIN_ROLE) returns (Pilot[] memory) {
         return pilotList;
     }
 
@@ -180,7 +181,12 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @return The pilot information.
      */
-    function getPilot(address _pilotAddress) external view onlyRole("ADMIN_ROLE") returns (Pilot memory) {
+    function getPilot(address _pilotAddress)
+        external
+        view
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
+        returns (Pilot memory)
+    {
         uint pilotIndex = pilotIndexMap[_pilotAddress];
         require(pilotIndex < pilotList.length, "Out of size index.");
         require(pilotList[pilotIndex].pilotAddress != address(0), "Pilot not found.");
@@ -200,7 +206,7 @@ contract StarwingsMaster is IStarwingsMaster {
      */
     function addPilot(address _pilotAddress, string memory _pilotName)
         external
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (Pilot memory)
     {
         uint pilotIndex = pilotIndexMap[_pilotAddress];
@@ -230,7 +236,7 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @param _pilotAddress The pilot address.
      */
-    function deletePilot(address _pilotAddress) external onlyRole("ADMIN_ROLE") {
+    function deletePilot(address _pilotAddress) external onlyRole(StarwingsDataLib.ADMIN_ROLE) {
         uint pilotIndex = pilotIndexMap[_pilotAddress];
         require(pilotIndex < pilotList.length, "Out of size index.");
         require(pilotList[pilotIndex].pilotAddress != address(0), "Pilot not found.");
@@ -245,7 +251,7 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @return The index of a pilot.
      */
-    function getPilotIndex(address _pilotAddress) external view onlyRole("ADMIN_ROLE") returns (uint) {
+    function getPilotIndex(address _pilotAddress) external view onlyRole(StarwingsDataLib.ADMIN_ROLE) returns (uint) {
         return pilotIndexMap[_pilotAddress];
     }
 
@@ -254,7 +260,7 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @return A list of Drone.
      */
-    function getDroneList() external view onlyRole("ADMIN_ROLE") returns (Drone[] memory) {
+    function getDroneList() external view onlyRole(StarwingsDataLib.ADMIN_ROLE) returns (Drone[] memory) {
         return droneList;
     }
 
@@ -265,7 +271,12 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @return The drone information.
      */
-    function getDrone(address _droneAddress) external view onlyRole("ADMIN_ROLE") returns (Drone memory) {
+    function getDrone(address _droneAddress)
+        external
+        view
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
+        returns (Drone memory)
+    {
         uint droneIndex = droneIndexMap[_droneAddress];
         require(droneIndex < droneList.length, "Out of size index.");
         require(droneList[droneIndex].droneAddress != address(0), "Drone not found.");
@@ -286,7 +297,7 @@ contract StarwingsMaster is IStarwingsMaster {
      */
     function addDrone(address _droneAddress, string memory _droneId, string memory _droneType)
         external
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (Drone memory)
     {
         uint droneIndex = droneIndexMap[_droneAddress];
@@ -317,7 +328,7 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @param _droneAddress The drone address.
      */
-    function deleteDrone(address _droneAddress) external onlyRole("ADMIN_ROLE") {
+    function deleteDrone(address _droneAddress) external onlyRole(StarwingsDataLib.ADMIN_ROLE) {
         uint droneIndex = droneIndexMap[_droneAddress];
         require(droneIndex < droneList.length, "Out of size index.");
         require(droneList[droneIndex].droneAddress != address(0), "Drone not found.");
@@ -332,7 +343,7 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @return The index of a drone.
      */
-    function getDroneIndex(address _droneAddress) external view onlyRole("ADMIN_ROLE") returns (uint) {
+    function getDroneIndex(address _droneAddress) external view onlyRole(StarwingsDataLib.ADMIN_ROLE) returns (uint) {
         return droneIndexMap[_droneAddress];
     }
 
