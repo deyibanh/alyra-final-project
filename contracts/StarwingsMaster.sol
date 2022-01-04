@@ -16,6 +16,29 @@ import "./interfaces/IStarwingsMaster.sol";
  */
 contract StarwingsMaster is IStarwingsMaster {
     /**
+     * @dev Pilot struct.
+     */
+    struct Pilot {
+        uint index;
+        bool isDeleted;
+        string name;
+        address pilotAddress;
+        address[] flightAddresses;
+    }
+
+    /**
+     * @dev Drone struct.
+     */
+    struct Drone {
+        uint index;
+        bool isDeleted;
+        string droneId;
+        string droneType;
+        address droneAddress;
+        address[] flightAddresses;
+    }
+
+    /**
      * @dev The DroneFlightFactory address.
      */
     address private droneFlightFactoryAddress;
@@ -26,29 +49,24 @@ contract StarwingsMaster is IStarwingsMaster {
     address[] private droneFlightAddressList;
 
     /**
-     * @dev A list of pilot address.
+     * @dev A list of Pilot.
      */
-    address[] private pilotAddressList;
+    Pilot[] private pilotList;
 
     /**
-     * @dev A list of drone address.
+     * @dev A list of Drone.
      */
-    address[] private droneAddressList;
+    Drone[] private droneList;
 
     /**
-     * @dev A map of a pilot address and a boolean for pilot flight authorization.
+     * @dev A map of a pilot address and an index of the pilot list.
      */
-    mapping(address => bool) private pilotAuthorizedMap;
+    mapping(address => uint) private pilotIndexMap;
 
     /**
-     * @dev A map of a pilot address and a list of DroneFlight address.
+     * @dev A map of a drone address and an index of the drone list.
      */
-    mapping(address => address[]) private pilotFlightAddressesMap;
-
-    /**
-     * @dev A map of a drone address and a list of DroneFlight address.
-     */
-    mapping(address => address[]) private droneFlightAddressesMap;
+    mapping(address => uint) private droneIndexMap;
 
     /**
      * @dev The IAccessControl contract.
@@ -147,79 +165,175 @@ contract StarwingsMaster is IStarwingsMaster {
     }
 
     /**
-     * @notice Get a list of pilot address.
+     * @notice Get a list of Pilot.
      *
-     * @return A list of pilot address.
+     * @return A list of Pilot.
      */
-    function getPilotAddressList()
-        external
-        view
-        onlyRole("ADMIN_ROLE")
-        returns (address[] memory)
-    {
-        return pilotAddressList;
+    function getPilotList() external view onlyRole("ADMIN_ROLE") returns (Pilot[] memory) {
+        return pilotList;
     }
 
     /**
-     * @notice Get a list of drone address.
-     *
-     * @return A list of drone address.
-     */
-    function getDroneAddressList()
-        external
-        view
-        onlyRole("ADMIN_ROLE")
-        returns (address[] memory)
-    {
-        return droneAddressList;
-    }
-
-    /**
-     * @notice Get the pilot flight authorization from a pilot address.
+     * @notice Get the pilot information for a given address.
      *
      * @param _pilotAddress The pilot address.
      *
-     * @return The pilot flight authorization.
+     * @return The pilot information.
      */
-    function getPilotAuthorized(address _pilotAddress)
-        external
-        view
-        onlyRole("ADMIN_ROLE")
-        returns (bool)
-    {
-        return pilotAuthorizedMap[_pilotAddress];
+    function getPilot(address _pilotAddress) external view onlyRole("ADMIN_ROLE") returns (Pilot memory) {
+        uint pilotIndex = pilotIndexMap[_pilotAddress];
+        require(pilotIndex < pilotList.length, "Out of size index.");
+        require(pilotList[pilotIndex].pilotAddress != address(0), "Pilot not found.");
+
+        return pilotList[pilotIndex];
     }
 
     /**
-     * @notice Get a list of DroneFlight address from a pilot address.
+     * @notice Add a pilot for a given address.
+     *
+     * @dev The pilot can be added only if he is not registered yet or if he have been deleted.
+     *
+     * @param _pilotAddress The pilot address.
+     * @param _pilotName The pilot name.
+     *
+     * @return The pilot information.
+     */
+    function addPilot(address _pilotAddress, string memory _pilotName)
+        external
+        onlyRole("ADMIN_ROLE")
+        returns (Pilot memory)
+    {
+        uint pilotIndex = pilotIndexMap[_pilotAddress];
+        Pilot storage pilot = pilotList[pilotIndex];
+
+        require(
+            (pilotIndex == 0 && pilot.pilotAddress == address(0)) ||
+            !pilot.isDeleted,
+            "Pilot already added."
+        );
+
+        pilot.isDeleted = false;
+        pilot.name = _pilotName;
+
+        if (pilotIndex == 0 && pilot.pilotAddress == address(0)) {
+            pilot.pilotAddress = _pilotAddress;
+            pilotList.push(pilot);
+            pilot.index = pilotList.length - 1;
+            pilotIndexMap[_pilotAddress] = pilot.index;
+        }
+        
+        return pilot;
+    }
+
+    /**
+     * @notice Delete a pilot for a given address.
+     *
+     * @param _pilotAddress The pilot address.
+     */
+    function deletePilot(address _pilotAddress) external onlyRole("ADMIN_ROLE") {
+        uint pilotIndex = pilotIndexMap[_pilotAddress];
+        require(pilotIndex < pilotList.length, "Out of size index.");
+        require(pilotList[pilotIndex].pilotAddress != address(0), "Pilot not found.");
+
+        pilotList[pilotIndex].isDeleted = false;
+    }
+
+    /**
+     * @notice Get the index of a pilot from a pilot address.
      *
      * @param _pilotAddress The pilot address.
      *
-     * @return A list of DroneFlight address.
+     * @return The index of a pilot.
      */
-    function getPilotFlightAddresses(address _pilotAddress)
-        external
-        view
-        onlyRole("ADMIN_ROLE")
-        returns (address[] memory)
-    {
-        return pilotFlightAddressesMap[_pilotAddress];
+    function getPilotIndex(address _pilotAddress) external view onlyRole("ADMIN_ROLE") returns (uint) {
+        return pilotIndexMap[_pilotAddress];
     }
 
     /**
-     * @notice Get a list of DroneFlight address from a drone address.
+     * @notice Get a list of Drone.
+     *
+     * @return A list of Drone.
+     */
+    function getDroneList() external view onlyRole("ADMIN_ROLE") returns (Drone[] memory) {
+        return droneList;
+    }
+
+    /**
+     * @notice Get the drone information for a given address.
      *
      * @param _droneAddress The drone address.
      *
-     * @return A list of DroneFlight address.
+     * @return The drone information.
      */
-    function getDroneFlightAddresses(address _droneAddress)
+    function getDrone(address _droneAddress) external view onlyRole("ADMIN_ROLE") returns (Drone memory) {
+        uint droneIndex = droneIndexMap[_droneAddress];
+        require(droneIndex < droneList.length, "Out of size index.");
+        require(droneList[droneIndex].droneAddress != address(0), "Drone not found.");
+
+        return droneList[droneIndex];
+    }
+
+    /**
+     * @notice Add a drone for a given address.
+     *
+     * @dev The drone can be added only if he is not registered yet or if he have been deleted.
+     *
+     * @param _droneAddress The drone address.
+     * @param _droneId The drone id.
+     * @param _droneType The drone type.
+     *
+     * @return The Drone information.
+     */
+    function addDrone(address _droneAddress, string memory _droneId, string memory _droneType)
         external
-        view
         onlyRole("ADMIN_ROLE")
-        returns (address[] memory)
+        returns (Drone memory)
     {
-        return droneFlightAddressesMap[_droneAddress];
+        uint droneIndex = droneIndexMap[_droneAddress];
+        Drone storage drone = droneList[droneIndex];
+
+        require(
+            (droneIndex == 0 && drone.droneAddress == address(0)) ||
+            !drone.isDeleted,
+            "Drone already added."
+        );
+
+        drone.isDeleted = false;
+        drone.droneId = _droneId;
+        drone.droneType = _droneType;
+
+        if (droneIndex == 0 && drone.droneAddress == address(0)) {
+            drone.droneAddress = _droneAddress;
+            droneList.push(drone);
+            drone.index = droneList.length - 1;
+            droneIndexMap[_droneAddress] = drone.index;
+        }
+        
+        return drone;
+    }
+
+    /**
+     * @notice Delete a drone for a given address.
+     *
+     * @param _droneAddress The drone address.
+     */
+    function deleteDrone(address _droneAddress) external onlyRole("ADMIN_ROLE") {
+        uint droneIndex = droneIndexMap[_droneAddress];
+        require(droneIndex < droneList.length, "Out of size index.");
+        require(droneList[droneIndex].droneAddress != address(0), "Drone not found.");
+
+        droneList[droneIndex].isDeleted = false;
+    }
+
+    /**
+     * @notice Get the index of a drone from a drone address.
+     *
+     * @param _droneAddress The drone address.
+     *
+     * @return The index of a drone.
+     */
+    function getDroneIndex(address _droneAddress) external view onlyRole("ADMIN_ROLE") returns (uint) {
+        return droneIndexMap[_droneAddress];
     }
 
     /**
@@ -264,8 +378,15 @@ contract StarwingsMaster is IStarwingsMaster {
         address _droneAddress
     ) external {
         require(msg.sender == droneFlightFactoryAddress, "not allowed");
+        uint pilotIndex = pilotIndexMap[_pilotAddress];
+        require(pilotIndex < pilotList.length, "Out of size index.");
+        require(pilotList[pilotIndex].pilotAddress != address(0), "Pilot not found.");
+        uint droneIndex = droneIndexMap[_droneAddress];
+        require(droneIndex < droneList.length, "Out of size index.");
+        require(droneList[droneIndex].droneAddress != address(0), "Pilot not found.");
+
         droneFlightAddressList.push(_droneFlightAddress);
-        pilotFlightAddressesMap[_pilotAddress].push(_droneFlightAddress);
-        droneFlightAddressesMap[_droneAddress].push(_droneFlightAddress);
+        pilotList[pilotIndex].flightAddresses.push(_droneFlightAddress);
+        droneList[droneIndex].flightAddresses.push(_droneFlightAddress);
     }
 }
