@@ -29,43 +29,14 @@ const reducer = (state, action) => {
 };
 
 function ConopsForm({ formChange, setFormData }) {
-    const [airRisksCount, setAirRisksCount] = useState(0);
     const [airRisks, setAirRisks] = useReducer(reducer, []);
 
-    const addRisk = (a) => {
-        // setAirRisksCount((n) => n + a);
-        setAirRisks({ type: "NEW_ITEM", id: airRisksCount });
+    const addRisk = () => {
+        setAirRisks({ type: "NEW_ITEM" });
     };
 
     const removeRisk = (id) => {
         setAirRisks({ type: "REMOVE_ITEM", id: id });
-        // setAirRisksCount((n) => n - 1);
-    };
-
-    const getAirRisks = () => {
-        let airRisks = [];
-
-        for (let i = 0; i < airRisksCount; i++) {
-            airRisks.push(
-                // <>
-                <Row key={i} className="justify-content-end align-items-center">
-                    <h6>
-                        <u>Air Risk {i} :</u>
-                    </h6>
-                    <Col sm={1}>
-                        <Button variant="danger" size="sm" onClick={() => removeRisk(i)}>
-                            -
-                        </Button>
-                    </Col>
-                    <Col sm={11}>
-                        <AirRiskForm count={i} setAirRisks={setAirRisks}></AirRiskForm>
-                    </Col>
-                </Row>
-                // </>
-            );
-        }
-
-        return airRisks;
     };
 
     useLayoutEffect(() => {
@@ -111,7 +82,6 @@ function ConopsForm({ formChange, setFormData }) {
             <h5 className="text-center">Air Security Analysis</h5>
             {airRisks.map((r, i) => (
                 <Row key={i} className="justify-content-end align-items-center">
-                    {console.log(r)}
                     <h6>
                         <u>Air Risk {i} :</u>
                     </h6>
@@ -127,12 +97,8 @@ function ConopsForm({ formChange, setFormData }) {
                     </Col>
                 </Row>
             ))}
-            {/* {getAirRisks()} */}
-            <Button variant="primary" size="sm" className="mx-1" onClick={() => addRisk(1)}>
+            <Button variant="primary" size="sm" className="mx-1" onClick={addRisk}>
                 + Add
-            </Button>
-            <Button variant="danger" size="sm" className="mx-1" onClick={() => addRisk(-1)}>
-                - Remove Last
             </Button>
             <Form.Group as={Row} className="mb-3" controlId="ARC">
                 <Form.Label column sm="auto">

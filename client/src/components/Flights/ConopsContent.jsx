@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useReducer } from "react";
-import { Button, Col, Form, FormControl, InputGroup, Modal, Row, Card } from "react-bootstrap";
+import { Button, Col, Modal, Row } from "react-bootstrap";
 import { ethers } from "ethers";
 import ConopsArtifact from "../../artifacts/contracts/ConopsManager.sol/ConopsManager.json";
 import ConopsForm from "./ConopsForm";
+import ConopsCard from "./ConopsCard";
+import ConopsDetail from "./ConopsDetail";
 
 const ConopsManagerAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 
@@ -17,11 +19,15 @@ const formReducer = (state, event) => {
     };
 };
 
+const airRistType = { 0: "Aerodrome", 1: "CHU", 2: "Military Base" };
+
 function ConopsContent({ state }) {
     const [conops, setConops] = useState([]);
     const [conopsManager, setConopsManager] = useState({});
     const [modalIsShown, setModalIsShown] = useState(false);
     const [formData, setFormData] = useReducer(formReducer, {});
+    const [viewDetails, setViewDetails] = useState(-1);
+    const [cardGroupSize, setCardGroupSize] = useState(5);
 
     useEffect(() => {
         if (state.provider) {
@@ -79,6 +85,11 @@ function ConopsContent({ state }) {
         });
     };
 
+    const changeVisibility = (i) => {
+        i === -1 ? setCardGroupSize(5) : setCardGroupSize(1);
+        setViewDetails(i);
+    };
+
     return (
         <div className="ConopsContent">
             {conops.length === 0 && <div>No Conops at the moment</div>}
@@ -89,22 +100,25 @@ function ConopsContent({ state }) {
                     </Button>
                 </Col>
             </Row>
-            <Row md={5} className="g-4 mt-2">
-                {conops.map((c) => (
-                    <Col key={c.name}>
-                        <Card bg={c.activated ? "light" : "secondary"} text={c.activated ? "dark" : "white"}>
-                            <Card.Body>
-                                <Card.Title className="text-center">{c.name}</Card.Title>
-                                {/* <Card.Subtitle className="mb-2 text-muted">{c.}</Card.Subtitle> */}
-                                <Card.Text>GRC: {c.grc}</Card.Text>
-                                <Card.Text>ARC: {c.arc}</Card.Text>
-                                <Card.Link href="#">More Info</Card.Link>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                ))}
+            <Row md={cardGroupSize} className="g-2 mt-2">
+                {conops.map((c, i) =>
+                    viewDetails === -1 ? (
+                        <Col key={c.name}>
+                            <ConopsCard conops={c} changeVisibility={changeVisibility} id={i} />
+                        </Col>
+                    ) : (
+                        viewDetails === i && (
+                            <Col key={c.name}>
+                                <ConopsDetail
+                                    conops={c}
+                                    changeVisibility={changeVisibility}
+                                    airRistType={airRistType}
+                                />
+                            </Col>
+                        )
+                    )
+                )}
             </Row>
-
             <Modal
                 show={modalIsShown}
                 onHide={hideModal}
