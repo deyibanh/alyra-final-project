@@ -15,12 +15,11 @@ import "hardhat/console.sol";
 contract DeliveryManager is IDeliveryManager {
     using Strings for uint256;
     // 1. State variables
-    mapping(string => Delivery) private deliveries;
-    //Delivery[] private deliveryList;
+    mapping(string => uint256) private deliveriesIndex;
+    Delivery[] private deliveries;
     IAccessControl private accessControl;
 
     // 2. Events
-    event DeliveryCreated(string deliveryId);
 
     // 3. Function Modifiers
 
@@ -41,10 +40,10 @@ contract DeliveryManager is IDeliveryManager {
     // 6. Fallback — Receive function
     // 7. External visible functions
 
-    /// @notice Explain to an end user what this does
-    /// @dev Explain to a developer any extra details
-    /// @param _delivery a parameter just like in doxygen (must be followed by parameter name)
-    /// @return Documents the return variables of a contract’s function state variable
+    /// @notice Creates a new delivery
+    /// @dev
+    /// @param _delivery a struct containing delivery information, all properties are required expect deliveryId
+    /// @return Delivery ID
     function newDelivery(Delivery memory _delivery)
         external
         onlyRole(StarwingsDataLib.ADMIN_ROLE)
@@ -59,6 +58,7 @@ contract DeliveryManager is IDeliveryManager {
         require(_delivery.toHubId != 0, "toHubId:0");
 
         _delivery.state = DeliveryState.noInfo;
+        // Generate pseudo random deliveryID
         _delivery.deliveryId = uint256(
             keccak256(
                 abi.encodePacked(
@@ -70,7 +70,8 @@ contract DeliveryManager is IDeliveryManager {
             )
         ).toHexString();
 
-        deliveries[_delivery.deliveryId] = _delivery;
+        deliveries.push(_delivery);
+        deliveriesIndex[_delivery.deliveryId] = deliveries.length - 1;
 
         console.log("[Contract Debug] DeliveryId:%s", _delivery.deliveryId);
         console.log("[Contract Debug] OrderId:%s", _delivery.supplierOrderId);
@@ -82,53 +83,66 @@ contract DeliveryManager is IDeliveryManager {
         return _delivery.deliveryId;
     }
 
-    /// @notice Explain to an end user what this does
-    /// @dev Explain to a developer any extra details
-    /// @param _deliveryId a parameter just like in doxygen (must be followed by parameter name)
-    /// @return Documents the return variables of a contract’s function state variable
+    /// @notice Get delivery by ID
+    /// @dev
+    /// @param _deliveryId Self explanatory
+    /// @return Delivery struct
     function getDelivery(string memory _deliveryId)
         external
         view
         returns (Delivery memory)
     {
         console.log("[Contract Debug] get DeliveryId:%s", _deliveryId);
-        console.log(
-            "[Contract Debug] get toAddr:%s",
-            deliveries[_deliveryId].toAddr
-        );
+
+        uint256 tabIndex = deliveriesIndex[_deliveryId];
+
+        require(tabIndex < deliveries.length, "Out of size index");
         require(
-            bytes(deliveries[_deliveryId].deliveryId).length > 0,
+            bytes(deliveries[tabIndex].deliveryId).length > 0,
             "Delivery does not exist"
         );
 
-        return deliveries[_deliveryId];
+        console.log(
+            "[Contract Debug] get toAddr:%s",
+            deliveries[tabIndex].toAddr
+        );
+
+        return deliveries[tabIndex];
     }
 
-    /// @notice Explain to an end user what this does
-    /// @dev Explain to a developer any extra details
-    /// @param _deliveryId a parameter just like in doxygen (must be followed by parameter name)
-    /// @param _deliveryState a parameter just like in doxygen (must be followed by parameter name)
-    /// @return Documents the return variables of a contract’s function state variable
+    /// @notice Update the delivery state
+    /// @dev
+    /// @param _deliveryId The delivery ID to update
+    /// @param _deliveryState The new state, using DeliveryState enum
     function setDeliveryState(
         string memory _deliveryId,
         DeliveryState _deliveryState
-    ) external returns (bool) {
+    ) external {
+        uint256 tabIndex = deliveriesIndex[_deliveryId];
+
+        require(tabIndex < deliveries.length, "Out of size index");
         require(
-            deliveries[_deliveryId].toAddr != address(0),
+            bytes(deliveries[tabIndex].deliveryId).length > 0,
             "Delivery does not exist"
         );
-        deliveries[_deliveryId].state = _deliveryState;
-        return true;
+
+        DeliveryState oldState = deliveries[tabIndex].state;
+        deliveries[tabIndex].state = _deliveryState;
+        emit DeliveryStatusUpdated(
+            deliveries[tabIndex].deliveryId,
+            oldState,
+            _deliveryState
+        );
+    }
+
+    /// @notice Get all deliveries ID to be able to query the map after
+    /// @dev
+    /// @return All deliveries id
+    function getAllDeliveries() external view returns (Delivery[] memory) {
+        return deliveries;
     }
 
     // 8. Public visible functions
     // 9. Internal visible functions
     // 10. Private visible functions
-    // function getDeliveries()
-    //     external
-    //     view
-    //     returns (Delivery[] memory)
-    // {
-    //     return deliveryList;
-    // }
 }
