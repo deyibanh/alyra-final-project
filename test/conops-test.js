@@ -33,8 +33,10 @@ describe("Conops", function () {
             "with 5 plots",
             "with flag",
             "with 1 person",
-            ["CHU A", "BASE B"],
-            [0, 2],
+            [
+                { name: "CHU A", riskType: 0 },
+                { name: "BASE B", riskType: 2 },
+            ],
             4,
             5
         );
@@ -62,19 +64,19 @@ describe("Conops", function () {
 
     it("should revert with proper message", async () => {
         await expect(
-            conops
-                .connect(addr1)
-                .addConops(
-                    "test1",
-                    "with 4 plots",
-                    "with 5 plots",
-                    "with flag",
-                    "with 1 person",
-                    ["CHU A", "BASE B"],
-                    [0, 2],
-                    4,
-                    5
-                )
+            conops.connect(addr1).addConops(
+                "test1",
+                "with 4 plots",
+                "with 5 plots",
+                "with flag",
+                "with 1 person",
+                [
+                    { name: "CHU A", riskType: 0 },
+                    { name: "BASE B", riskType: 2 },
+                ],
+                4,
+                5
+            )
         ).to.be.revertedWith("Access refused");
     });
 });
@@ -88,8 +90,10 @@ describe("Conops activation", () => {
             "with 5 plots",
             "with flag",
             "with 1 person",
-            ["CHU A", "BASE B"],
-            [0, 2],
+            [
+                { name: "CHU A", riskType: 0 },
+                { name: "BASE B", riskType: 2 },
+            ],
             4,
             5
         );

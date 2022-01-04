@@ -25,14 +25,25 @@ interface IConopsManager {
         MilitaryBase
     }
 
+    // function addConops(
+    //     string memory _name,
+    //     string memory _startingPoint,
+    //     string memory _endPoint,
+    //     string memory _crossRoad,
+    //     string memory _exclusionZone,
+    //     string[] memory _entities,
+    //     uint256[] memory _airRiskType,
+    //     uint8 _grc,
+    //     uint8 _arc
+    // ) external returns (uint256 _conopsID);
+
     function addConops(
         string memory _name,
         string memory _startingPoint,
         string memory _endPoint,
         string memory _crossRoad,
         string memory _exclusionZone,
-        string[] memory _entities,
-        uint256[] memory _airRiskType,
+        AirRisk[] memory _airRisks,
         uint8 _grc,
         uint8 _arc
     ) external returns (uint256 _conopsID);
