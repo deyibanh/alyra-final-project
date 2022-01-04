@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "./interfaces/IConopsManager.sol";
 import "./interfaces/IDeliveryManager.sol";
 import "./interfaces/IStarwingsMaster.sol";
+import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 /**
  * @title The StarwingsMaster contract.
@@ -98,7 +99,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneFlightFactoryAddress()
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address)
     {
         return droneFlightFactoryAddress;
@@ -111,7 +112,7 @@ contract StarwingsMaster is IStarwingsMaster {
      */
     function setDroneFlightFactoryAddress(address _droneFlightFactoryAddress)
         external
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
     {
         droneFlightFactoryAddress = _droneFlightFactoryAddress;
     }
@@ -124,7 +125,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneFlightAddressList()
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address[] memory)
     {
         return droneFlightAddressList;
@@ -140,7 +141,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneFlightAddress(uint256 _droneFlightId)
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address)
     {
         return droneFlightAddressList[_droneFlightId];
@@ -154,7 +155,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getPilotAddressList()
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address[] memory)
     {
         return pilotAddressList;
@@ -168,7 +169,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneAddressList()
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address[] memory)
     {
         return droneAddressList;
@@ -184,7 +185,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getPilotAuthorized(address _pilotAddress)
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (bool)
     {
         return pilotAuthorizedMap[_pilotAddress];
@@ -200,7 +201,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getPilotFlightAddresses(address _pilotAddress)
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address[] memory)
     {
         return pilotFlightAddressesMap[_pilotAddress];
@@ -216,7 +217,7 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneFlightAddresses(address _droneAddress)
         external
         view
-        onlyRole("ADMIN_ROLE")
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address[] memory)
     {
         return droneFlightAddressesMap[_droneAddress];

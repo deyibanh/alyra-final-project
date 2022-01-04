@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Col, Nav, Row, Tab } from "react-bootstrap";
+import ConopsContent from "../components/Flights/ConopsContent";
 import PilotsContent from "../components/Flights/PilotsContent";
 import "./Flights.css";
 
@@ -34,7 +35,7 @@ function Flights(props) {
                         <Col sm={9}>
                             <Tab.Content>
                                 <Tab.Pane eventKey="conops">
-                                    <div>There is no CONOPS yet.</div>
+                                    <ConopsContent state={state} />
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="pilots">
                                     <PilotsContent
