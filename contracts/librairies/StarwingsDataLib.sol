@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.9;
 
+
 library StarwingsDataLib {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant PILOT_ROLE = keccak256("PILOT_ROLE");
@@ -20,5 +21,29 @@ library StarwingsDataLib {
         string droneId;
         string depart;
         string destination;
+    }
+
+    struct AirRisk {
+        bool validated;
+        string name;
+        AirRiskType riskType;
+    }
+
+    struct SimpleConops {
+        bool activated;
+        string name;
+        string startingPoint;
+        string endPoint;
+        string crossRoad;
+        string exclusionZone;
+        uint8 grc;
+        uint8 arc;
+        AirRisk[] airRiskList;
+    }
+
+    enum AirRiskType {
+        Aerodrome,
+        CHU,
+        MilitaryBase
     }
 }

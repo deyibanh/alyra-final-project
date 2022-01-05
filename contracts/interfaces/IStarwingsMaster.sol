@@ -16,4 +16,6 @@ interface IStarwingsMaster {
     function getDeliveryManager() external view returns (address);
 
     function getConopsManager() external view returns (address);
+
+    function getAccessControlAddress() external view returns (address);
 }
