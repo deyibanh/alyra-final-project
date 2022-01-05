@@ -12,8 +12,10 @@ contract DroneDelivery is DroneFlight {
         uint256 _deliveryId,
         // DroneFlight
         address _conopsManager,
+        address _accessControlAddress,
         StarwingsDataLib.FlightData memory data
-    ) DroneFlight(_conopsManager, data) {
+    ) DroneFlight(_conopsManager, _accessControlAddress, data) {
+
         deliveryManager = _deliveryManager;
         deliveryId = _deliveryId;
     }
