@@ -1,49 +1,17 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.9;
 
+import {StarwingsDataLib} from "../librairies/StarwingsDataLib.sol";
+
 interface IConopsManager {
-    struct AirRisk {
-        string name;
-        AirRiskType riskType;
-    }
-
-    struct SimpleConops {
-        bool activated;
-        string name;
-        string startingPoint;
-        string endPoint;
-        string crossRoad;
-        string exclusionZone;
-        uint8 grc;
-        uint8 arc;
-        AirRisk[] airRiskList;
-    }
-
-    enum AirRiskType {
-        Aerodrome,
-        CHU,
-        MilitaryBase
-    }
-
-    // function addConops(
-    //     string memory _name,
-    //     string memory _startingPoint,
-    //     string memory _endPoint,
-    //     string memory _crossRoad,
-    //     string memory _exclusionZone,
-    //     string[] memory _entities,
-    //     uint256[] memory _airRiskType,
-    //     uint8 _grc,
-    //     uint8 _arc
-    // ) external returns (uint256 _conopsID);
-
+    
     function addConops(
         string memory _name,
         string memory _startingPoint,
         string memory _endPoint,
         string memory _crossRoad,
         string memory _exclusionZone,
-        AirRisk[] memory _airRisks,
+        StarwingsDataLib.AirRisk[] memory _airRisks,
         uint8 _grc,
         uint8 _arc
     ) external returns (uint256 _conopsID);
@@ -55,9 +23,9 @@ interface IConopsManager {
     function viewConops(uint256 _conopsID)
         external
         view
-        returns (SimpleConops memory);
+        returns (StarwingsDataLib.SimpleConops memory);
 
-    function viewAllConops() external view returns (SimpleConops[] memory);
+    function viewAllConops() external view returns (StarwingsDataLib.SimpleConops[] memory);
 
     /**
         @notice event emited when a conops is created
