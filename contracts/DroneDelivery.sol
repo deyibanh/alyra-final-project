@@ -15,12 +15,15 @@ contract DroneDelivery is DroneFlight {
         address _accessControlAddress,
         StarwingsDataLib.FlightData memory data
     ) DroneFlight(_conopsManager, _accessControlAddress, data) {
-
         deliveryManager = _deliveryManager;
         deliveryId = _deliveryId;
     }
 
     function getDeliveryId() external view returns (uint256) {
         return deliveryId;
+    }
+
+    function _customAllowToFlight() internal pure override returns(bool){
+        return true;
     }
 }

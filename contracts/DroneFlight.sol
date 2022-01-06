@@ -5,23 +5,23 @@ import "./interfaces/IConopsManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
-contract DroneFlight {
+abstract contract DroneFlight {
     using StarwingsDataLib for StarwingsDataLib.FlightData;
 
     // 1. State variables
     IConopsManager private conopsManager;
     IAccessControl private accessControl;
 
-    bool private engineCheck;
-    bool private batteryCheck;
-    bool private controlStationCheck;
-    bool private allowedToFlight;
+    bool allowedToFlight;
     // Drone events
-    bool private droneParcelPickUp;
-    bool private droneTakeOff;
+    // bool private droneParcelPickUp;
+    // bool private droneTakeOff;
 
     StarwingsDataLib.FlightData private datas;
-    FlightState private flightState;
+    FlightState droneFlightState;
+    FlightState pilotFlightState;
+    Check private preChecks;
+    Check private postChecks;
 
     // 2. Events
     // 3. Modifiers
@@ -37,13 +37,21 @@ contract DroneFlight {
     Event[] private riskEvent;
     // Drone checkpoints
     Checkpoint[] private checkpoints;
-    StarwingsDataLib.AirRisk[] private airRisks;
+    StarwingsDataLib.AirRisk[] airRisks;
 
+    /**
+     *  PreFlight : flight is not started
+     *  Canceled : flight canceled (only if in Preflight state)
+     *  Flying : In flight ( only if in Preflight state and allowedToFlight)
+     *  Paused : In pause/wait (only if in Flying state)
+     *  Aborted : Flight aborted (only if Flying / Paused)
+     *  Ended : Flight Ended correctly (only if Flying/Pause)
+     */
     enum FlightState {
         PreFlight,
         Canceled,
         Flying,
-        Pause,
+        Paused,
         Aborted,
         Ended
     }
@@ -52,6 +60,16 @@ contract DroneFlight {
         Engine,
         Gps,
         Telecom
+    }
+
+    enum CheckType {
+        Engine,
+        Battery,
+        ControlStation
+    }
+
+    struct Check {
+        mapping(CheckType => bool) checkType;
     }
 
     struct Event {
@@ -92,50 +110,76 @@ contract DroneFlight {
     // 6. Fallback — Receive function
     // 7. External visible functions
 
-    function checkEngine()
+    function preFlightChecks(CheckType _checkType) external {
+        require(!preChecks.checkType[_checkType], "already checked");
+        preChecks.checkType[_checkType] = true;
+    }
+
+    function postFlightChecks(CheckType _checkType) external {
+        require(!postChecks.checkType[_checkType], "already checked");
+        postChecks.checkType[_checkType] = true;
+    }
+
+    function getPreFlightChecks(CheckType _checkType)
         external
-        onlyRole(StarwingsDataLib.PILOT_ROLE)
+        view
         returns (bool)
     {
-        require(!engineCheck, "engine already checked");
-        engineCheck = true;
-
-        return engineCheck;
+        return preChecks.checkType[_checkType];
     }
 
-    function getEngineCheck() external view returns (bool) {
-        return engineCheck;
-    }
-
-    function checkBattery()
+    function getPostFlightChecks(CheckType _checkType)
         external
-        onlyRole(StarwingsDataLib.PILOT_ROLE)
+        view
         returns (bool)
     {
-        require(!batteryCheck, "battery already checked");
-        batteryCheck = true;
-
-        return batteryCheck;
+        return postChecks.checkType[_checkType];
     }
 
-    function getBatteryCheck() external view returns (bool) {
-        return batteryCheck;
-    }
+    // function checkEngine()
+    //     external
+    //     onlyRole(StarwingsDataLib.PILOT_ROLE)
+    //     returns (bool)
+    // {
+    //     require(!engineCheck, "engine already checked");
+    //     engineCheck = true;
 
-    function checkControlStation()
-        external
-        onlyRole(StarwingsDataLib.PILOT_ROLE)
-        returns (bool)
-    {
-        require(!controlStationCheck, "station already checked");
-        controlStationCheck = true;
+    //     return engineCheck;
+    // }
 
-        return controlStationCheck;
-    }
+    // function getEngineCheck() external view returns (bool) {
+    //     return engineCheck;
+    // }
 
-    function getControlStationCheck() external view returns (bool) {
-        return controlStationCheck;
-    }
+    // function checkBattery()
+    //     external
+    //     onlyRole(StarwingsDataLib.PILOT_ROLE)
+    //     returns (bool)
+    // {
+    //     require(!batteryCheck, "battery already checked");
+    //     batteryCheck = true;
+
+    //     return batteryCheck;
+    // }
+
+    // function getBatteryCheck() external view returns (bool) {
+    //     return batteryCheck;
+    // }
+
+    // function checkControlStation()
+    //     external
+    //     onlyRole(StarwingsDataLib.PILOT_ROLE)
+    //     returns (bool)
+    // {
+    //     require(!controlStationCheck, "station already checked");
+    //     controlStationCheck = true;
+
+    //     return controlStationCheck;
+    // }
+
+    // function getControlStationCheck() external view returns (bool) {
+    //     return controlStationCheck;
+    // }
 
     function newRiskEvent(Event memory _event)
         external
@@ -179,8 +223,13 @@ contract DroneFlight {
     }
 
     function cancelFlight() external onlyRole(StarwingsDataLib.PILOT_ROLE) {
-        require(flightState == FlightState.PreFlight, "flight already started/canceled");
-        _changeFlightState(FlightState(1));
+        require(
+            pilotFlightState == FlightState.PreFlight,
+            "flight already started/canceled"
+        );
+
+        _changeDroneFlightState(FlightState(1));
+        _changePilotFlightState(FlightState(1));
         _allowToFlight();
     }
 
@@ -188,23 +237,53 @@ contract DroneFlight {
         external
         onlyRole(StarwingsDataLib.DRONE_ROLE)
     {
-        require(_status != 1, "Drone can't cancel flight");
+        bool isPilot = accessControl.hasRole(
+            StarwingsDataLib.PILOT_ROLE,
+            msg.sender
+        );
+        bool isDrone = accessControl.hasRole(
+            StarwingsDataLib.DRONE_ROLE,
+            msg.sender
+        );
+
+        require(isPilot || isDrone, "Access refused");
+        require(_status != 1, "Cannot cancel flight this way");
         require(allowedToFlight, "Flying is not allowed");
         require(
             _status > uint256(FlightState.PreFlight),
             "Not a valide logical status"
         );
         require(
-            ((_status == 2 && flightState == FlightState.PreFlight) ||
-                (_status > 2 && uint256(flightState) >= 2)),
+            _status < uint256(type(FlightState).max),
+            "Not a valide logical status"
+        );
+
+        FlightState statetype;
+        if (isDrone) {
+            statetype = droneFlightState;
+        } else {
+            statetype = pilotFlightState;
+        }
+
+        require(
+            ((_status == 2 && statetype == FlightState.PreFlight) ||
+                (_status > 2 && uint256(statetype) >= 2)),
             "status not allowed"
         );
 
-        _changeFlightState(FlightState(_status));
+        if (isDrone) {
+            _changeDroneFlightState(FlightState(_status));
+        } else {
+            _changePilotFlightState(FlightState(_status));
+        }
     }
 
-    function viewFlightstatus() external view returns (FlightState) {
-        return flightState;
+    function viewDroneFlightstatus() external view returns (FlightState) {
+        return droneFlightState;
+    }
+
+    function viewPilotFlightstatus() external view returns (FlightState) {
+        return pilotFlightState;
     }
 
     // 8. Public visible functions
@@ -221,14 +300,18 @@ contract DroneFlight {
         }
     }
 
-    function _changeFlightState(FlightState _state) internal {
-        flightState = _state;
+    function _changeDroneFlightState(FlightState _value) internal {
+        droneFlightState = _value;
     }
 
-    function _allowToFlight() internal {
+    function _changePilotFlightState(FlightState _value) internal {
+        pilotFlightState = _value;
+    }
+
+    function _standardAllowToFlight() internal view returns(bool) {
         bool allowed = true;
 
-        if (flightState == FlightState.Canceled) {
+        if (pilotFlightState == FlightState.Canceled) {
             allowed = false;
         } else {
             for (uint256 i = 0; i < airRisks.length; i++) {
@@ -238,7 +321,16 @@ contract DroneFlight {
             }
         }
 
-        allowedToFlight = allowed;
+        return allowed;
     }
-    // 10. Private visible functions
+
+    function _allowToFlight() internal {
+        bool standardAllowed = _standardAllowToFlight();
+        bool customAllowed = _customAllowToFlight();
+
+        allowedToFlight = (standardAllowed && customAllowed);
+    }
+
+    function _customAllowToFlight() internal virtual returns(bool);
+
 }
