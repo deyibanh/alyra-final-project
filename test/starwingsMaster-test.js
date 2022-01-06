@@ -114,7 +114,7 @@ describe("StarwingsMaster", function () {
     //         const flightData = {
     //             piloteAddr: pilot.address,
     //             droneAddr: drone.address,
-    //             conopsId: 4,
+    //             conopsId: 0,
     //             flightDatetime: 57875,
     //             flightDuration: 10,
     //             pilotName: "john",
@@ -123,10 +123,24 @@ describe("StarwingsMaster", function () {
     //             depart: "Terre",
     //             destination: "Moon",
     //         };
+    //         await ConopsManager.addConops(
+    //             "test1",
+    //             "with 4 plots",
+    //             "with 5 plots",
+    //             "with flag",
+    //             "with 1 person",
+    //             [
+    //                 { name: "CHU A", riskType: 0 },
+    //                 { name: "BASE B", riskType: 2 },
+    //             ],
+    //             4,
+    //             5
+    //         );
     //         DroneDelivery = await DroneDeliveryArtifact.deploy(
     //             DeliveryManager.address,
-    //             1,
+    //             44,
     //             ConopsManager.address,
+    //             SWAccessControl.address,
     //             flightData
     //         );
     //         await DroneDelivery.deployed();
