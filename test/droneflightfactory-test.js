@@ -78,6 +78,8 @@ describe("DroneFlightFactory", function () {
 
     it("Should deploy 2 new DroneDelivery contract", async () => {
         expect((await factory.getDeployedContracts()).length).to.equal(0);
+        await starwingsMaster.addPilot(pilot.address, "Pilot Name");
+        await starwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type");
         const addDroneDeliveryTx = await factory
             .connect(pilot)
             .newDroneDelivery(44, droneFlightDataSample);
@@ -106,16 +108,16 @@ describe("DroneFlightFactory", function () {
         expect(addressesFromFactory).to.be.eql(addressesFromStarwingsMaster);
 
         expect(
-            (await starwingsMaster.getPilotFlightAddresses(pilot.address))[0]
+            (await starwingsMaster.getPilot(pilot.address)).flightAddresses[0]
         ).to.be.equal(addressesFromStarwingsMaster[0]);
         expect(
-            (await starwingsMaster.getPilotFlightAddresses(pilot.address))[1]
+            (await starwingsMaster.getPilot(pilot.address)).flightAddresses[1]
         ).to.be.equal(addressesFromStarwingsMaster[1]);
         expect(
-            (await starwingsMaster.getDroneFlightAddresses(drone.address))[0]
+            (await starwingsMaster.getDrone(drone.address)).flightAddresses[0]
         ).to.be.equal(addressesFromStarwingsMaster[0]);
         expect(
-            (await starwingsMaster.getDroneFlightAddresses(drone.address))[1]
+            (await starwingsMaster.getDrone(drone.address)).flightAddresses[1]
         ).to.be.equal(addressesFromStarwingsMaster[1]);
 
         // Verify contracts deployement

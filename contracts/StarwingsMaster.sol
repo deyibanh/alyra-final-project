@@ -85,6 +85,34 @@ contract StarwingsMaster is IStarwingsMaster {
     IDeliveryManager private deliveryManager;
 
     /**
+     * @notice Pilot added event.
+     *
+     * @param pilotAddress The pilot address.
+     */
+    event PilotAdded(address pilotAddress);
+
+    /**
+     * @notice Pilot deleted event.
+     *
+     * @param pilotAddress The pilot address.
+     */
+    event PilotDeleted(address pilotAddress);
+
+    /**
+     * @notice Drone added event.
+     *
+     * @param droneAddress The drone address.
+     */
+    event DroneAdded(address droneAddress);
+
+    /**
+     * @notice Drone deleted event.
+     *
+     * @param droneAddress The drone address.
+     */
+    event DroneDeleted(address droneAddress);
+
+    /**
      * @dev Check the msg.sender's role.
      */
     modifier onlyRole(bytes32 _role) {
@@ -189,7 +217,11 @@ contract StarwingsMaster is IStarwingsMaster {
     {
         uint pilotIndex = pilotIndexMap[_pilotAddress];
         require(pilotIndex < pilotList.length, "Out of size index.");
-        require(pilotList[pilotIndex].pilotAddress != address(0), "Pilot not found.");
+        require(
+            pilotList[pilotIndex].pilotAddress != address(0) &&
+            pilotList[pilotIndex].pilotAddress == _pilotAddress,
+            "Pilot not found."
+        );
 
         return pilotList[pilotIndex];
     }
@@ -201,20 +233,23 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @param _pilotAddress The pilot address.
      * @param _pilotName The pilot name.
-     *
-     * @return The pilot information.
      */
     function addPilot(address _pilotAddress, string memory _pilotName)
         external
         onlyRole(StarwingsDataLib.ADMIN_ROLE)
-        returns (Pilot memory)
     {
-        uint pilotIndex = pilotIndexMap[_pilotAddress];
-        Pilot storage pilot = pilotList[pilotIndex];
+        require(_pilotAddress != address(0), "Can not add this address.");
 
+        Pilot memory pilot;
+        uint pilotIndex = pilotIndexMap[_pilotAddress];
+
+        if (pilotList.length > pilotIndex && pilotList[pilotIndex].pilotAddress == _pilotAddress) {
+            pilot = pilotList[pilotIndex];
+        }
+        
         require(
             (pilotIndex == 0 && pilot.pilotAddress == address(0)) ||
-            !pilot.isDeleted,
+            pilot.isDeleted,
             "Pilot already added."
         );
 
@@ -224,11 +259,14 @@ contract StarwingsMaster is IStarwingsMaster {
         if (pilotIndex == 0 && pilot.pilotAddress == address(0)) {
             pilot.pilotAddress = _pilotAddress;
             pilotList.push(pilot);
-            pilot.index = pilotList.length - 1;
-            pilotIndexMap[_pilotAddress] = pilot.index;
+            uint newPilotIndex = pilotList.length - 1;
+            pilotList[newPilotIndex].index = newPilotIndex;
+            pilotIndexMap[_pilotAddress] = newPilotIndex;
+        } else {
+            pilotList[pilotIndex] = pilot;
         }
         
-        return pilot;
+        emit PilotAdded(_pilotAddress);
     }
 
     /**
@@ -239,9 +277,15 @@ contract StarwingsMaster is IStarwingsMaster {
     function deletePilot(address _pilotAddress) external onlyRole(StarwingsDataLib.ADMIN_ROLE) {
         uint pilotIndex = pilotIndexMap[_pilotAddress];
         require(pilotIndex < pilotList.length, "Out of size index.");
-        require(pilotList[pilotIndex].pilotAddress != address(0), "Pilot not found.");
+        require(
+            pilotList[pilotIndex].pilotAddress != address(0) &&
+            pilotList[pilotIndex].pilotAddress == _pilotAddress,
+            "Pilot not found."
+        );
 
-        pilotList[pilotIndex].isDeleted = false;
+        pilotList[pilotIndex].isDeleted = true;
+
+        emit PilotDeleted(_pilotAddress);
     }
 
     /**
@@ -279,7 +323,11 @@ contract StarwingsMaster is IStarwingsMaster {
     {
         uint droneIndex = droneIndexMap[_droneAddress];
         require(droneIndex < droneList.length, "Out of size index.");
-        require(droneList[droneIndex].droneAddress != address(0), "Drone not found.");
+        require(
+            droneList[droneIndex].droneAddress != address(0) &&
+            droneList[droneIndex].droneAddress == _droneAddress,
+            "Drone not found."
+        );
 
         return droneList[droneIndex];
     }
@@ -292,20 +340,23 @@ contract StarwingsMaster is IStarwingsMaster {
      * @param _droneAddress The drone address.
      * @param _droneId The drone id.
      * @param _droneType The drone type.
-     *
-     * @return The Drone information.
      */
     function addDrone(address _droneAddress, string memory _droneId, string memory _droneType)
         external
         onlyRole(StarwingsDataLib.ADMIN_ROLE)
-        returns (Drone memory)
     {
-        uint droneIndex = droneIndexMap[_droneAddress];
-        Drone storage drone = droneList[droneIndex];
+        require(_droneAddress != address(0), "Can not add this address.");
 
+        Drone memory drone;
+        uint droneIndex = droneIndexMap[_droneAddress];
+
+        if (droneList.length > droneIndex && droneList[droneIndex].droneAddress == _droneAddress) {
+            drone = droneList[droneIndex];
+        }
+        
         require(
             (droneIndex == 0 && drone.droneAddress == address(0)) ||
-            !drone.isDeleted,
+            drone.isDeleted,
             "Drone already added."
         );
 
@@ -316,11 +367,14 @@ contract StarwingsMaster is IStarwingsMaster {
         if (droneIndex == 0 && drone.droneAddress == address(0)) {
             drone.droneAddress = _droneAddress;
             droneList.push(drone);
-            drone.index = droneList.length - 1;
-            droneIndexMap[_droneAddress] = drone.index;
+            uint newDroneIndex = droneList.length - 1;
+            droneList[newDroneIndex].index = newDroneIndex;
+            droneIndexMap[_droneAddress] = newDroneIndex;
+        } else {
+            droneList[droneIndex] = drone;
         }
         
-        return drone;
+        emit DroneAdded(_droneAddress);
     }
 
     /**
@@ -331,9 +385,14 @@ contract StarwingsMaster is IStarwingsMaster {
     function deleteDrone(address _droneAddress) external onlyRole(StarwingsDataLib.ADMIN_ROLE) {
         uint droneIndex = droneIndexMap[_droneAddress];
         require(droneIndex < droneList.length, "Out of size index.");
-        require(droneList[droneIndex].droneAddress != address(0), "Drone not found.");
+        require(
+            droneList[droneIndex].droneAddress != address(0) &&
+            droneList[droneIndex].droneAddress == _droneAddress,
+            "Drone not found.");
 
-        droneList[droneIndex].isDeleted = false;
+        droneList[droneIndex].isDeleted = true;
+
+        emit DroneDeleted(_droneAddress);
     }
 
     /**
@@ -391,10 +450,18 @@ contract StarwingsMaster is IStarwingsMaster {
         require(msg.sender == droneFlightFactoryAddress, "not allowed");
         uint pilotIndex = pilotIndexMap[_pilotAddress];
         require(pilotIndex < pilotList.length, "Out of size index.");
-        require(pilotList[pilotIndex].pilotAddress != address(0), "Pilot not found.");
+        require(
+            pilotList[pilotIndex].pilotAddress != address(0) &&
+            pilotList[pilotIndex].pilotAddress == _pilotAddress,
+            "Pilot not found."
+        );
         uint droneIndex = droneIndexMap[_droneAddress];
         require(droneIndex < droneList.length, "Out of size index.");
-        require(droneList[droneIndex].droneAddress != address(0), "Pilot not found.");
+        require(
+            droneList[droneIndex].droneAddress != address(0) &&
+            droneList[droneIndex].droneAddress == _droneAddress,
+            "Drone not found."
+        );
 
         droneFlightAddressList.push(_droneFlightAddress);
         pilotList[pilotIndex].flightAddresses.push(_droneFlightAddress);
