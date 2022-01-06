@@ -29,6 +29,11 @@ async function main() {
         "StarwingsMaster"
     );
 
+    const DroneFlightFactoryArtifact = await hre.ethers.getContractFactory(
+        "DroneFlightFactory"
+    );
+
+
     const SWAccessControl = await SWAccessControlArtifact.deploy();
     await SWAccessControl.deployed();
 
@@ -53,6 +58,14 @@ async function main() {
 
     await StarwingsMaster.deployed();
     console.log("StarwingsMaster deployed to:", StarwingsMaster.address);
+
+    const DroneFlightFactory = await DroneFlightFactoryArtifact.deploy(
+        SWAccessControl.address,
+        StarwingsMaster.address
+    );
+
+    await DroneFlightFactory.deployed();
+    console.log("DroneFlightFactory deployed to:", DroneFlightFactory.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
