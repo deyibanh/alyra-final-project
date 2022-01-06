@@ -33,7 +33,6 @@ async function main() {
         "DroneFlightFactory"
     );
 
-
     const SWAccessControl = await SWAccessControlArtifact.deploy();
     await SWAccessControl.deployed();
 

@@ -12,14 +12,14 @@ abstract contract DroneFlight {
     IConopsManager private conopsManager;
     IAccessControl private accessControl;
 
-    bool allowedToFlight;
+    bool internal allowedToFlight;
     // Drone events
     // bool private droneParcelPickUp;
     // bool private droneTakeOff;
 
     StarwingsDataLib.FlightData private datas;
-    FlightState droneFlightState;
-    FlightState pilotFlightState;
+    FlightState internal droneFlightState;
+    FlightState internal pilotFlightState;
     Check private preChecks;
     Check private postChecks;
 
@@ -37,7 +37,7 @@ abstract contract DroneFlight {
     Event[] private riskEvent;
     // Drone checkpoints
     Checkpoint[] private checkpoints;
-    StarwingsDataLib.AirRisk[] airRisks;
+    StarwingsDataLib.AirRisk[] internal airRisks;
 
     /**
      *  PreFlight : flight is not started
@@ -110,12 +110,18 @@ abstract contract DroneFlight {
     // 6. Fallback — Receive function
     // 7. External visible functions
 
-    function preFlightChecks(CheckType _checkType) external {
+    function preFlightChecks(CheckType _checkType)
+        external
+        onlyRole(StarwingsDataLib.PILOT_ROLE)
+    {
         require(!preChecks.checkType[_checkType], "already checked");
         preChecks.checkType[_checkType] = true;
     }
 
-    function postFlightChecks(CheckType _checkType) external {
+    function postFlightChecks(CheckType _checkType)
+        external
+        onlyRole(StarwingsDataLib.PILOT_ROLE)
+    {
         require(!postChecks.checkType[_checkType], "already checked");
         postChecks.checkType[_checkType] = true;
     }
@@ -235,7 +241,6 @@ abstract contract DroneFlight {
 
     function changeFlightStatus(uint256 _status)
         external
-        onlyRole(StarwingsDataLib.DRONE_ROLE)
     {
         bool isPilot = accessControl.hasRole(
             StarwingsDataLib.PILOT_ROLE,
@@ -248,15 +253,15 @@ abstract contract DroneFlight {
 
         require(isPilot || isDrone, "Access refused");
         require(_status != 1, "Cannot cancel flight this way");
-        require(allowedToFlight, "Flying is not allowed");
         require(
             _status > uint256(FlightState.PreFlight),
             "Not a valide logical status"
         );
         require(
-            _status < uint256(type(FlightState).max),
+            _status <= uint256(type(FlightState).max),
             "Not a valide logical status"
         );
+        require(allowedToFlight, "Flying is not allowed");
 
         FlightState statetype;
         if (isDrone) {
@@ -308,7 +313,7 @@ abstract contract DroneFlight {
         pilotFlightState = _value;
     }
 
-    function _standardAllowToFlight() internal view returns(bool) {
+    function _standardAllowToFlight() internal view returns (bool) {
         bool allowed = true;
 
         if (pilotFlightState == FlightState.Canceled) {
@@ -331,6 +336,5 @@ abstract contract DroneFlight {
         allowedToFlight = (standardAllowed && customAllowed);
     }
 
-    function _customAllowToFlight() internal virtual returns(bool);
-
+    function _customAllowToFlight() internal virtual returns (bool);
 }
