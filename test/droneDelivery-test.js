@@ -132,8 +132,45 @@ describe("droneflight", function () {
         });
     });
 
+    describe("parcel management", function () {
+        it("Should revert as sender is not Drone", async () => {
+            expect(await droneDelivery.isParcelPickedUp()).to.be.equal(false);
+
+            await expect(droneDelivery.pickUp()).to.be.revertedWith(
+                "Access refused"
+            );
+        });
+        it("should be picked up parcel", async () => {
+            expect(await droneDelivery.isParcelPickedUp()).to.equal(false);
+            await droneDelivery.connect(drone).pickUp();
+            expect(await droneDelivery.isParcelPickedUp()).to.equal(true);
+        });
+
+        it("Should revert as parcel was already picked up", async () => {
+            expect(await droneDelivery.isParcelPickedUp()).to.be.equal(false);
+            await droneDelivery.connect(drone).pickUp();
+            await expect(
+                droneDelivery.connect(drone).pickUp()
+            ).to.be.revertedWith("parcel already pickedUp");
+        });
+        it("Should revert as parcel was not pickedup before delivery", async () => {
+            expect(await droneDelivery.isParcelPickedUp()).to.be.equal(false);
+            await expect(
+                droneDelivery.connect(drone).deliver()
+            ).to.be.revertedWith("parcel not picked up before");
+        });
+        it("should deliver the parcel", async () => {
+            expect(await droneDelivery.isParcelPickedUp()).to.equal(false);
+            expect(await droneDelivery.isParcelDelivered()).to.equal(false);
+            await droneDelivery.connect(drone).pickUp();
+            expect(await droneDelivery.isParcelPickedUp()).to.equal(true);
+            await droneDelivery.connect(drone).deliver();
+            expect(await droneDelivery.isParcelDelivered()).to.equal(true);
+        });
+    });
+
     describe("flight status", function () {
-        it("Should revert due as sender is not Pilot or Drone", async () => {
+        it("Should revert as sender is not Pilot or Drone", async () => {
             expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(0);
 
             await expect(
@@ -175,6 +212,7 @@ describe("droneflight", function () {
             beforeEach(async function () {
                 await droneDelivery.connect(pilot).validateAirRisk(0);
                 await droneDelivery.connect(pilot).validateAirRisk(1);
+                await droneDelivery.connect(drone).pickUp();
             });
 
             it("Should change piloteflightstatus to 2", async () => {
@@ -197,7 +235,7 @@ describe("droneflight", function () {
                 );
             });
 
-            it("Should revert due to flight not started", async () => {
+            it("Should revert due to flight not started (as pilot)", async () => {
                 expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(
                     0
                 );
@@ -206,7 +244,7 @@ describe("droneflight", function () {
                 ).to.be.revertedWith("status not allowed");
             });
 
-            it("Should revert due to flight not started", async () => {
+            it("Should revert due to flight not started (as drone)", async () => {
                 expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(
                     0
                 );

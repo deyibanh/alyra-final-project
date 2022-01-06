@@ -6,6 +6,8 @@ import "./DroneFlight.sol";
 contract DroneDelivery is DroneFlight {
     uint256 private deliveryId;
     address private deliveryManager;
+    bool public droneParcelPickedUp;
+    bool private droneParcelDelivered;
 
     constructor(
         address _deliveryManager,
@@ -23,7 +25,27 @@ contract DroneDelivery is DroneFlight {
         return deliveryId;
     }
 
-    function _customAllowToFlight() internal pure override returns(bool){
-        return true;
+    function pickUp() external onlyRole(StarwingsDataLib.DRONE_ROLE) {
+        require(!droneParcelPickedUp, "parcel already pickedUp");
+        droneParcelPickedUp = true;
+        _allowToFlight();
     }
+
+    function deliver() external onlyRole(StarwingsDataLib.DRONE_ROLE) {
+        require(droneParcelPickedUp, "parcel not picked up before");
+        droneParcelDelivered = true;
+    }
+
+    function isParcelPickedUp() external view returns(bool){
+        return droneParcelPickedUp;
+    }
+
+    function isParcelDelivered() external view returns(bool){
+        return droneParcelDelivered;
+    }
+
+    function _customAllowToFlight() internal override view returns(bool){
+        return droneParcelPickedUp;
+    }
+
 }
