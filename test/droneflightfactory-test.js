@@ -13,7 +13,7 @@ let factory,
 const droneFlightDataSample = {
     piloteAddr: "",
     droneAddr: "",
-    conopsId: 4,
+    conopsId: 0,
     flightDatetime: 57875,
     flightDuration: 10,
     pilotName: "john",
@@ -41,6 +41,22 @@ const deploy = async () => {
     const Conops = await ethers.getContractFactory("ConopsManager");
     conops = await Conops.deploy(accessControl.address);
     await conops.deployed();
+
+    const addConopsTx = await conops.addConops(
+        "test1",
+        "with 4 plots",
+        "with 5 plots",
+        "with flag",
+        "with 1 person",
+        [
+            { name: "CHU A", riskType: 0 },
+            { name: "BASE B", riskType: 2 },
+        ],
+        4,
+        5
+    );
+
+    await addConopsTx.wait();
 
     const Delivery = await ethers.getContractFactory("DeliveryManager");
     delivery = await Delivery.deploy(accessControl.address);
@@ -78,6 +94,8 @@ describe("DroneFlightFactory", function () {
 
     it("Should deploy 2 new DroneDelivery contract", async () => {
         expect((await factory.getDeployedContracts()).length).to.equal(0);
+        await starwingsMaster.addPilot(pilot.address, "Pilot Name");
+        await starwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type");
         const addDroneDeliveryTx = await factory
             .connect(pilot)
             .newDroneDelivery(44, droneFlightDataSample);
@@ -106,16 +124,16 @@ describe("DroneFlightFactory", function () {
         expect(addressesFromFactory).to.be.eql(addressesFromStarwingsMaster);
 
         expect(
-            (await starwingsMaster.getPilotFlightAddresses(pilot.address))[0]
+            (await starwingsMaster.getPilot(pilot.address)).flightAddresses[0]
         ).to.be.equal(addressesFromStarwingsMaster[0]);
         expect(
-            (await starwingsMaster.getPilotFlightAddresses(pilot.address))[1]
+            (await starwingsMaster.getPilot(pilot.address)).flightAddresses[1]
         ).to.be.equal(addressesFromStarwingsMaster[1]);
         expect(
-            (await starwingsMaster.getDroneFlightAddresses(drone.address))[0]
+            (await starwingsMaster.getDrone(drone.address)).flightAddresses[0]
         ).to.be.equal(addressesFromStarwingsMaster[0]);
         expect(
-            (await starwingsMaster.getDroneFlightAddresses(drone.address))[1]
+            (await starwingsMaster.getDrone(drone.address)).flightAddresses[1]
         ).to.be.equal(addressesFromStarwingsMaster[1]);
 
         // Verify contracts deployement

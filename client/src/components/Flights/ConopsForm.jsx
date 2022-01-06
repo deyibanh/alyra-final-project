@@ -11,6 +11,7 @@ const reducer = (state, action) => {
                 if (index === action.id) {
                     const updatedItem = {
                         ...item,
+                        validated: false,
                         name: action.airRisk.name,
                         riskType: action.airRisk.riskType,
                     };

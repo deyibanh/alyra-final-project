@@ -34,7 +34,6 @@ contract DroneFlightFactory {
         starwingsMaster = IStarwingsMaster(starwingsMasterAddress);
     }
 
-
     // modifier isAllowedTypeFlight(FlightType _type) {
     //     require(_type <= type(FlightType).max, "type of flight not allowed");
     //     _;
@@ -52,6 +51,7 @@ contract DroneFlightFactory {
             starwingsMaster.getDeliveryManager(),
             _deliveryId,
             starwingsMaster.getConopsManager(),
+            starwingsMaster.getAccessControlAddress(),
             flightData
         );
 
