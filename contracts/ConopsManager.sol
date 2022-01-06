@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "./interfaces/IConopsManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
+import "hardhat/console.sol";
 
 /**
  *   @title Conops
@@ -11,17 +12,8 @@ import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
  *  @notice This contract manage all the conops. Admins can add a simple Conop^s and enable/disable it
  */
 contract ConopsManager is IConopsManager {
-    SimpleConops[] private simpleConopsList;
+    StarwingsDataLib.SimpleConops[] private simpleConopsList;
     IAccessControl private accessControl;
-
-    // modifier onlyRole(string memory role) {
-    //     bytes32 byteRole = keccak256(abi.encodePacked(role));
-    //     require(
-    //         accessControl.hasRole(byteRole, msg.sender),
-    //         "you don't have the role"
-    //     );
-    //     _;
-    // }
 
     /// @notice Modifier to restrict function to specific role
     /// @dev Use the library to retrieve bytes32 values when calling the modifier
@@ -52,7 +44,7 @@ contract ConopsManager is IConopsManager {
         string memory _endPoint,
         string memory _crossRoad,
         string memory _exclusionZone,
-        AirRisk[] memory _airRisks,
+        StarwingsDataLib.AirRisk[] memory _airRisks,
         uint8 _grc,
         uint8 _arc
     )
@@ -60,7 +52,7 @@ contract ConopsManager is IConopsManager {
         onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (uint256 conopsID)
     {
-        SimpleConops storage simpleConops = simpleConopsList.push();
+        StarwingsDataLib.SimpleConops storage simpleConops = simpleConopsList.push();
 
         simpleConops.activated = true;
         simpleConops.name = _name;
@@ -123,7 +115,7 @@ contract ConopsManager is IConopsManager {
     function viewConops(uint256 _conopsID)
         external
         view
-        returns (SimpleConops memory)
+        returns (StarwingsDataLib.SimpleConops memory)
     {
         return simpleConopsList[_conopsID];
     }
@@ -131,7 +123,7 @@ contract ConopsManager is IConopsManager {
     /**
      *  @notice return all conops
      */
-    function viewAllConops() external view returns (SimpleConops[] memory) {
+    function viewAllConops() external view returns (StarwingsDataLib.SimpleConops[] memory) {
         return simpleConopsList;
     }
 }

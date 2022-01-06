@@ -13,7 +13,7 @@ let factory,
 const droneFlightDataSample = {
     piloteAddr: "",
     droneAddr: "",
-    conopsId: 4,
+    conopsId: 0,
     flightDatetime: 57875,
     flightDuration: 10,
     pilotName: "john",
@@ -41,6 +41,22 @@ const deploy = async () => {
     const Conops = await ethers.getContractFactory("ConopsManager");
     conops = await Conops.deploy(accessControl.address);
     await conops.deployed();
+
+    const addConopsTx = await conops.addConops(
+        "test1",
+        "with 4 plots",
+        "with 5 plots",
+        "with flag",
+        "with 1 person",
+        [
+            { name: "CHU A", riskType: 0 },
+            { name: "BASE B", riskType: 2 },
+        ],
+        4,
+        5
+    );
+
+    await addConopsTx.wait();
 
     const Delivery = await ethers.getContractFactory("DeliveryManager");
     delivery = await Delivery.deploy(accessControl.address);
