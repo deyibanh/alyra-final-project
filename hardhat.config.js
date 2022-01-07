@@ -37,6 +37,13 @@ module.exports = {
                     ? [process.env.PRIVATE_KEY]
                     : [],
         },
+        fantom_testnet: {
+            url: process.env.FANTOM_TESTNET_URL || "",
+            accounts:
+                process.env.PRIVATE_KEY !== undefined
+                    ? [process.env.PRIVATE_KEY]
+                    : [],
+        },
     },
     settings: {
         optimizer: {
