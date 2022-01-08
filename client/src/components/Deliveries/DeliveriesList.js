@@ -25,12 +25,17 @@ function DeliveriesList(props) {
     const [modalIsShown, setModalIsShown] = useState(false);
     const [formData, setFormData] = useReducer(formReducer, {});
     const [pending, setPending] = useState(true);
+    const [eventToProcess, setEventToProcess] = useState(false);
 
     useEffect(() => {
         if (state.provider) {
             const provider = new ethers.Contract(DeliveryManagerAddress, DeliveryArtifact.abi, state.provider);
             const signer = new ethers.Contract(DeliveryManagerAddress, DeliveryArtifact.abi, state.signer);
             setDeliveryManager({ provider, signer });
+
+            provider.on("DeliveryCreated", (deliveryId) => {
+                setEventToProcess(!eventToProcess);
+            });
         }
     }, [state]);
 
@@ -38,7 +43,7 @@ function DeliveriesList(props) {
         if (deliveryManager.provider) {
             getDeliveries();
         }
-    }, [deliveryManager]);
+    }, [deliveryManager, eventToProcess]);
 
     const getDeliveries = async () => {
         setPending(true);
@@ -165,8 +170,11 @@ function DeliveriesList(props) {
                     <Button variant="primary">+ Add Delivery</Button>
                 </Col>
             </Row>
-            <Row className="g-2 mt-2"></Row>
-            <DataTable columns={columns} data={deliveriesList} progressPending={pending} />
+            <Row className="g-2 mt-2">
+                <Col>
+                    <DataTable columns={columns} data={deliveriesList} progressPending={pending} />
+                </Col>
+            </Row>
             <Modal
                 show={modalIsShown}
                 onHide={hideModal}
