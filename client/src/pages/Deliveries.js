@@ -7,8 +7,8 @@ import { checkProperties } from "ethers/lib/utils";
 
 function Deliveries(props) {
     const state = props.state;
-    const StarwingsMasterProvider = props.StarwingsMasterProvider;
-    const StarwingsMasterSigner = props.StarwingsMasterSigner;
+    // const StarwingsMasterProvider = props.StarwingsMasterProvider;
+    // const StarwingsMasterSigner = props.StarwingsMasterSigner;
 
     return (
         <div className="Deliveries">
@@ -22,23 +22,19 @@ function Deliveries(props) {
                                 <Nav.Item>
                                     <Nav.Link eventKey="all_deliveries">All</Nav.Link>
                                 </Nav.Item>
-                                <Nav.Item>
+                                {/* <Nav.Item>
                                     <Nav.Link eventKey="my_deliveries">My Deliveries</Nav.Link>
-                                </Nav.Item>
+                                </Nav.Item> */}
                             </Nav>
                         </Col>
                         <Col sm={9}>
                             <Tab.Content>
                                 <Tab.Pane eventKey="all_deliveries">
-                                    <DeliveriesList
-                                        state={state}
-                                        StarwingsMasterProvider={StarwingsMasterProvider}
-                                        StarwingsMasterSigner={StarwingsMasterSigner}
-                                    ></DeliveriesList>
+                                    <DeliveriesList state={state}></DeliveriesList>
                                 </Tab.Pane>
-                                <Tab.Pane eventKey="my_deliveries">
+                                {/* <Tab.Pane eventKey="my_deliveries">
                                     <div>Nothing yet.</div>
-                                </Tab.Pane>
+                                </Tab.Pane> */}
                             </Tab.Content>
                         </Col>
                     </Row>
