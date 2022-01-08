@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Col, Nav, Row, Tab } from "react-bootstrap";
 import ConopsContent from "../components/Flights/ConopsContent";
 import PilotsContent from "../components/Flights/PilotsContent";
+import DronesContent from "../components/Flights/DronesContent";
 import "./Flights.css";
 
 function Flights(props) {
@@ -45,7 +46,11 @@ function Flights(props) {
                                     ></PilotsContent>
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="drones">
-                                    <div>There is no drones yet.</div>
+                                    <DronesContent
+                                        state={state}
+                                        StarwingsMasterProvider={StarwingsMasterProvider}
+                                        StarwingsMasterSigner={StarwingsMasterSigner}
+                                    ></DronesContent>
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="flights">
                                     <div>There is no flights yet.</div>
