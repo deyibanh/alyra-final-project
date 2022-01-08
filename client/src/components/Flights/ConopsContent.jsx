@@ -61,7 +61,6 @@ function ConopsContent({ state }) {
         try {
             const conopsList = await conopsManager.provider.viewAllConops();
             setConops(conopsList);
-            console.log(conopsList);
         } catch (error) {
             console.error(error);
         }
