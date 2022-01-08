@@ -62,6 +62,7 @@ contract DeliveryManager is IDeliveryManager {
         _delivery.deliveryId = uint256(
             keccak256(
                 abi.encodePacked(
+                    blockhash(block.number - 1),
                     block.timestamp,
                     _delivery.fromAddr,
                     _delivery.toAddr,
