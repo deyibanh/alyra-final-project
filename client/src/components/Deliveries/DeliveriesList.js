@@ -38,7 +38,7 @@ function DeliveriesList(props) {
         if (deliveryManager.provider) {
             getDeliveries();
         }
-    }, [modalIsShown]);
+    }, [deliveryManager]);
 
     const getDeliveries = async () => {
         setPending(true);
@@ -75,16 +75,20 @@ function DeliveriesList(props) {
             supplierOrderId: formData.orderId,
             state: 0,
             from: formData.from,
-            fromAddr: ethers.utils.getAddress("0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"),
+            fromAddr: ethers.utils.getAddress(formData.fromAccount),
             to: formData.to,
-            toAddr: ethers.utils.getAddress("0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"),
+            toAddr: ethers.utils.getAddress(formData.toAccount),
             fromHubId: Number(formData.fromHubId),
             toHubId: Number(formData.toHubId),
         };
-        console.log(delivery);
         const tx = await deliveryManager.signer.newDelivery(delivery);
         await tx;
         hideModal();
+    };
+
+    const handleButtonClick = (state) => {
+        console.log("clicked");
+        console.log(state.target.id);
     };
 
     const columns = [
@@ -132,6 +136,16 @@ function DeliveriesList(props) {
         {
             name: "Dest. hub",
             selector: (row) => row.toHubId,
+        },
+        {
+            cell: (row) => (
+                <Button onClick={handleButtonClick} id={row.deliveryId} variant="warning" size="sm">
+                    Process
+                </Button>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
         },
     ];
 
