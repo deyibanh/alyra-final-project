@@ -22,7 +22,6 @@ const reducer = (state, action) => {
                 return item;
             });
         case "REMOVE_ITEM":
-            console.log(action.id);
             return state.filter((item, index) => index !== action.id);
         default:
             throw new Error();
@@ -46,8 +45,6 @@ function ConopsForm({ formChange, setFormData }) {
             value: airRisks,
         });
     }, [airRisks]);
-
-    console.log(airRisks);
 
     return (
         <div className="conops-form">
