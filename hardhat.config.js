@@ -44,6 +44,27 @@ module.exports = {
                     ? [process.env.PRIVATE_KEY]
                     : [],
         },
+        arbitrum_testnet: {
+            url: process.env.ARBITRUM_TESTNET_URL || "",
+            accounts:
+                process.env.PRIVATE_KEY !== undefined
+                    ? [process.env.PRIVATE_KEY]
+                    : [],
+        },
+        polygon_testnet: {
+            url: process.env.POLYGON_TESTNET_URL || "",
+            accounts:
+                process.env.PRIVATE_KEY !== undefined
+                    ? [process.env.PRIVATE_KEY]
+                    : [],
+        },
+        optimism_testnet: {
+            url: process.env.OPTIMISM_TESTNET_URL || "",
+            accounts:
+                process.env.PRIVATE_KEY !== undefined
+                    ? [process.env.PRIVATE_KEY]
+                    : [],
+        },
     },
     settings: {
         optimizer: {
