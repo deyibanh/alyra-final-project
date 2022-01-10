@@ -197,9 +197,13 @@ contract StarwingsMaster is IStarwingsMaster {
     function getPilot(address _pilotAddress)
         external
         view
-        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (StarwingsDataLib.Pilot memory)
     {
+        require(
+            msg.sender == droneFlightFactoryAddress ||
+                accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender),
+            "Access refused"
+        );
         uint256 pilotIndex = pilotIndexMap[_pilotAddress];
         require(pilotIndex < pilotList.length, "Out of size index.");
         require(
@@ -319,9 +323,13 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDrone(address _droneAddress)
         external
         view
-        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (StarwingsDataLib.Drone memory)
     {
+        require(
+            msg.sender == droneFlightFactoryAddress ||
+                accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender),
+            "Access refused"
+        );
         uint256 droneIndex = droneIndexMap[_droneAddress];
         require(droneIndex < droneList.length, "Out of size index.");
         require(

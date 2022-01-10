@@ -10,23 +10,31 @@ let factory,
     pilot,
     drone;
 
+const pilotSample = {
+    _pilotAddress: "",
+    _pilotName: "John Pilot",
+};
+
+const droneSample = {
+    _droneAddress: "",
+    _droneId: "78re2578",
+    _droneType: "aiir32",
+};
+
 const droneFlightDataSample = {
-    piloteAddr: "",
-    droneAddr: "",
+    droneAddress: "",
     conopsId: 0,
     flightDatetime: 57875,
     flightDuration: 10,
-    pilotName: "john",
-    droneType: "azer",
-    droneId: "45",
-    depart: "Terre",
+    depart: "Earth",
     destination: "Moon",
 };
 
 const deploy = async () => {
     [owner, pilot, drone] = await ethers.getSigners();
-    droneFlightDataSample.piloteAddr = pilot.address;
-    droneFlightDataSample.droneAddr = drone.address;
+    pilotSample._pilotAddress = pilot.address;
+    droneSample._droneAddress = drone.address;
+    droneFlightDataSample.droneAddress = drone.address;
 
     const AccessControl = await ethers.getContractFactory("SWAccessControl");
     accessControl = await AccessControl.deploy();
@@ -77,6 +85,16 @@ const deploy = async () => {
     await factory.deployed();
 
     await starwingsMaster.setDroneFlightFactoryAddress(factory.address);
+    await starwingsMaster.addDrone(
+        droneSample._droneAddress,
+        droneSample._droneId,
+        droneSample._droneType
+    );
+    await starwingsMaster.addPilot(
+        pilotSample._pilotAddress,
+        pilotSample._pilotName
+    );
+
     return [factory, accessControl];
 };
 
@@ -88,17 +106,17 @@ describe("DroneFlightFactory", function () {
     it("Should revert due to caller not pilot", async () => {
         expect((await factory.getDeployedContracts()).length).to.equal(0);
         await expect(
-            factory.connect(owner).newDroneDelivery(0, droneFlightDataSample)
+            factory
+                .connect(owner)
+                .newDroneDelivery(0, ...Object.values(droneFlightDataSample))
         ).to.be.revertedWith("Access refused");
     });
 
     it("Should deploy 2 new DroneDelivery contract", async () => {
         expect((await factory.getDeployedContracts()).length).to.equal(0);
-        await starwingsMaster.addPilot(pilot.address, "Pilot Name");
-        await starwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type");
         const addDroneDeliveryTx = await factory
             .connect(pilot)
-            .newDroneDelivery(44, droneFlightDataSample);
+            .newDroneDelivery(44, ...Object.values(droneFlightDataSample));
 
         await addDroneDeliveryTx.wait();
 
@@ -107,7 +125,7 @@ describe("DroneFlightFactory", function () {
 
         const addDroneDeliveryTx2 = await factory
             .connect(pilot)
-            .newDroneDelivery(57, droneFlightDataSample);
+            .newDroneDelivery(57, ...Object.values(droneFlightDataSample));
         await addDroneDeliveryTx2.wait();
 
         // Verify Contract Addresses creation
