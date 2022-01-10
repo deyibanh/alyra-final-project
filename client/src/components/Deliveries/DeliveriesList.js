@@ -4,8 +4,10 @@ import DeliveryArtifact from "../../artifacts/contracts/DeliveryManager.sol/Deli
 import { Button, Col, Modal, Row } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import DeliveryForm from "./DeliveryForm";
+import FactoryModal from "./FactoryModal";
 
 const DeliveryManagerAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+const FlightFactoryAddress = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
 
 const formReducer = (state, event) => {
     if (event.type === "reset") {
@@ -26,6 +28,16 @@ function DeliveriesList(props) {
     const [formData, setFormData] = useReducer(formReducer, {});
     const [pending, setPending] = useState(true);
     const [eventToProcess, setEventToProcess] = useState(false);
+    const [factoryModalIsShown, setFactoryModalIsShown] = useState(false);
+    const [selectedDeliveryId, setSelectedDeliveryId] = useState();
+
+    const hideFactoryModal = () => {
+        setFactoryModalIsShown(false);
+    };
+
+    const showFactoryModal = () => {
+        setFactoryModalIsShown(true);
+    };
 
     useEffect(() => {
         if (state.provider) {
@@ -34,7 +46,7 @@ function DeliveriesList(props) {
             setDeliveryManager({ provider, signer });
 
             provider.on("DeliveryCreated", (deliveryId) => {
-                setEventToProcess(!eventToProcess);
+                getDeliveries();
             });
         }
     }, [state]);
@@ -93,6 +105,8 @@ function DeliveriesList(props) {
 
     const handleButtonClick = (state) => {
         console.log("clicked");
+        setSelectedDeliveryId(state.target.id);
+        setFactoryModalIsShown(true);
         console.log(state.target.id);
     };
 
@@ -196,6 +210,12 @@ function DeliveriesList(props) {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            <FactoryModal
+                show={factoryModalIsShown}
+                onHide={hideFactoryModal}
+                state={state}
+                deliveryId={selectedDeliveryId}
+            />
         </div>
     );
 }

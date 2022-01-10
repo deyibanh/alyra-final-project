@@ -4,7 +4,7 @@ import ConopsArtifact from "../../artifacts/contracts/ConopsManager.sol/ConopsMa
 import { ethers } from "ethers";
 import FlightPlanForm from "./FlightPlanForm";
 
-const ConopsManagerAddress = "0x51C5aba2e32C0bFcf4AeC2CA35c91C1FC47F142D";
+const ConopsManagerAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 
 const formReducer = (state, event) => {
     if (event.type === "reset") {
@@ -17,7 +17,7 @@ const formReducer = (state, event) => {
     };
 };
 
-function FactoryModal({ state, show, onHide }) {
+function FactoryModal({ state, show, onHide, deliveryId }) {
     // const [formData, setFormData] = useReducer(formReducer, {});
     const [formData, setFormData] = useState({});
     const [conopsList, setConopsList] = useState([]);
@@ -66,7 +66,7 @@ function FactoryModal({ state, show, onHide }) {
     return (
         <Modal show={show} onHide={onHide} keyboard={false} aria-labelledby="contained-modal-title-vcenter">
             <Modal.Header closeButton>
-                <Modal.Title>Deliver</Modal.Title>
+                <Modal.Title>Deliver (id:{deliveryId})</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {conops === -1 ? (

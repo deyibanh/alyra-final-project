@@ -4,12 +4,12 @@ import { Button, Col, Modal, Row } from "react-bootstrap";
 import ConopsArtifact from "../../artifacts/contracts/ConopsManager.sol/ConopsManager.json";
 import FactoryModal from "./FactoryModal";
 
-const FlightFactoryAddress = "0x2A1530D9645B6C5ae0Bd8AC2d847C41c891239f5";
+const FlightFactoryAddress = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
 
 function TestDeliveriesContent({ state }) {
     const [factoryModalIsShown, setFactoryModalIsShown] = useState(false);
-    
-    const hideModal = () => {
+
+    const hideFactoryModal = () => {
         setFactoryModalIsShown(false);
     };
 
@@ -26,7 +26,7 @@ function TestDeliveriesContent({ state }) {
                     </Button>
                 </Col>
             </Row>
-            <FactoryModal show={factoryModalIsShown} onHide={hideModal} state={state} />
+            <FactoryModal show={factoryModalIsShown} onHide={hideFactoryModal} state={state} />
         </div>
     );
 }

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Button, Col, Form, FormControl, InputGroup, Modal, Row } from "react-bootstrap";
 
 function FlightPlanForm({ setFormData, handleFormChange }) {
-
     return (
         <div className="flightPlan-form">
             <Form.Group as={Row} className="mb-3" controlId="conops-name">

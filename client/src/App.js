@@ -13,7 +13,7 @@ import getEthersProvider from "./utils/getEthers";
 import "./App.css";
 import { Container } from "react-bootstrap";
 
-const StarwingsMasterAddress = "0x169a6B5Be373Be7911a31754db77f89A63b00241";
+const StarwingsMasterAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
 // const SWAccessControlAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero;
 const ADMIN_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ADMIN_ROLE"));
