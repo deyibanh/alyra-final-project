@@ -25,27 +25,42 @@ function DeliveriesList(props) {
     const [modalIsShown, setModalIsShown] = useState(false);
     const [formData, setFormData] = useReducer(formReducer, {});
     const [pending, setPending] = useState(true);
-    const [eventToProcess, setEventToProcess] = useState(false);
+    const [eventToProcess, setEventToProcess] = useState(0);
 
     useEffect(() => {
         if (state.provider) {
+            console.log("UseEffect state !");
             const provider = new ethers.Contract(DeliveryManagerAddress, DeliveryArtifact.abi, state.provider);
             const signer = new ethers.Contract(DeliveryManagerAddress, DeliveryArtifact.abi, state.signer);
             setDeliveryManager({ provider, signer });
 
+            console.log("UseEffect state :: Listening to events !");
             provider.on("DeliveryCreated", (deliveryId) => {
-                setEventToProcess(!eventToProcess);
+                console.log("Event DeliveryCreated !");
+                console.log("bool=" + eventToProcess);
+                setEventToProcess(eventToProcess + 1);
+                console.log("bool=" + eventToProcess);
             });
         }
     }, [state]);
 
     useEffect(() => {
         if (deliveryManager.provider) {
+            console.log(`UseEffect deliveryManager !`);
             getDeliveries();
         }
-    }, [deliveryManager, eventToProcess]);
+    }, [deliveryManager]);
+
+    useEffect(() => {
+        console.log(`UseEffect getDeliveries ! [${eventToProcess}]`);
+        if (deliveryManager.provider) {
+            console.log("UseEffect getting deliveries !");
+            getDeliveries();
+        }
+    }, [eventToProcess]);
 
     const getDeliveries = async () => {
+        console.log("getDeliveries start !");
         setPending(true);
         try {
             const deliveriesList = await deliveryManager.provider.getAllDeliveries();
@@ -55,6 +70,7 @@ function DeliveriesList(props) {
         }
 
         setPending(false);
+        console.log("getDeliveries end !");
     };
 
     const hideModal = () => {
