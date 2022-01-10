@@ -1,28 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { Button, Col, Form, FormControl, Badge, Modal, Row } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import "./PilotsContent.css";
 
-function PilotsContent(props) {
+function DronesContent(props) {
     const state = props.state;
     const StarwingsMasterProvider = props.StarwingsMasterProvider;
     const StarwingsMasterSigner = props.StarwingsMasterSigner;
-    const [pilotAddressList, setPilotAddressList] = useState([]);
-    const [inputAddPilot, setInputAddPilot] = useState("");
-    const [inputAddPilotName, setInputAddPilotName] = useState("");
+    const [droneAddressList, setDroneAddressList] = useState([]);
+    const [inputAddDrone, setInputAddDrone] = useState("");
+    const [inputAddDroneId, setInputAddDroneId] = useState("");
+    const [inputAddDroneType, setInputAddDroneType] = useState("");
     const [modalIsShown, setModalIsShown] = useState(false);
     const [pending, setPending] = useState(true);
     const [eventToProcess, setEventToProcess] = useState(false);
 
     useEffect(() => {
         if (StarwingsMasterProvider) {
-            getPilotList();
+            getDroneList();
 
-            StarwingsMasterProvider.on("PilotAdded", (pilotAddress) => {
+            StarwingsMasterProvider.on("DroneAdded", (droneAddress) => {
                 setEventToProcess(!eventToProcess);
             });
 
-            StarwingsMasterProvider.on("PilotDeleted", (pilotAddress) => {
+            StarwingsMasterProvider.on("DroneDeleted", (droneAddress) => {
                 setEventToProcess(!eventToProcess);
             });
         }
@@ -30,18 +30,23 @@ function PilotsContent(props) {
 
     useEffect(() => {
         if (StarwingsMasterProvider) {
-            getPilotList();
+            getDroneList();
         }
     }, [eventToProcess]);
 
-    function onChangeInputAddPilot(event) {
+    function onChangeInputAddDrone(event) {
         event.preventDefault();
-        setInputAddPilot(event.target.value);
+        setInputAddDrone(event.target.value);
     }
 
-    function onChangeInputAddPilotName(event) {
+    function onChangeInputAddDroneId(event) {
         event.preventDefault();
-        setInputAddPilotName(event.target.value);
+        setInputAddDroneId(event.target.value);
+    }
+
+    function onChangeInputAddDroneType(event) {
+        event.preventDefault();
+        setInputAddDroneType(event.target.value);
     }
 
     function hideModal() {
@@ -52,20 +57,21 @@ function PilotsContent(props) {
         setModalIsShown(true);
     }
 
-    async function onSubmitAddPilot(event) {
+    async function onSubmitAddDrone(event) {
         event.preventDefault();
-        await StarwingsMasterSigner.addPilot(inputAddPilot, inputAddPilotName);
-        setInputAddPilot("");
-        setInputAddPilotName("");
+        await StarwingsMasterSigner.addDrone(inputAddDrone, inputAddDroneId, inputAddDroneType);
+        setInputAddDrone("");
+        setInputAddDroneId("");
+        setInputAddDroneType("");
         hideModal();
     }
 
-    const getPilotList = async () => {
+    const getDroneList = async () => {
         setPending(true);
         try {
-            const pilotAddressListResult = await StarwingsMasterProvider.getPilotList();
-            setPilotAddressList(pilotAddressListResult);
-            //console.log(pilotAddressList);
+            const droneAddressListResult = await StarwingsMasterProvider.getDroneList();
+            setDroneAddressList(droneAddressListResult);
+            //console.log(droneAddressList);
         } catch (error) {
             console.error(error);
         }
@@ -73,9 +79,9 @@ function PilotsContent(props) {
         setPending(false);
     };
 
-    const handleDeletePilotClick = async (state) => {
+    const handleDeleteDroneClick = async (state) => {
         console.log(state.target.id);
-        await StarwingsMasterSigner.deletePilot(state.target.id);
+        await StarwingsMasterSigner.deleteDrone(state.target.id);
     };
 
     const columns = [
@@ -90,21 +96,25 @@ function PilotsContent(props) {
             },
         },
         {
-            name: "Name",
-            selector: (row) => row.name,
+            name: "Id",
+            selector: (row) => row.droneId,
         },
         {
-            name: "addr",
-            selector: (row) => row.pilotAddress,
+            name: "Type",
+            selector: (row) => row.droneType,
+        },
+        {
+            name: "Addr",
+            selector: (row) => row.droneAddress,
         },
         {
             cell: (row) =>
                 row.isDeleted ? (
-                    <Button onClick={handleDeletePilotClick} id={row.pilotAddress} variant="danger" size="sm" disabled>
+                    <Button onClick={handleDeleteDroneClick} id={row.droneAddress} variant="danger" size="sm" disabled>
                         The end!
                     </Button>
                 ) : (
-                    <Button onClick={handleDeletePilotClick} id={row.pilotAddress} variant="danger" size="sm">
+                    <Button onClick={handleDeleteDroneClick} id={row.droneAddress} variant="danger" size="sm">
                         Delete
                     </Button>
                 ),
@@ -115,30 +125,30 @@ function PilotsContent(props) {
     ];
 
     return (
-        <div className="PilotsContent">
+        <div className="DronesContent">
             <Row>
                 <Col
                     sm="auto"
                     onClick={async () => {
-                        await getPilotList();
+                        await getDroneList();
                     }}
                 >
                     <Button variant="primary">Refresh</Button>
                 </Col>
                 <Col>
                     <Button variant="primary" onClick={showModal}>
-                        + Add Pilot
+                        + Add Drone
                     </Button>
                 </Col>
             </Row>
             <Row style={{ marginTop: "30px" }}>
                 <Col>
-                    {/* {pilotAddressList && pilotAddressList.length > 0 ? (
-                        <span>There is pilots.</span>
+                    {/* {droneAddressList && droneAddressList.length > 0 ? (
+                        <span>There is drones.</span>
                     ) : (
-                        <span>There is no pilots yet.</span>
+                        <span>There is no drones yet.</span>
                     )} */}
-                    <DataTable columns={columns} data={pilotAddressList} progressPending={pending} />
+                    <DataTable columns={columns} data={droneAddressList} progressPending={pending} />
                 </Col>
             </Row>
 
@@ -149,18 +159,20 @@ function PilotsContent(props) {
                 aria-labelledby="contained-modal-title-vcenter"
             >
                 <Modal.Header closeButton>
-                    <Modal.Title>Add Pilot</Modal.Title>
+                    <Modal.Title>Add Drone</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form.Label>Pilot Address</Form.Label>
+                    <Form.Label>Drone Address</Form.Label>
                     <FormControl
                         placeholder="0x..."
                         aria-label="0x..."
-                        value={inputAddPilot}
-                        onChange={onChangeInputAddPilot}
+                        value={inputAddDrone}
+                        onChange={onChangeInputAddDrone}
                     />
-                    <Form.Label>Pilot Name</Form.Label>
-                    <FormControl value={inputAddPilotName} onChange={onChangeInputAddPilotName} />
+                    <Form.Label>Drone Id</Form.Label>
+                    <FormControl value={inputAddDroneId} onChange={onChangeInputAddDroneId} />
+                    <Form.Label>Drone Type</Form.Label>
+                    <FormControl value={inputAddDroneType} onChange={onChangeInputAddDroneType} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={hideModal}>
@@ -168,8 +180,8 @@ function PilotsContent(props) {
                     </Button>
                     <Button
                         variant="primary"
-                        disabled={StarwingsMasterSigner && inputAddPilot === ""}
-                        onClick={onSubmitAddPilot}
+                        disabled={StarwingsMasterSigner && inputAddDrone === ""}
+                        onClick={onSubmitAddDrone}
                     >
                         Add
                     </Button>
@@ -179,4 +191,4 @@ function PilotsContent(props) {
     );
 }
 
-export default PilotsContent;
+export default DronesContent;

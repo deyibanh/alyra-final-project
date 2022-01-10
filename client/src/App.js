@@ -48,7 +48,7 @@ function App() {
                     signer
                 );
                 setStarwingsMasterProvider(StarwingsMasterProviderInstance);
-                setStarwingsMasterProvider(StarwingsMasterSignerInstance);
+                setStarwingsMasterSigner(StarwingsMasterSignerInstance);
 
                 const SWAccessControlAddress = await StarwingsMasterProviderInstance.getAccessControlAddress();
                 const SWAccessControlInstance = new ethers.Contract(
