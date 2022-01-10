@@ -6,7 +6,7 @@ import ConopsForm from "./ConopsForm";
 import ConopsCard from "./ConopsCard";
 import ConopsDetail from "./ConopsDetail";
 
-const ConopsManagerAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const ConopsManagerAddress = "0x51C5aba2e32C0bFcf4AeC2CA35c91C1FC47F142D";
 
 const formReducer = (state, event) => {
     if (event.type === "reset") {
@@ -53,13 +53,14 @@ function ConopsContent({ state }) {
     };
 
     const getConops = async () => {
-        try {
+        // try {
+            console.log(conopsManager)
             const conopsList = await conopsManager.provider.viewAllConops();
             setConops(conopsList);
             console.log(conopsList);
-        } catch (error) {
-            console.error(error);
-        }
+        // } catch (error) {
+        //     console.error(error);
+        // }
     };
 
     const submitConops = async () => {
