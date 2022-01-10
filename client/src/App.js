@@ -94,7 +94,10 @@ function App() {
                 <Container>
                     <Routes>
                         <Route exact path="/" element={<Deliveries state={state} />} />
-                        <Route path="/deliveries" element={<Deliveries state={state} />} />
+                        <Route
+                            path="/deliveries"
+                            element={<Deliveries state={state} StarwingsMasterProvider={StarwingsMasterProvider} />}
+                        />
                         <Route
                             path="/flights"
                             element={

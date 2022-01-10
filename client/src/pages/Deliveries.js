@@ -1,20 +1,19 @@
 /* eslint-disable prettier/prettier */
 import { Col, Nav, Row, Tab } from "react-bootstrap";
 import React, { useState, useEffect } from "react";
-import TestDeliveriesContent from "../components/Deliveries/TempDeliveriesContent";
 import DeliveriesList from "../components/Deliveries/DeliveriesList";
 import "./Deliveries.css";
 import { checkProperties } from "ethers/lib/utils";
 
 function Deliveries(props) {
     const state = props.state;
-    // const StarwingsMasterProvider = props.StarwingsMasterProvider;
+    const StarwingsMasterProvider = props.StarwingsMasterProvider;
     // const StarwingsMasterSigner = props.StarwingsMasterSigner;
 
     return (
         <div className="Deliveries">
             <h1>Deliveries</h1>
-            <TestDeliveriesContent state={state} />
+            {/* <TestDeliveriesContent state={state} /> */}
 
             <div className="FlightsMenu">
                 <Tab.Container id="left-tabs-example" defaultActiveKey="all_deliveries">
@@ -32,7 +31,10 @@ function Deliveries(props) {
                         <Col sm={9}>
                             <Tab.Content>
                                 <Tab.Pane eventKey="all_deliveries">
-                                    <DeliveriesList state={state}></DeliveriesList>
+                                    <DeliveriesList
+                                        state={state}
+                                        StarwingsMasterProvider={StarwingsMasterProvider}
+                                    ></DeliveriesList>
                                 </Tab.Pane>
                                 {/* <Tab.Pane eventKey="my_deliveries">
                                     <div>Nothing yet.</div>

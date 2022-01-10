@@ -6,8 +6,9 @@ import DataTable from "react-data-table-component";
 import DeliveryForm from "./DeliveryForm";
 import FactoryModal from "./FactoryModal";
 
-const DeliveryManagerAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-const FlightFactoryAddress = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
+const contractAddresses = require("../../contractAddresses.json");
+
+const DeliveryManagerAddress = contractAddresses.DeliveryManager;
 
 const formReducer = (state, event) => {
     if (event.type === "reset") {
@@ -54,18 +55,9 @@ function DeliveriesList(props) {
 
     useEffect(() => {
         if (deliveryManager.provider) {
-            console.log(`UseEffect deliveryManager !`);
             getDeliveries();
         }
     }, [deliveryManager]);
-
-    useEffect(() => {
-        console.log(`UseEffect getDeliveries ! [${eventToProcess}]`);
-        if (deliveryManager.provider) {
-            console.log("UseEffect getting deliveries !");
-            getDeliveries();
-        }
-    }, [eventToProcess]);
 
     const getDeliveries = async () => {
         console.log("getDeliveries start !");
@@ -169,11 +161,12 @@ function DeliveriesList(props) {
             selector: (row) => row.toHubId,
         },
         {
-            cell: (row) => (
-                <Button onClick={handleButtonClick} id={row.deliveryId} variant="warning" size="sm">
-                    Process
-                </Button>
-            ),
+            cell: (row) =>
+                state.roles.hasPilotRole && (
+                    <Button onClick={handleButtonClick} id={row.deliveryId} variant="warning" size="sm">
+                        Process
+                    </Button>
+                ),
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
@@ -222,11 +215,13 @@ function DeliveriesList(props) {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
             <FactoryModal
                 show={factoryModalIsShown}
                 onHide={hideFactoryModal}
                 state={state}
                 deliveryId={selectedDeliveryId}
+                StarwingsMasterProvider={props.StarwingsMasterProvider}
             />
         </div>
     );

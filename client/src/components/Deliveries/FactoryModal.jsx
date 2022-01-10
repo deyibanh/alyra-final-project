@@ -1,10 +1,14 @@
 import React, { useEffect, useState, useRef, useReducer } from "react";
 import { Button, Col, Form, FormControl, InputGroup, Modal, Row } from "react-bootstrap";
 import ConopsArtifact from "../../artifacts/contracts/ConopsManager.sol/ConopsManager.json";
+import FactoryArtifact from "../../artifacts/contracts/DroneFlightFactory.sol/DroneFlightFactory.json";
 import { ethers } from "ethers";
 import FlightPlanForm from "./FlightPlanForm";
 
-const ConopsManagerAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const contractAddresses = require("../../contractAddresses.json");
+
+const ConopsManagerAddress = contractAddresses.ConopsManager;
+const FlightFactoryAddress = contractAddresses.DroneFlightFactory;
 
 const formReducer = (state, event) => {
     if (event.type === "reset") {
@@ -17,20 +21,36 @@ const formReducer = (state, event) => {
     };
 };
 
-function FactoryModal({ state, show, onHide, deliveryId }) {
+function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterProvider }) {
     // const [formData, setFormData] = useReducer(formReducer, {});
     const [formData, setFormData] = useState({});
     const [conopsList, setConopsList] = useState([]);
     const [conops, setConops] = useState(-1);
     const conopsRef = useRef();
     const [conopsManager, setConopsManager] = useState({ provider: null, signer: null });
+    const [flightFactory, setFlightFactory] = useState({ provider: null, signer: null });
+    const [drones, setDrones] = useState();
+    // const [pilot, setPilot] = useState();
 
     useEffect(() => {
-        if (state.provider) {
-            const provider = new ethers.Contract(ConopsManagerAddress, ConopsArtifact.abi, state.provider);
-            const signer = new ethers.Contract(ConopsManagerAddress, ConopsArtifact.abi, state.signer);
-            setConopsManager({ provider, signer });
-        }
+        (async () => {
+            if (state.provider) {
+                let provider = new ethers.Contract(ConopsManagerAddress, ConopsArtifact.abi, state.provider);
+                let signer = new ethers.Contract(ConopsManagerAddress, ConopsArtifact.abi, state.signer);
+                setConopsManager({ provider, signer });
+
+                provider = new ethers.Contract(FlightFactoryAddress, FactoryArtifact.abi, state.provider);
+                signer = new ethers.Contract(FlightFactoryAddress, FactoryArtifact.abi, state.signer);
+                setFlightFactory({ provider, signer });
+
+                const dronesList = await StarwingsMasterProvider.getDroneList();
+                console.log("DRONELIST:", dronesList);
+                setDrones(dronesList);
+                // console.log("signer:", state.signer);
+                // const pilot = await StarwingsMasterProvider.getPilot(state.accounts[0]);
+                // setPilot(pilot);
+            }
+        })();
     }, [state]);
 
     useEffect(() => {
@@ -41,11 +61,23 @@ function FactoryModal({ state, show, onHide, deliveryId }) {
 
     useEffect(() => {
         setConops(-1);
-        setFormData({});
+        if (show) {
+            // const data = { deliveryId: deliveryId, pilot: pilot };
+            const data = { deliveryId: deliveryId };
+            updateFormData(data);
+        } else {
+            setFormData({});
+        }
     }, [show]);
 
+    const updateFormData = (data) => {
+        setFormData({ ...formData, ...data });
+    };
+
     const selectConops = () => {
-        setConops(conopsRef.current.value);
+        if (conopsRef.current.value != "noConops") {
+            setConops(conopsRef.current.value);
+        }
     };
 
     const getConops = async () => {
@@ -57,12 +89,26 @@ function FactoryModal({ state, show, onHide, deliveryId }) {
         }
     };
 
-    const submitFlight = async () => {};
+    const submitFlight = async () => {
+        const tx = await flightFactory.signer.newDroneDelivery(
+            ethers.BigNumber.from(formData.deliveryId),
+            formData.drone,
+            ethers.BigNumber.from(formData.conopsId),
+            Date.parse(formData.flightDatetime) / 1000,
+            ethers.BigNumber.from(formData.flightDuration),
+            formData.depart,
+            formData.destination
+        );
+        await tx;
+        onHide();
+    };
 
     const handleFormChange = (event) => {
         setFormData({ ...formData, [event.target.name]: event.target.value });
     };
+
     console.log(formData);
+
     return (
         <Modal show={show} onHide={onHide} keyboard={false} aria-labelledby="contained-modal-title-vcenter">
             <Modal.Header closeButton>
@@ -72,7 +118,8 @@ function FactoryModal({ state, show, onHide, deliveryId }) {
                 {conops === -1 ? (
                     <div>
                         <h5>Choose Conops</h5>
-                        <Form.Select name={"riskType"} ref={conopsRef}>
+                        <Form.Select name={"conopsId"} ref={conopsRef} onChange={handleFormChange}>
+                            <option value="noConops">Choose Conops</option>
                             {conopsList.map((c, i) => (
                                 <option value={i} key={i}>
                                     {c.name}
@@ -86,10 +133,12 @@ function FactoryModal({ state, show, onHide, deliveryId }) {
                             {"Next >"}
                         </Button>
                     </div>
-                ) : (
+                ) : drones ? (
                     <div>
                         <h5>Fill flight plan</h5>
-                        <FlightPlanForm setFormData={setFormData} handleFormChange={handleFormChange} />
+                        <div>Conops id: {conops}</div>
+                        <hr />
+                        <FlightPlanForm setFormData={setFormData} handleFormChange={handleFormChange} drones={drones} />
                         <Button variant="secondary" onClick={onHide}>
                             Cancel
                         </Button>
@@ -97,6 +146,8 @@ function FactoryModal({ state, show, onHide, deliveryId }) {
                             Submit
                         </Button>
                     </div>
+                ) : (
+                    <div>...loading drones</div>
                 )}
             </Modal.Body>
         </Modal>
