@@ -65,7 +65,39 @@ async function main() {
 
     await DroneFlightFactory.deployed();
     console.log("DroneFlightFactory deployed to:", DroneFlightFactory.address);
+
+    const rolePilot = await SWAccessControl.PILOT_ROLE();
+    SWAccessControl.grantRole(
+        rolePilot,
+        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+    );
+
+    StarwingsMaster.setDroneFlightFactoryAddress(DroneFlightFactory.address);
+
+    const contractAddresses = {
+        SWAccessControl: SWAccessControl.address,
+        StarwingsMaster: StarwingsMaster.address,
+        ConopsManager: ConopsManager.address,
+        DeliveryManager: DeliveryManager.address,
+        DroneFlightFactory: DroneFlightFactory.address,
+    };
+
+    storeContractAddresses(contractAddresses);
 }
+
+const storeContractAddresses = (jsonData) => {
+    const fs = require("fs");
+
+    fs.writeFileSync(
+        "./client/src/contractAddresses.json",
+        JSON.stringify(jsonData),
+        function (err) {
+            if (err) {
+                console.log(err);
+            }
+        }
+    );
+};
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

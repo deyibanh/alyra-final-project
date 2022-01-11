@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "./DroneDelivery.sol";
 import "./interfaces/IStarwingsMaster.sol";
+// import "./interfaces/IDeliveryManager.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 /**
@@ -41,12 +42,58 @@ contract DroneFlightFactory {
 
     function newDroneDelivery(
         uint256 _deliveryId,
+        address _drone,
+        uint256 _conopsId,
+        uint256 _flightDatetime,
+        uint256 _flightDuration,
+        string memory _depart,
+        string memory _destination
+    ) external onlyRole(StarwingsDataLib.PILOT_ROLE) returns (address droneDeliveryAddress) {
+        StarwingsDataLib.FlightData memory flightData = _flightDataSetup(
+            _drone,
+            _conopsId,
+            _flightDatetime,
+            _flightDuration,
+            _depart,
+            _destination
+        );
+        droneDeliveryAddress = _newDroneDelivery(_deliveryId, flightData);
+
+    }
+
+    function _flightDataSetup(
+        address _drone,
+        uint256 _conopsId,
+        uint256 _flightDatetime,
+        uint256 _flightDuration,
+        string memory _depart,
+        string memory _destination
+    ) internal view returns (StarwingsDataLib.FlightData memory flightData) {
+        StarwingsDataLib.Pilot memory pilot = starwingsMaster.getPilot(
+            msg.sender
+        );
+        StarwingsDataLib.Drone memory drone = starwingsMaster.getDrone(_drone);
+
+        flightData = StarwingsDataLib.FlightData(
+            pilot,
+            drone,
+            _conopsId,
+            _flightDatetime,
+            _flightDuration,
+            _depart,
+            _destination
+        );
+    }
+
+    function _newDroneDelivery(
+        uint256 _deliveryId,
         StarwingsDataLib.FlightData memory flightData
     )
-        external
-        onlyRole(StarwingsDataLib.PILOT_ROLE)
+        internal
         returns (address droneDeliveryAddress)
     {
+        IDeliveryManager deliveryManager = IDeliveryManager(starwingsMaster.getDeliveryManager());
+
         DroneDelivery droneDelivery = new DroneDelivery(
             starwingsMaster.getDeliveryManager(),
             _deliveryId,
@@ -59,9 +106,11 @@ contract DroneFlightFactory {
         deployedContracts.push(droneDeliveryAddress);
         starwingsMaster.addDroneFlight(
             droneDeliveryAddress,
-            flightData.piloteAddr,
-            flightData.droneAddr
+            flightData.pilot.pilotAddress,
+            flightData.drone.droneAddress
         );
+
+        // deliveryManager.setDeliveryState(_deliveryId, 3);
     }
 
     function getDeployedContracts() external view returns (address[] memory) {

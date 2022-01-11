@@ -4,8 +4,11 @@ import DeliveryArtifact from "../../artifacts/contracts/DeliveryManager.sol/Deli
 import { Button, Col, Modal, Row } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import DeliveryForm from "./DeliveryForm";
+import FactoryModal from "./FactoryModal";
 
-const DeliveryManagerAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+const contractAddresses = require("../../contractAddresses.json");
+
+const DeliveryManagerAddress = contractAddresses.DeliveryManager;
 
 const formReducer = (state, event) => {
     if (event.type === "reset") {
@@ -25,7 +28,16 @@ function DeliveriesList(props) {
     const [modalIsShown, setModalIsShown] = useState(false);
     const [formData, setFormData] = useReducer(formReducer, {});
     const [pending, setPending] = useState(true);
-    const [eventToProcess, setEventToProcess] = useState(0);
+    const [factoryModalIsShown, setFactoryModalIsShown] = useState(false);
+    const [selectedDeliveryId, setSelectedDeliveryId] = useState();
+
+    const hideFactoryModal = () => {
+        setFactoryModalIsShown(false);
+    };
+
+    const showFactoryModal = () => {
+        setFactoryModalIsShown(true);
+    };
 
     useEffect(() => {
         if (state.provider) {
@@ -36,28 +48,16 @@ function DeliveriesList(props) {
 
             console.log("UseEffect state :: Listening to events !");
             provider.on("DeliveryCreated", (deliveryId) => {
-                console.log("Event DeliveryCreated !");
-                console.log("bool=" + eventToProcess);
-                setEventToProcess(eventToProcess + 1);
-                console.log("bool=" + eventToProcess);
+                getDeliveries();
             });
         }
     }, [state]);
 
     useEffect(() => {
         if (deliveryManager.provider) {
-            console.log(`UseEffect deliveryManager !`);
             getDeliveries();
         }
     }, [deliveryManager]);
-
-    useEffect(() => {
-        console.log(`UseEffect getDeliveries ! [${eventToProcess}]`);
-        if (deliveryManager.provider) {
-            console.log("UseEffect getting deliveries !");
-            getDeliveries();
-        }
-    }, [eventToProcess]);
 
     const getDeliveries = async () => {
         console.log("getDeliveries start !");
@@ -109,6 +109,8 @@ function DeliveriesList(props) {
 
     const handleButtonClick = (state) => {
         console.log("clicked");
+        setSelectedDeliveryId(state.target.id);
+        setFactoryModalIsShown(true);
         console.log(state.target.id);
     };
 
@@ -159,11 +161,12 @@ function DeliveriesList(props) {
             selector: (row) => row.toHubId,
         },
         {
-            cell: (row) => (
-                <Button onClick={handleButtonClick} id={row.deliveryId} variant="warning" size="sm">
-                    Process
-                </Button>
-            ),
+            cell: (row) =>
+                state.roles.hasPilotRole && (
+                    <Button onClick={handleButtonClick} id={row.deliveryId} variant="warning" size="sm">
+                        Process
+                    </Button>
+                ),
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
@@ -212,6 +215,14 @@ function DeliveriesList(props) {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            <FactoryModal
+                show={factoryModalIsShown}
+                onHide={hideFactoryModal}
+                state={state}
+                deliveryId={selectedDeliveryId}
+                StarwingsMasterProvider={props.StarwingsMasterProvider}
+            />
         </div>
     );
 }

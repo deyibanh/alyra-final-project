@@ -95,11 +95,13 @@ abstract contract DroneFlight {
     ) {
         conopsManager = IConopsManager(_conopsManager);
         accessControl = IAccessControl(_accessControlAddress);
+        datas.pilot = data.pilot;
+        datas.drone = data.drone;
         datas.conopsId = data.conopsId;
-        datas.droneAddr = data.droneAddr;
-        datas.piloteAddr = data.piloteAddr;
-        datas.droneType = data.droneType;
-        datas.droneId = data.droneId;
+        // datas.droneAddr = data.droneAddr;
+        // datas.piloteAddr = data.piloteAddr;
+        // datas.droneType = data.droneType;
+        // datas.droneId = data.droneId;
         datas.depart = data.depart;
         datas.destination = data.destination;
         datas.flightDuration = data.flightDuration;

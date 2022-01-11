@@ -7,14 +7,24 @@ const deploy = async () => {
     [owner, pilot, drone] = await ethers.getSigners();
 
     const droneFlightDataSample = {
+        pilot: {
+            index: 0,
+            isDeleted: false,
+            name: "John Pilot",
+            pilotAddress: pilot.address,
+            flightAddresses: [],
+        },
+        drone: {
+            index: 0,
+            isDeleted: false,
+            droneId: "78re2578",
+            droneType: "aiir32",
+            droneAddress: drone.address,
+            flightAddresses: [],
+        },
         conopsId: 0,
-        droneAddr: drone.address,
-        piloteAddr: pilot.address,
         flightDatetime: 57875,
         flightDuration: 10,
-        pilotName: "john",
-        droneType: "azer",
-        droneId: 4,
         depart: "Terre",
         destination: "Moon",
     };

@@ -6,7 +6,9 @@ import ConopsForm from "./ConopsForm";
 import ConopsCard from "./ConopsCard";
 import ConopsDetail from "./ConopsDetail";
 
-const ConopsManagerAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const contractAddresses = require("../../contractAddresses.json");
+
+const ConopsManagerAddress = contractAddresses.ConopsManager;
 
 const formReducer = (state, event) => {
     if (event.type === "reset") {
@@ -59,6 +61,7 @@ function ConopsContent({ state }) {
 
     const getConops = async () => {
         try {
+            console.log(conopsManager);
             const conopsList = await conopsManager.provider.viewAllConops();
             setConops(conopsList);
         } catch (error) {

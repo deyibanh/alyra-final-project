@@ -33,14 +33,16 @@ library StarwingsDataLib {
     }
 
     struct FlightData {
-        address piloteAddr;
-        address droneAddr;
+        Pilot pilot;
+        Drone drone;
+        // address piloteAddr;
+        // address droneAddr;
         uint256 conopsId;
         uint256 flightDatetime;
         uint256 flightDuration;
-        string pilotName;
-        string droneType;
-        string droneId;
+        // string pilotName;
+        // string droneType;
+        // string droneId;
         string depart;
         string destination;
     }
