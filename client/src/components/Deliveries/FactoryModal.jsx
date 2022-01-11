@@ -43,9 +43,10 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterProvider
                 signer = new ethers.Contract(FlightFactoryAddress, FactoryArtifact.abi, state.signer);
                 setFlightFactory({ provider, signer });
 
-                const dronesList = await StarwingsMasterProvider.getDroneList();
-                console.log("DRONELIST:", dronesList);
-                setDrones(dronesList);
+                if (StarwingsMasterProvider) {
+                    const dronesList = await StarwingsMasterProvider.getDroneList();
+                    setDrones(dronesList);
+                }
                 // console.log("signer:", state.signer);
                 // const pilot = await StarwingsMasterProvider.getPilot(state.accounts[0]);
                 // setPilot(pilot);
@@ -91,7 +92,7 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterProvider
 
     const submitFlight = async () => {
         const tx = await flightFactory.signer.newDroneDelivery(
-            ethers.BigNumber.from(formData.deliveryId),
+            formData.deliveryId,
             formData.drone,
             ethers.BigNumber.from(formData.conopsId),
             Date.parse(formData.flightDatetime) / 1000,

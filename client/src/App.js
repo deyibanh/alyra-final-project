@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import StarwingsMasterArtifact from "./artifacts/contracts/StarwingsMaster.sol/StarwingsMaster.json";
 import SWAccessControlArtifact from "./artifacts/contracts/SWAccessControl.sol/SWAccessControl.json";
 import Header from "./components/Header";
-import AccessControl from "./pages/AccessControl";
+import AdminPanel from "./pages/AdminPanel";
 import Deliveries from "./pages/Deliveries";
 import Flights from "./pages/Flights";
 import NotFound from "./pages/NotFound";
@@ -12,12 +12,11 @@ import DroneSimulator from "./pages/DroneSimulator";
 import getEthersProvider from "./utils/getEthers";
 import "./App.css";
 import { Container } from "react-bootstrap";
+import Home from "./pages/Home";
 const contractAddresses = require("./contractAddresses.json");
 
 const StarwingsMasterAddress = contractAddresses.StarwingsMaster;
 
-// const StarwingsMasterAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-// const SWAccessControlAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero;
 const ADMIN_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ADMIN_ROLE"));
 const PILOT_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("PILOT_ROLE"));
@@ -96,7 +95,8 @@ function App() {
                 <Header state={state} />
                 <Container>
                     <Routes>
-                        <Route exact path="/" element={<Deliveries state={state} />} />
+                        <Route exact path="/" element={<Home state={state} />} />
+
                         <Route
                             path="/deliveries"
                             element={<Deliveries state={state} StarwingsMasterProvider={StarwingsMasterProvider} />}
@@ -112,7 +112,18 @@ function App() {
                             }
                         />
                         <Route path="/drone-simulator" element={<DroneSimulator state={state} />} />
-                        <Route path="/access-control" element={<AccessControl state={state} />} />
+                        {state.roles && (state.roles.hasAdminRole || state.roles.hasDefaultAdminRole) && (
+                            <Route
+                                path="/admin-panel"
+                                element={
+                                    <AdminPanel
+                                        state={state}
+                                        StarwingsMasterProvider={StarwingsMasterProvider}
+                                        StarwingsMasterSigner={StarwingsMasterSigner}
+                                    />
+                                }
+                            />
+                        )}
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Container>

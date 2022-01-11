@@ -20,6 +20,11 @@ function Header(props) {
                         <Nav className="me-auto" activeKey={location.pathname}>
                             {state.roles &&
                                 (state.roles.hasDefaultAdminRole ||
+                                    state.roles.hasAdminRole ) && (
+                                <Nav.Link href="/admin-panel">Admin Panel</Nav.Link>
+                            )}
+                            {state.roles &&
+                                (state.roles.hasDefaultAdminRole ||
                                     state.roles.hasAdminRole ||
                                     state.roles.hasPilotRole) && <Nav.Link href="/deliveries">Deliveries</Nav.Link>}
                             {state.roles &&
@@ -32,12 +37,6 @@ function Header(props) {
                                     state.roles.hasAdminRole ||
                                     state.roles.hasPilotRole) && (
                                 <Nav.Link href="/drone-simulator">Drone Simulator</Nav.Link>
-                            )}
-                            {state.roles &&
-                                (state.roles.hasDefaultAdminRole ||
-                                    state.roles.hasAdminRole ||
-                                    state.roles.hasPilotRole) && (
-                                <Nav.Link href="/access-control">Access Control</Nav.Link>
                             )}
                         </Nav>
                         <NavWalletStatus state={state} />
