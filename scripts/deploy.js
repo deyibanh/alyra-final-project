@@ -82,7 +82,112 @@ async function main() {
         DroneFlightFactory: DroneFlightFactory.address,
     };
 
+    // Store contracts addresses for client
     storeContractAddresses(contractAddresses);
+
+    /**
+     * Test actors *
+     *
+     * Admin   : 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (Acct0)
+     * Pilot 1 : 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (Acct1)
+     * Pilot 2 : 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc (Acct2)
+     * Drone 1 : 0x90f79bf6eb2c4f870365e785982e1f101e93b906 (Acct3)
+     * Drone 2 : 0x15d34aaf54267db7d7c367839aaf71a00a2c6a65 (Acct4)
+     *
+     * Deliveries *
+     *
+     * From : Pharmacie Le Tertre (0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc) (Acct5)
+     * To : Francois Brobeck (0x976ea74026e726554db657fa54763abd0c3a0aa9) (Acct6)
+     *
+     * From : Pharmacie Le Tertre (0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc) (Acct5)
+     * To : Jean-Philippe BONHOMME (0x14dc79964da2c08b23698b3d3cc7ca32193d9955) (Acct7)
+     *
+     * Conops *
+     *
+     *
+     */
+
+    // Pilot 1
+    await StarwingsMaster.addPilot(
+        "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+        "Joanna"
+    );
+
+    // Pilot 2
+    await StarwingsMaster.addPilot(
+        "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+        "Florian"
+    );
+
+    // Drone 1
+    await StarwingsMaster.addDrone(
+        "0x90f79bf6eb2c4f870365e785982e1f101e93b906",
+        "UAS-FR-239271",
+        "DJI Matrice 600 Pro"
+    );
+
+    // Drone 2
+    await StarwingsMaster.addDrone(
+        "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
+        "UAS-FR-170981",
+        "Vertix"
+    );
+
+    // Delivery 1
+    await DeliveryManager.newDelivery({
+        deliveryId: "",
+        supplierOrderId: "O798325",
+        state: 0,
+        from: "Pharmacie Le Tertre",
+        fromAddr: "0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc",
+        to: "Francois Brobeck",
+        toAddr: "0x976ea74026e726554db657fa54763abd0c3a0aa9",
+        fromHubId: 100,
+        toHubId: 300,
+    });
+
+    // Delivery 2
+    await DeliveryManager.newDelivery({
+        deliveryId: "",
+        supplierOrderId: "O312607",
+        state: 0,
+        from: "Pharmacie Le Tertre",
+        fromAddr: "0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc",
+        to: "Jean-Philippe BONHOMME",
+        toAddr: "0x14dc79964da2c08b23698b3d3cc7ca32193d9955",
+        fromHubId: 100,
+        toHubId: 700,
+    });
+
+    // Conops 1
+    await ConopsManager.addConops(
+        "Villedieu 3 km", // name
+        "HUB Villedieu-Sur-Indre", // startingPoint
+        "HUB Chambon", // endPoint
+        "None", // crossRoad
+        "None", // exclusionZone
+        [
+            { validated: false, name: "Aerodrome 1", riskType: 0 },
+            { validated: false, name: "CHU 1", riskType: 1 },
+        ],
+        4, // grc
+        0 // arc
+    );
+
+    // Conops 1
+    await ConopsManager.addConops(
+        "Villedieu 7 km", // name
+        "HUB Villedieu-Sur-Indre", // startingPoint
+        "HUB La Chapelle Orthemale", // endPoint
+        "None", // crossRoad
+        "None", // exclusionZone
+        [
+            { validated: false, name: "Aerodrome 1", riskType: 0 },
+            { validated: false, name: "MilitaryBase 1", riskType: 2 },
+        ],
+        4, // grc
+        0 // arc
+    );
 }
 
 const storeContractAddresses = (jsonData) => {
