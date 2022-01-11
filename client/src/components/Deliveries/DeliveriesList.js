@@ -41,12 +41,11 @@ function DeliveriesList(props) {
 
     useEffect(() => {
         if (state.provider) {
-            console.log("UseEffect state !");
             const provider = new ethers.Contract(DeliveryManagerAddress, DeliveryArtifact.abi, state.provider);
             const signer = new ethers.Contract(DeliveryManagerAddress, DeliveryArtifact.abi, state.signer);
             setDeliveryManager({ provider, signer });
 
-            console.log("UseEffect state :: Listening to events !");
+            //console.log("UseEffect state :: Listening to events !");
             provider.on("DeliveryCreated", (deliveryId) => {
                 getDeliveries();
             });
@@ -60,7 +59,7 @@ function DeliveriesList(props) {
     }, [deliveryManager]);
 
     const getDeliveries = async () => {
-        console.log("getDeliveries start !");
+        //console.log("getDeliveries start !");
         setPending(true);
         try {
             const deliveriesList = await deliveryManager.provider.getAllDeliveries();
@@ -70,7 +69,7 @@ function DeliveriesList(props) {
         }
 
         setPending(false);
-        console.log("getDeliveries end !");
+        //console.log("getDeliveries end !");
     };
 
     const hideModal = () => {
@@ -108,10 +107,10 @@ function DeliveriesList(props) {
     };
 
     const handleButtonClick = (state) => {
-        console.log("clicked");
+        //console.log("clicked");
         setSelectedDeliveryId(state.target.id);
         setFactoryModalIsShown(true);
-        console.log(state.target.id);
+        //console.log(state.target.id);
     };
 
     const columns = [
