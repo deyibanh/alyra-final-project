@@ -12,8 +12,11 @@ import DroneSimulator from "./pages/DroneSimulator";
 import getEthersProvider from "./utils/getEthers";
 import "./App.css";
 import { Container } from "react-bootstrap";
+const contractAddresses = require("./contractAddresses.json");
 
-const StarwingsMasterAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+const StarwingsMasterAddress = contractAddresses.StarwingsMaster;
+
+// const StarwingsMasterAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
 // const SWAccessControlAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero;
 const ADMIN_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ADMIN_ROLE"));

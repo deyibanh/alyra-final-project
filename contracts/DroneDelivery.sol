@@ -4,14 +4,14 @@ pragma solidity ^0.8.9;
 import "./DroneFlight.sol";
 
 contract DroneDelivery is DroneFlight {
-    uint256 private deliveryId;
+    string private deliveryId;
     address private deliveryManager;
     bool public droneParcelPickedUp;
     bool private droneParcelDelivered;
 
     constructor(
         address _deliveryManager,
-        uint256 _deliveryId,
+        string memory _deliveryId,
         // DroneFlight
         address _conopsManager,
         address _accessControlAddress,
@@ -21,7 +21,7 @@ contract DroneDelivery is DroneFlight {
         deliveryId = _deliveryId;
     }
 
-    function getDeliveryId() external view returns (uint256) {
+    function getDeliveryId() external view returns (string memory) {
         return deliveryId;
     }
 

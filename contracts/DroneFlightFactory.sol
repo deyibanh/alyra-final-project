@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "./DroneDelivery.sol";
 import "./interfaces/IStarwingsMaster.sol";
-// import "./interfaces/IDeliveryManager.sol";
+import "./interfaces/IDeliveryManager.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 /**
@@ -41,7 +41,7 @@ contract DroneFlightFactory {
     // }
 
     function newDroneDelivery(
-        uint256 _deliveryId,
+        string memory _deliveryId,
         address _drone,
         uint256 _conopsId,
         uint256 _flightDatetime,
@@ -86,7 +86,7 @@ contract DroneFlightFactory {
     }
 
     function _newDroneDelivery(
-        uint256 _deliveryId,
+        string memory _deliveryId,
         StarwingsDataLib.FlightData memory flightData
     )
         internal
@@ -110,7 +110,7 @@ contract DroneFlightFactory {
             flightData.drone.droneAddress
         );
 
-        // deliveryManager.setDeliveryState(_deliveryId, 3);
+        deliveryManager.setDeliveryState(_deliveryId, IDeliveryManager.DeliveryState(3));
     }
 
     function getDeployedContracts() external view returns (address[] memory) {

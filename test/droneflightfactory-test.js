@@ -30,11 +30,25 @@ const droneFlightDataSample = {
     destination: "Moon",
 };
 
+const deliverySample = {
+    deliveryId: "kj",
+    supplierOrderId: "A47G-78",
+    state: 0,
+    from: "From1",
+    fromAddr: 0x01,
+    to: "To1",
+    toAddr: 0x00,
+    fromHubId: "007",
+    toHubId: "0056",
+};
+
 const deploy = async () => {
     [owner, pilot, drone] = await ethers.getSigners();
     pilotSample._pilotAddress = pilot.address;
     droneSample._droneAddress = drone.address;
     droneFlightDataSample.droneAddress = drone.address;
+    deliverySample.fromAddr = pilot.address;
+    deliverySample.toAddr = drone.address;
 
     const AccessControl = await ethers.getContractFactory("SWAccessControl");
     accessControl = await AccessControl.deploy();
@@ -113,10 +127,16 @@ describe("DroneFlightFactory", function () {
     });
 
     it("Should deploy 2 new DroneDelivery contract", async () => {
+        await delivery.newDelivery(deliverySample);
+        await delivery.newDelivery(deliverySample);
+        const deliveries = await delivery.getAllDeliveries();
         expect((await factory.getDeployedContracts()).length).to.equal(0);
         const addDroneDeliveryTx = await factory
             .connect(pilot)
-            .newDroneDelivery(44, ...Object.values(droneFlightDataSample));
+            .newDroneDelivery(
+                deliveries[0].deliveryId,
+                ...Object.values(droneFlightDataSample)
+            );
 
         await addDroneDeliveryTx.wait();
 
@@ -125,7 +145,10 @@ describe("DroneFlightFactory", function () {
 
         const addDroneDeliveryTx2 = await factory
             .connect(pilot)
-            .newDroneDelivery(57, ...Object.values(droneFlightDataSample));
+            .newDroneDelivery(
+                deliveries[1].deliveryId,
+                ...Object.values(droneFlightDataSample)
+            );
         await addDroneDeliveryTx2.wait();
 
         // Verify Contract Addresses creation
@@ -163,7 +186,11 @@ describe("DroneFlightFactory", function () {
             addressesFromFactory[1]
         );
 
-        expect(await droneDelivery0.getDeliveryId()).to.be.equal(44);
-        expect(await droneDelivery1.getDeliveryId()).to.be.equal(57);
+        expect(await droneDelivery0.getDeliveryId()).to.be.equal(
+            deliveries[0].deliveryId
+        );
+        expect(await droneDelivery1.getDeliveryId()).to.be.equal(
+            deliveries[1].deliveryId
+        );
     });
 });
