@@ -108,12 +108,14 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterProvider
         setFormData({ ...formData, [event.target.name]: event.target.value });
     };
 
-    console.log(formData);
+    //console.log(formData);
 
     return (
-        <Modal show={show} onHide={onHide} keyboard={false} aria-labelledby="contained-modal-title-vcenter">
+        <Modal show={show} onHide={onHide} keyboard={false} aria-labelledby="contained-modal-title-vcenter" size="lg">
             <Modal.Header closeButton>
-                <Modal.Title>Deliver (id:{deliveryId})</Modal.Title>
+                <Modal.Title>
+                    Deliver (id:{deliveryId ? `${deliveryId.toString().substring(0, 20)}...` : "Unknown"})
+                </Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {conops === -1 ? (

@@ -33,56 +33,66 @@ function App() {
     const [StarwingsMasterSigner, setStarwingsMasterSigner] = useState();
     const [SWAccessControl, setSWAccessControl] = useState();
 
+    const reload = async () => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const accounts = await provider.listAccounts();
+
+        const StarwingsMasterProviderInstance = new ethers.Contract(
+            StarwingsMasterAddress,
+            StarwingsMasterArtifact.abi,
+            provider
+        );
+        const StarwingsMasterSignerInstance = new ethers.Contract(
+            StarwingsMasterAddress,
+            StarwingsMasterArtifact.abi,
+            signer
+        );
+        setStarwingsMasterProvider(StarwingsMasterProviderInstance);
+        setStarwingsMasterSigner(StarwingsMasterSignerInstance);
+
+        const SWAccessControlAddress = await StarwingsMasterProviderInstance.getAccessControlAddress();
+        const SWAccessControlInstance = new ethers.Contract(
+            SWAccessControlAddress,
+            SWAccessControlArtifact.abi,
+            provider
+        );
+        setSWAccessControl(SWAccessControlInstance);
+
+        let roles = {};
+
+        try {
+            const hasDefaultAdminRole = await SWAccessControlInstance.hasRole(DEFAULT_ADMIN_ROLE, accounts[0]);
+            const hasAdminRole = await SWAccessControlInstance.hasRole(ADMIN_ROLE, accounts[0]);
+            const hasPilotRole = await SWAccessControlInstance.hasRole(PILOT_ROLE, accounts[0]);
+            const hasDroneRole = await SWAccessControlInstance.hasRole(DRONE_ROLE, accounts[0]);
+            roles = {
+                hasDefaultAdminRole: hasDefaultAdminRole,
+                hasAdminRole: hasAdminRole,
+                hasPilotRole: hasPilotRole,
+                hasDroneRole: hasDroneRole,
+            };
+        } catch (error) {
+            console.error(error);
+        }
+
+        setState({
+            provider,
+            signer,
+            accounts,
+            roles,
+        });
+    };
+
     useEffect(() => {
         (async () => {
             try {
-                const provider = await getEthersProvider();
-                const signer = provider.getSigner();
-                const accounts = await provider.listAccounts();
-                const StarwingsMasterProviderInstance = new ethers.Contract(
-                    StarwingsMasterAddress,
-                    StarwingsMasterArtifact.abi,
-                    provider
-                );
-                const StarwingsMasterSignerInstance = new ethers.Contract(
-                    StarwingsMasterAddress,
-                    StarwingsMasterArtifact.abi,
-                    signer
-                );
-                setStarwingsMasterProvider(StarwingsMasterProviderInstance);
-                setStarwingsMasterSigner(StarwingsMasterSignerInstance);
-
-                const SWAccessControlAddress = await StarwingsMasterProviderInstance.getAccessControlAddress();
-                const SWAccessControlInstance = new ethers.Contract(
-                    SWAccessControlAddress,
-                    SWAccessControlArtifact.abi,
-                    provider
-                );
-                setSWAccessControl(SWAccessControlInstance);
-
-                let roles = {};
-
-                try {
-                    const hasDefaultAdminRole = await SWAccessControlInstance.hasRole(DEFAULT_ADMIN_ROLE, accounts[0]);
-                    const hasAdminRole = await SWAccessControlInstance.hasRole(ADMIN_ROLE, accounts[0]);
-                    const hasPilotRole = await SWAccessControlInstance.hasRole(PILOT_ROLE, accounts[0]);
-                    const hasDroneRole = await SWAccessControlInstance.hasRole(DRONE_ROLE, accounts[0]);
-                    roles = {
-                        hasDefaultAdminRole: hasDefaultAdminRole,
-                        hasAdminRole: hasAdminRole,
-                        hasPilotRole: hasPilotRole,
-                        hasDroneRole: hasDroneRole,
-                    };
-                } catch (error) {
-                    console.error(error);
-                }
-
-                setState({
-                    provider,
-                    signer,
-                    accounts,
-                    roles,
+                window.ethereum.on("accountsChanged", async function (accounts) {
+                    console.log(`Account changed to ${accounts[0]}`);
+                    await reload();
                 });
+
+                await reload();
             } catch (error) {
                 console.error(error);
             }

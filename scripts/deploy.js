@@ -66,12 +66,6 @@ async function main() {
     await DroneFlightFactory.deployed();
     console.log("DroneFlightFactory deployed to:", DroneFlightFactory.address);
 
-    const rolePilot = await SWAccessControl.PILOT_ROLE();
-    SWAccessControl.grantRole(
-        rolePilot,
-        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
-    );
-
     StarwingsMaster.setDroneFlightFactoryAddress(DroneFlightFactory.address);
 
     const contractAddresses = {
@@ -107,16 +101,29 @@ async function main() {
      *
      */
 
+    const rolePilot = await SWAccessControl.PILOT_ROLE();
+    const roleDrone = await SWAccessControl.DRONE_ROLE();
+
     // Pilot 1
     await StarwingsMaster.addPilot(
         "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
         "Joanna"
     );
 
+    SWAccessControl.grantRole(
+        rolePilot,
+        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+    );
+
     // Pilot 2
     await StarwingsMaster.addPilot(
         "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
         "Florian"
+    );
+
+    SWAccessControl.grantRole(
+        rolePilot,
+        "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"
     );
 
     // Drone 1
@@ -126,11 +133,21 @@ async function main() {
         "DJI Matrice 600 Pro"
     );
 
+    SWAccessControl.grantRole(
+        roleDrone,
+        "0x90f79bf6eb2c4f870365e785982e1f101e93b906"
+    );
+
     // Drone 2
     await StarwingsMaster.addDrone(
         "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
         "UAS-FR-170981",
         "Vertix"
+    );
+
+    SWAccessControl.grantRole(
+        roleDrone,
+        "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65"
     );
 
     // Delivery 1
