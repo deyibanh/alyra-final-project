@@ -35,11 +35,6 @@ contract DroneFlightFactory {
         starwingsMaster = IStarwingsMaster(starwingsMasterAddress);
     }
 
-    // modifier isAllowedTypeFlight(FlightType _type) {
-    //     require(_type <= type(FlightType).max, "type of flight not allowed");
-    //     _;
-    // }
-
     function newDroneDelivery(
         string memory _deliveryId,
         address _drone,
@@ -49,32 +44,12 @@ contract DroneFlightFactory {
         string memory _depart,
         string memory _destination
     ) external onlyRole(StarwingsDataLib.PILOT_ROLE) returns (address droneDeliveryAddress) {
-        StarwingsDataLib.FlightData memory flightData = _flightDataSetup(
-            _drone,
-            _conopsId,
-            _flightDatetime,
-            _flightDuration,
-            _depart,
-            _destination
-        );
-        droneDeliveryAddress = _newDroneDelivery(_deliveryId, flightData);
-
-    }
-
-    function _flightDataSetup(
-        address _drone,
-        uint256 _conopsId,
-        uint256 _flightDatetime,
-        uint256 _flightDuration,
-        string memory _depart,
-        string memory _destination
-    ) internal view returns (StarwingsDataLib.FlightData memory flightData) {
         StarwingsDataLib.Pilot memory pilot = starwingsMaster.getPilot(
             msg.sender
         );
         StarwingsDataLib.Drone memory drone = starwingsMaster.getDrone(_drone);
 
-        flightData = StarwingsDataLib.FlightData(
+        StarwingsDataLib.FlightData memory flightData = StarwingsDataLib.FlightData(
             pilot,
             drone,
             _conopsId,
@@ -83,6 +58,8 @@ contract DroneFlightFactory {
             _depart,
             _destination
         );
+
+        droneDeliveryAddress = _newDroneDelivery(_deliveryId, flightData);
     }
 
     function _newDroneDelivery(

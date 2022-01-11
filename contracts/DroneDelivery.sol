@@ -6,7 +6,7 @@ import "./DroneFlight.sol";
 contract DroneDelivery is DroneFlight {
     string private deliveryId;
     address private deliveryManager;
-    bool public droneParcelPickedUp;
+    bool private droneParcelPickedUp;
     bool private droneParcelDelivered;
 
     constructor(
@@ -36,16 +36,43 @@ contract DroneDelivery is DroneFlight {
         droneParcelDelivered = true;
     }
 
-    function isParcelPickedUp() external view returns(bool){
+    function isParcelPickedUp() external view returns (bool) {
         return droneParcelPickedUp;
     }
 
-    function isParcelDelivered() external view returns(bool){
+    function isParcelDelivered() external view returns (bool) {
         return droneParcelDelivered;
     }
 
-    function _customAllowToFlight() internal override view returns(bool){
+    function _customAllowToFlight() internal view override returns (bool) {
         return droneParcelPickedUp;
     }
 
+    function flightInfoDisplay()
+        external
+        view
+        returns (
+            string memory,
+            bool,
+            bool,
+            bool,
+            StarwingsDataLib.FlightData memory,
+            FlightState,
+            FlightState,
+            Event[] memory,
+            StarwingsDataLib.AirRisk[] memory
+        )
+    {
+        return (
+            deliveryId,
+            droneParcelPickedUp,
+            droneParcelDelivered,
+            allowedToFlight,
+            datas,
+            droneFlightState,  
+            pilotFlightState,
+            riskEvent,
+            airRisks
+        );
+    }
 }
