@@ -17,11 +17,11 @@ abstract contract DroneFlight {
     // bool private droneParcelPickUp;
     // bool private droneTakeOff;
 
-    StarwingsDataLib.FlightData private datas;
+    StarwingsDataLib.FlightData internal datas;
     FlightState internal droneFlightState;
     FlightState internal pilotFlightState;
-    Check private preChecks;
-    Check private postChecks;
+    Check internal preChecks;
+    Check internal postChecks;
 
     // 2. Events
     // 3. Modifiers
@@ -34,9 +34,9 @@ abstract contract DroneFlight {
     }
 
     // 4. Structs, arrays, enums
-    Event[] private riskEvent;
+    Event[] internal riskEvent;
     // Drone checkpoints
-    Checkpoint[] private checkpoints;
+    Checkpoint[] internal checkpoints;
     StarwingsDataLib.AirRisk[] internal airRisks;
 
     /**
@@ -241,9 +241,7 @@ abstract contract DroneFlight {
         _allowToFlight();
     }
 
-    function changeFlightStatus(uint256 _status)
-        external
-    {
+    function changeFlightStatus(uint256 _status) external {
         bool isPilot = accessControl.hasRole(
             StarwingsDataLib.PILOT_ROLE,
             msg.sender
