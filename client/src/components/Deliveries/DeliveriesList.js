@@ -162,7 +162,8 @@ function DeliveriesList(props) {
         },
         {
             cell: (row) =>
-                state.roles.hasPilotRole && (
+                state.roles.hasPilotRole &&
+                row.state !== 3 && (
                     <Button onClick={handleButtonClick} id={row.deliveryId} variant="warning" size="sm">
                         Process
                     </Button>
