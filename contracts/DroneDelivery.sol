@@ -9,6 +9,9 @@ contract DroneDelivery is DroneFlight {
     bool private droneParcelPickedUp;
     bool private droneParcelDelivered;
 
+    event ParcelPickedUp();
+    event ParcelDelivered();
+
     constructor(
         address _deliveryManager,
         string memory _deliveryId,
@@ -29,11 +32,15 @@ contract DroneDelivery is DroneFlight {
         require(!droneParcelPickedUp, "parcel already pickedUp");
         droneParcelPickedUp = true;
         _allowToFlight();
+
+        emit ParcelPickedUp();
     }
 
     function deliver() external onlyRole(StarwingsDataLib.DRONE_ROLE) {
         require(droneParcelPickedUp, "parcel not picked up before");
         droneParcelDelivered = true;
+
+        emit ParcelDelivered();
     }
 
     function isParcelPickedUp() external view returns (bool) {

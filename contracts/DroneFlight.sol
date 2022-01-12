@@ -24,6 +24,14 @@ abstract contract DroneFlight {
     Check internal postChecks;
 
     // 2. Events
+
+    event PreFlightCheck(CheckType _checkType);
+    event PostFlightCheck(CheckType _checkType);
+    event AirRiskValidated(uint256 _airRiskId);
+    event AirRiskCanceled(uint256 _airRiskId);
+    event CancelFlight();
+    event ChangeFlightStatus(FlightState _status);
+
     // 3. Modifiers
     /**
      * @dev Check the msg.sender's role.
@@ -118,6 +126,8 @@ abstract contract DroneFlight {
     {
         require(!preChecks.checkType[_checkType], "already checked");
         preChecks.checkType[_checkType] = true;
+
+        emit PreFlightCheck(_checkType);
     }
 
     function postFlightChecks(CheckType _checkType)
@@ -126,6 +136,8 @@ abstract contract DroneFlight {
     {
         require(!postChecks.checkType[_checkType], "already checked");
         postChecks.checkType[_checkType] = true;
+
+        emit PostFlightCheck(_checkType);
     }
 
     function getPreFlightChecks(CheckType _checkType)
@@ -211,6 +223,8 @@ abstract contract DroneFlight {
         require(!airRisks[_airRiskId].validated, "airRisk already validated");
         airRisks[_airRiskId].validated = true;
         _allowToFlight();
+
+        emit AirRiskValidated(_airRiskId);
     }
 
     function cancelAirRisk(uint256 _airRiskId)
@@ -220,6 +234,8 @@ abstract contract DroneFlight {
         require(airRisks[_airRiskId].validated, "airRisk already canceled");
         airRisks[_airRiskId].validated = false;
         _allowToFlight();
+
+        emit AirRiskCanceled(_airRiskId);
     }
 
     function viewAirRisks()
@@ -239,6 +255,8 @@ abstract contract DroneFlight {
         _changeDroneFlightState(FlightState(1));
         _changePilotFlightState(FlightState(1));
         _allowToFlight();
+
+        emit CancelFlight();
     }
 
     function changeFlightStatus(uint256 _status) external {
@@ -281,6 +299,8 @@ abstract contract DroneFlight {
         } else {
             _changePilotFlightState(FlightState(_status));
         }
+
+        emit ChangeFlightStatus(FlightState(_status));
     }
 
     function viewDroneFlightstatus() external view returns (FlightState) {

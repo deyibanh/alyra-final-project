@@ -3,8 +3,6 @@ import { Button, Col, Form, FormControl, Badge, Modal, Row } from "react-bootstr
 import DataTable from "react-data-table-component";
 
 function DronesContent(props) {
-    const state = props.state;
-    const StarwingsMasterProvider = props.StarwingsMasterProvider;
     const StarwingsMasterSigner = props.StarwingsMasterSigner;
     const [droneAddressList, setDroneAddressList] = useState([]);
     const [inputAddDrone, setInputAddDrone] = useState("");
@@ -12,27 +10,20 @@ function DronesContent(props) {
     const [inputAddDroneType, setInputAddDroneType] = useState("");
     const [modalIsShown, setModalIsShown] = useState(false);
     const [pending, setPending] = useState(true);
-    const [eventToProcess, setEventToProcess] = useState(false);
 
     useEffect(() => {
-        if (StarwingsMasterProvider) {
+        if (StarwingsMasterSigner) {
             getDroneList();
 
-            StarwingsMasterProvider.on("DroneAdded", (droneAddress) => {
-                setEventToProcess(!eventToProcess);
+            StarwingsMasterSigner.on("DroneAdded", (droneAddress) => {
+                getDroneList();
             });
 
-            StarwingsMasterProvider.on("DroneDeleted", (droneAddress) => {
-                setEventToProcess(!eventToProcess);
+            StarwingsMasterSigner.on("DroneDeleted", (droneAddress) => {
+                getDroneList();
             });
         }
-    }, [StarwingsMasterProvider]);
-
-    useEffect(() => {
-        if (StarwingsMasterProvider) {
-            getDroneList();
-        }
-    }, [eventToProcess]);
+    }, [StarwingsMasterSigner]);
 
     function onChangeInputAddDrone(event) {
         event.preventDefault();
