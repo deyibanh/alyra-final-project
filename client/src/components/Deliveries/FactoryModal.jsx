@@ -10,19 +10,7 @@ const contractAddresses = require("../../contractAddresses.json");
 const ConopsManagerAddress = contractAddresses.ConopsManager;
 const FlightFactoryAddress = contractAddresses.DroneFlightFactory;
 
-const formReducer = (state, event) => {
-    if (event.type === "reset") {
-        return {};
-    }
-
-    return {
-        ...state,
-        [event.name]: event.value,
-    };
-};
-
-function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterProvider }) {
-    // const [formData, setFormData] = useReducer(formReducer, {});
+function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }) {
     const [formData, setFormData] = useState({});
     const [conopsList, setConopsList] = useState([]);
     const [conops, setConops] = useState(-1);
@@ -43,8 +31,8 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterProvider
                 signer = new ethers.Contract(FlightFactoryAddress, FactoryArtifact.abi, state.signer);
                 setFlightFactory({ provider, signer });
 
-                if (StarwingsMasterProvider) {
-                    const dronesList = await StarwingsMasterProvider.getDroneList();
+                if (StarwingsMasterSigner) {
+                    const dronesList = await StarwingsMasterSigner.getDroneList();
                     setDrones(dronesList);
                 }
                 // console.log("signer:", state.signer);
@@ -53,7 +41,8 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterProvider
             }
         })();
     }, [state]);
-
+    console.log(StarwingsMasterSigner);
+    console.log(drones);
     useEffect(() => {
         if (conopsManager.provider) {
             getConops();
@@ -83,7 +72,7 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterProvider
 
     const getConops = async () => {
         try {
-            const conopsL = await conopsManager.provider.viewAllConops();
+            const conopsL = await conopsManager.signer.viewAllConops();
             setConopsList(conopsL);
         } catch (error) {
             console.error(error);

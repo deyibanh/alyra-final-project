@@ -109,7 +109,13 @@ function App() {
 
                         <Route
                             path="/deliveries"
-                            element={<Deliveries state={state} StarwingsMasterProvider={StarwingsMasterProvider} />}
+                            element={
+                                <Deliveries
+                                    state={state}
+                                    StarwingsMasterProvider={StarwingsMasterProvider}
+                                    StarwingsMasterSigner={StarwingsMasterSigner}
+                                />
+                            }
                         />
                         <Route
                             path="/flights"

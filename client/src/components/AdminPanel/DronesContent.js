@@ -69,7 +69,7 @@ function DronesContent(props) {
     const getDroneList = async () => {
         setPending(true);
         try {
-            const droneAddressListResult = await StarwingsMasterProvider.getDroneList();
+            const droneAddressListResult = await StarwingsMasterSigner.getDroneList();
             setDroneAddressList(droneAddressListResult);
             //console.log(droneAddressList);
         } catch (error) {

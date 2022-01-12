@@ -8,7 +8,7 @@ import { checkProperties } from "ethers/lib/utils";
 function Deliveries(props) {
     const state = props.state;
     const StarwingsMasterProvider = props.StarwingsMasterProvider;
-    // const StarwingsMasterSigner = props.StarwingsMasterSigner;
+    const StarwingsMasterSigner = props.StarwingsMasterSigner;
 
     return (
         <div className="Deliveries">
@@ -34,6 +34,7 @@ function Deliveries(props) {
                                     <DeliveriesList
                                         state={state}
                                         StarwingsMasterProvider={StarwingsMasterProvider}
+                                        StarwingsMasterSigner={StarwingsMasterSigner}
                                     ></DeliveriesList>
                                 </Tab.Pane>
                                 {/* <Tab.Pane eventKey="my_deliveries">

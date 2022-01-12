@@ -9,8 +9,6 @@ const contractAddresses = require("../../contractAddresses.json");
 
 const StarwingsMasterAddress = contractAddresses.StarwingsMaster;
 
-const airRistType = { 0: "Aerodrome", 1: "CHU", 2: "Military Base" };
-
 function FlightsContent({ state }) {
     const [flights, setFlights] = useState([]);
     const [starwingsMaster, setStarwingsMaster] = useState({});
@@ -30,15 +28,14 @@ function FlightsContent({ state }) {
     }, [state]);
 
     useEffect(() => {
-        if (starwingsMaster.provider) {
-            console.log(starwingsMaster);
+        if (starwingsMaster.signer) {
             getFlights();
         }
     }, [starwingsMaster]);
 
     const getFlights = async () => {
         try {
-            const flightsAddresses = await starwingsMaster.provider.getDroneFlightAddressList();
+            const flightsAddresses = await starwingsMaster.signer.getDroneFlightAddressList();
             let flightsInfo = [];
             for (let address of flightsAddresses) {
                 const provider = new ethers.Contract(address, droneDeliveryArtifact.abi, state.provider);
@@ -50,7 +47,7 @@ function FlightsContent({ state }) {
             console.error(error);
         }
     };
-    console.log(flights);
+
     const changeVisibility = (i) => {
         i === -1 ? setCardGroupSize(3) : setCardGroupSize(1);
         setViewDetails(i);
@@ -59,7 +56,7 @@ function FlightsContent({ state }) {
     return (
         <div className="ConopsContent">
             {flights.length === 0 && <div>No Flight at the moment</div>}
-            <Row md={cardGroupSize} className="g-2 mt-2">
+            <Row md={1} className="g-2 mt-2">
                 {flights.map((f, i) =>
                     viewDetails === -1 ? (
                         <Col key={f[0]}>

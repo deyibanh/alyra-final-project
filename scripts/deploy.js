@@ -110,7 +110,7 @@ async function main() {
         "Joanna"
     );
 
-    SWAccessControl.grantRole(
+    await SWAccessControl.grantRole(
         rolePilot,
         "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
     );
@@ -121,7 +121,7 @@ async function main() {
         "Florian"
     );
 
-    SWAccessControl.grantRole(
+    await SWAccessControl.grantRole(
         rolePilot,
         "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"
     );
@@ -133,7 +133,7 @@ async function main() {
         "DJI Matrice 600 Pro"
     );
 
-    SWAccessControl.grantRole(
+    await SWAccessControl.grantRole(
         roleDrone,
         "0x90f79bf6eb2c4f870365e785982e1f101e93b906"
     );
@@ -145,7 +145,7 @@ async function main() {
         "Vertix"
     );
 
-    SWAccessControl.grantRole(
+    await SWAccessControl.grantRole(
         roleDrone,
         "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65"
     );
