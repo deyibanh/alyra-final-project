@@ -29,7 +29,7 @@ function PilotsContent(props) {
     }, [StarwingsMasterProvider]);
 
     useEffect(() => {
-        if (StarwingsMasterProvider) {
+        if (StarwingsMasterSigner) {
             getPilotList();
         }
     }, [eventToProcess]);
@@ -63,7 +63,7 @@ function PilotsContent(props) {
     const getPilotList = async () => {
         setPending(true);
         try {
-            const pilotAddressListResult = await StarwingsMasterProvider.getPilotList();
+            const pilotAddressListResult = await StarwingsMasterSigner.getPilotList();
             setPilotAddressList(pilotAddressListResult);
             //console.log(pilotAddressList);
         } catch (error) {

@@ -307,9 +307,13 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneList()
         external
         view
-        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (StarwingsDataLib.Drone[] memory)
     {
+        require(
+            accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender) ||
+                accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender),
+            "Access refused"
+        );
         return droneList;
     }
 

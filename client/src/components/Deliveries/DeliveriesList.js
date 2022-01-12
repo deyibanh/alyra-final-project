@@ -172,7 +172,7 @@ function DeliveriesList(props) {
             button: true,
         },
     ];
-
+    console.log(props);
     return (
         <div>
             {deliveriesList.length === 0 && <div>No deliveries.</div>}
@@ -221,7 +221,7 @@ function DeliveriesList(props) {
                 onHide={hideFactoryModal}
                 state={state}
                 deliveryId={selectedDeliveryId}
-                StarwingsMasterProvider={props.StarwingsMasterProvider}
+                StarwingsMasterSigner={props.StarwingsMasterSigner}
             />
         </div>
     );
