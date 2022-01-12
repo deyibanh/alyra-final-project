@@ -30,25 +30,23 @@ function ConopsContent({ state }) {
     const [formData, setFormData] = useReducer(formReducer, {});
     const [viewDetails, setViewDetails] = useState(-1);
     const [cardGroupSize, setCardGroupSize] = useState(5);
-    const [eventToProcess, setEventToProcess] = useState(false);
 
     useEffect(() => {
         if (state.provider) {
             const provider = new ethers.Contract(ConopsManagerAddress, ConopsArtifact.abi, state.provider);
             const signer = new ethers.Contract(ConopsManagerAddress, ConopsArtifact.abi, state.signer);
             setConopsManager({ provider, signer });
-
-            provider.on("ConopsCreated", (conopsId, name) => {
-                setEventToProcess(!eventToProcess);
-            });
         }
     }, [state]);
 
     useEffect(() => {
-        if (conopsManager.provider) {
+        if (conopsManager.signer) {
+            conopsManager.provider.on("ConopsCreated", (conopsId, name) => {
+                getConops();
+            });
             getConops();
         }
-    }, [conopsManager, eventToProcess]);
+    }, [conopsManager]);
 
     const hideModal = () => {
         setModalIsShown(false);
@@ -61,6 +59,7 @@ function ConopsContent({ state }) {
 
     const getConops = async () => {
         try {
+            console.log(conopsManager.signer);
             const conopsList = await conopsManager.signer.viewAllConops();
             setConops(conopsList);
         } catch (error) {

@@ -4,35 +4,26 @@ import DataTable from "react-data-table-component";
 import "./PilotsContent.css";
 
 function PilotsContent(props) {
-    const state = props.state;
-    const StarwingsMasterProvider = props.StarwingsMasterProvider;
     const StarwingsMasterSigner = props.StarwingsMasterSigner;
     const [pilotAddressList, setPilotAddressList] = useState([]);
     const [inputAddPilot, setInputAddPilot] = useState("");
     const [inputAddPilotName, setInputAddPilotName] = useState("");
     const [modalIsShown, setModalIsShown] = useState(false);
     const [pending, setPending] = useState(true);
-    const [eventToProcess, setEventToProcess] = useState(false);
-
-    useEffect(() => {
-        if (StarwingsMasterProvider) {
-            getPilotList();
-
-            StarwingsMasterProvider.on("PilotAdded", (pilotAddress) => {
-                setEventToProcess(!eventToProcess);
-            });
-
-            StarwingsMasterProvider.on("PilotDeleted", (pilotAddress) => {
-                setEventToProcess(!eventToProcess);
-            });
-        }
-    }, [StarwingsMasterProvider]);
 
     useEffect(() => {
         if (StarwingsMasterSigner) {
             getPilotList();
+
+            StarwingsMasterSigner.on("PilotAdded", (pilotAddress) => {
+                getPilotList();
+            });
+
+            StarwingsMasterSigner.on("PilotDeleted", (pilotAddress) => {
+                getPilotList();
+            });
         }
-    }, [eventToProcess]);
+    }, [StarwingsMasterSigner]);
 
     function onChangeInputAddPilot(event) {
         event.preventDefault();

@@ -35,25 +35,19 @@ function DeliveriesList(props) {
         setFactoryModalIsShown(false);
     };
 
-    const showFactoryModal = () => {
-        setFactoryModalIsShown(true);
-    };
-
     useEffect(() => {
         if (state.provider) {
             const provider = new ethers.Contract(DeliveryManagerAddress, DeliveryArtifact.abi, state.provider);
             const signer = new ethers.Contract(DeliveryManagerAddress, DeliveryArtifact.abi, state.signer);
             setDeliveryManager({ provider, signer });
-
-            //console.log("UseEffect state :: Listening to events !");
-            provider.on("DeliveryCreated", (deliveryId) => {
-                getDeliveries();
-            });
         }
     }, [state]);
 
     useEffect(() => {
         if (deliveryManager.provider) {
+            deliveryManager.provider.on("DeliveryCreated", (deliveryId) => {
+                getDeliveries();
+            });
             getDeliveries();
         }
     }, [deliveryManager]);
