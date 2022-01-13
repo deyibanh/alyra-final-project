@@ -80,19 +80,19 @@ const adminWallet = ethers.Wallet.fromMnemonic(
 ).connect(provider);
 const pilot1Wallet = ethers.Wallet.fromMnemonic(
     mnemonic,
-    "m/44'/60'/0'/0/2"
+    "m/44'/60'/0'/0/11"
 ).connect(provider);
 const pilot2Wallet = ethers.Wallet.fromMnemonic(
     mnemonic,
-    "m/44'/60'/0'/0/3"
+    "m/44'/60'/0'/0/12"
 ).connect(provider);
 const drone1Wallet = ethers.Wallet.fromMnemonic(
     mnemonic,
-    "m/44'/60'/0'/0/4"
+    "m/44'/60'/0'/0/13"
 ).connect(provider);
 const drone2Wallet = ethers.Wallet.fromMnemonic(
     mnemonic,
-    "m/44'/60'/0'/0/5"
+    "m/44'/60'/0'/0/14"
 ).connect(provider);
 
 const pilotsData = [
@@ -266,6 +266,9 @@ async function simulate() {
         console.log(
             `Creating DroneDelivery for deliveryId: ${delivery1.deliveryId}...`
         );
+
+        // droneDeliveryAddress = ;
+
         await DroneFlightFactory.connect(pilot1Wallet).newDroneDelivery(
             delivery1.deliveryId,
             drone1Wallet.address,
@@ -273,7 +276,8 @@ async function simulate() {
             new Date("01/02/2022") / 1000,
             ethers.BigNumber.from(1),
             conops1.startingPoint,
-            conops1.endPoint
+            conops1.endPoint,
+            droneDeliveryAddress
         );
 
         console.log("5) Pre-Flight Checks");
@@ -290,6 +294,14 @@ async function simulate() {
         console.log("Pre-flight - Check battery OK");
         await droneDelivery1.connect(pilot1Wallet).preFlightChecks(2);
         console.log("Pre-flight - Check control station OK");
+
+        console.log("9) Post-Flight Checks");
+        await droneDelivery1.connect(pilot1Wallet).postFlightChecks(0);
+        console.log("Post-flight - Check motor OK");
+        await droneDelivery1.connect(pilot1Wallet).postFlightChecks(1);
+        console.log("Post-flight - Check battery OK");
+        await droneDelivery1.connect(pilot1Wallet).postFlightChecks(2);
+        console.log("Post-flight - Check control station OK");
     } catch (error) {
         console.error(error);
     }
