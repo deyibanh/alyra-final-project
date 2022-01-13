@@ -166,7 +166,7 @@ function DeliveriesList(props) {
             button: true,
         },
     ];
-    console.log(props);
+    //console.log(props);
     return (
         <div>
             {deliveriesList.length === 0 && <div>No deliveries.</div>}
