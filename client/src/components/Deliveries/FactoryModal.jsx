@@ -2,7 +2,9 @@ import React, { useEffect, useState, useRef, useReducer } from "react";
 import { Button, Col, Form, FormControl, InputGroup, Modal, Row } from "react-bootstrap";
 import ConopsArtifact from "../../artifacts/contracts/ConopsManager.sol/ConopsManager.json";
 import FactoryArtifact from "../../artifacts/contracts/DroneFlightFactory.sol/DroneFlightFactory.json";
+import DroneDeliveryArtifact from "../../artifacts/contracts/DroneDelivery.sol/DroneDelivery.json";
 import { ethers } from "ethers";
+import { buildCreate2Address, numberToUint256 } from "../../utils/create2helper";
 import FlightPlanForm from "./FlightPlanForm";
 
 const contractAddresses = require("../../contractAddresses.json");
@@ -41,8 +43,8 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
             }
         })();
     }, [state]);
-    console.log(StarwingsMasterSigner);
-    console.log(drones);
+    // console.log(StarwingsMasterSigner);
+    // console.log(drones);
     useEffect(() => {
         if (conopsManager.provider) {
             getConops();
@@ -80,6 +82,46 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
     };
 
     const submitFlight = async () => {
+        // Build byteCode for factory deploy
+        const droneDeliveryIface = new ethers.utils.Interface(DroneDeliveryArtifact.abi);
+        const salt = Date.now();
+
+        // Create bytecode sent to FlightFactory.deploy function
+        // We wants to call droneDelivery ctor, so we need :
+        // address _deliveryManager,
+        // string memory _deliveryId,
+        // address _conopsManager,
+        // address _accessControlAddress
+
+        const dm = await StarwingsMasterSigner.getDeliveryManager();
+        const cm = await StarwingsMasterSigner.getConopsManager();
+        const ac = await StarwingsMasterSigner.getAccessControlAddress();
+
+        // Generate hexCode from contract byteCode and ctor parameters
+        const hexCode = ethers.utils.hexConcat([
+            DroneDeliveryArtifact.bytecode,
+            droneDeliveryIface.encodeDeploy([
+                dm, // _deliveryManager
+                formData.deliveryId, // _deliveryId
+                cm, // _conopsManager
+                ac, // _accessControlAddress
+            ]),
+        ]);
+
+        // build deterministic contract address
+        const computedAddr = buildCreate2Address(FlightFactoryAddress, numberToUint256(salt), hexCode);
+
+        // generate byteCode for contract+ctor parameters
+        const bytecode = ethers.utils.arrayify(hexCode);
+        // Call factory to deploy contract
+        const newDroneDeliveryAddr = await flightFactory.signer.deploy(bytecode, salt, {
+            gasLimit: 9000000,
+        });
+
+        // wait for tx to be proceeded, and contract to be created
+        await newDroneDeliveryAddr.wait();
+
+        // Now initialize droneDelivery contract with data
         const tx = await flightFactory.signer.newDroneDelivery(
             formData.deliveryId,
             formData.drone,
@@ -87,7 +129,8 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
             Date.parse(formData.flightDatetime) / 1000,
             ethers.BigNumber.from(formData.flightDuration),
             formData.depart,
-            formData.destination
+            formData.destination,
+            computedAddr
         );
         await tx;
         onHide();
