@@ -29,6 +29,12 @@ module.exports = {
     networks: {
         hardhat: {
             chainId: 1337,
+            accounts: {
+                mnemonic:
+                    process.env.MNEMONIC !== undefined
+                        ? process.env.MNEMONIC
+                        : "",
+            },
         },
         ropsten: {
             url: process.env.INFURA_ROPSTEN_URL || "",
