@@ -211,7 +211,11 @@ contract StarwingsMaster is IStarwingsMaster {
     {
         require(
             msg.sender == droneFlightFactoryAddress ||
-                accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender),
+                accessControl.hasRole(
+                    StarwingsDataLib.ADMIN_ROLE,
+                    msg.sender
+                ) ||
+                (_pilotAddress == msg.sender),
             "Access refused"
         );
         uint256 pilotIndex = pilotIndexMap[_pilotAddress];
@@ -341,7 +345,11 @@ contract StarwingsMaster is IStarwingsMaster {
     {
         require(
             msg.sender == droneFlightFactoryAddress ||
-                accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender),
+                accessControl.hasRole(
+                    StarwingsDataLib.ADMIN_ROLE,
+                    msg.sender
+                ) ||
+                accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender),
             "Access refused"
         );
         uint256 droneIndex = droneIndexMap[_droneAddress];
