@@ -9,6 +9,7 @@ let factory,
     delivery,
     owner,
     pilot,
+    pilot2,
     drone;
 
 const pilotSample = {
@@ -23,13 +24,26 @@ const droneSample = {
 };
 
 const droneFlightDataSample = {
-    droneAddress: "",
+    pilot: {
+        index: 0,
+        isDeleted: false,
+        name: "",
+        pilotAddress: "0x14dc79964da2c08b23698b3d3cc7ca32193d9955",
+        flightAddresses: [],
+    },
+    drone: {
+        index: 0,
+        isDeleted: false,
+        droneId: "",
+        droneType: "",
+        droneAddress: "0x14dc79964da2c08b23698b3d3cc7ca32193d9955",
+        flightAddresses: [],
+    },
     conopsId: 0,
-    flightDatetime: 57875,
-    flightDuration: 10,
-    depart: "Earth",
-    destination: "Moon",
-    droneDeliveryAddr: "",
+    flightDatetime: 0,
+    flightDuration: 0,
+    depart: "",
+    destination: "",
 };
 
 const deliverySample = {
@@ -47,7 +61,7 @@ const deliverySample = {
 let droneDeliveryFactory;
 
 const deploy = async () => {
-    [owner, pilot, drone] = await ethers.getSigners();
+    [owner, pilot, pilot2, drone] = await ethers.getSigners();
     pilotSample._pilotAddress = pilot.address;
     droneSample._droneAddress = drone.address;
     droneFlightDataSample.droneAddress = drone.address;
@@ -103,11 +117,19 @@ const deploy = async () => {
     await factory.deployed();
 
     await starwingsMaster.setDroneFlightFactoryAddress(factory.address);
+
+    droneSample._droneAddress = drone.address;
+    // console.log(`======= Adding Drone [${droneSample._droneAddress}]`);
+
     await starwingsMaster.addDrone(
         droneSample._droneAddress,
         droneSample._droneId,
         droneSample._droneType
     );
+    pilotSample._pilotAddress = pilot.address;
+
+    // console.log(`======= Adding Pilot [${pilotSample._pilotAddress}]`);
+
     await starwingsMaster.addPilot(
         pilotSample._pilotAddress,
         pilotSample._pilotName
@@ -119,7 +141,7 @@ const deploy = async () => {
 };
 
 describe("DroneFlightFactory", function () {
-    beforeEach(async () => {
+    before(async () => {
         await deploy();
     });
 
@@ -127,7 +149,7 @@ describe("DroneFlightFactory", function () {
         expect((await factory.getDeployedContracts()).length).to.equal(0);
 
         // Magics happens
-        const salt = 1;
+        const salt = Date.now();
         const bytecode = ethers.utils.arrayify(
             ethers.utils.hexConcat([
                 droneDeliveryFactory.bytecode,
@@ -136,6 +158,7 @@ describe("DroneFlightFactory", function () {
                     "TEST",
                     conops.address,
                     accessControl.address,
+                    starwingsMaster.address,
                 ]),
             ])
         );
@@ -150,12 +173,15 @@ describe("DroneFlightFactory", function () {
     it("Should deploy 2 new DroneDelivery contract", async () => {
         await delivery.newDelivery(deliverySample);
         await delivery.newDelivery(deliverySample);
+
         const deliveries = await delivery.getAllDeliveries();
         expect((await factory.getDeployedContracts()).length).to.equal(0);
 
+        // ############################ 1st DroneDelivery
+        // // console.log("############################ 1st DroneDelivery");
         // Magics happens
-        const salt = 1;
-        const bytecode = ethers.utils.arrayify(
+        let salt = 1;
+        let bytecode = ethers.utils.arrayify(
             ethers.utils.hexConcat([
                 droneDeliveryFactory.bytecode,
                 droneDeliveryFactory.interface.encodeDeploy([
@@ -163,59 +189,110 @@ describe("DroneFlightFactory", function () {
                     deliveries[0].deliveryId,
                     conops.address,
                     accessControl.address,
+                    starwingsMaster.address,
                 ]),
             ])
         );
 
         // Create droneDelivery instance
-        const result = await factory.connect(pilot).deploy(bytecode, salt, {
+        let result = await factory.connect(pilot).deploy(bytecode, salt, {
             gasLimit: 9000000,
         });
 
         // Get event values
-        const temp = await result.wait();
-        const deliveryAddr = temp.events?.filter((x) => {
+        let temp = await result.wait();
+        let droneDeliveryAddr = temp.events?.filter((x) => {
             return x.event === "Deployed";
         })[0].args.addr;
 
-        console.log(`Delivery created ${deliveryAddr}`);
+        // console.log(`[DroneDelivery] deployed at ${droneDeliveryAddr}`);
+        // console.log(`[DeliveryId] used ${deliveries[0].deliveryId}`);
 
-        droneFlightDataSample.droneDeliveryAddr = deliveryAddr;
-
-        const addDroneDeliveryTx = await factory
-            .connect(pilot)
-            .newDroneDelivery(
-                deliveries[0].deliveryId,
-                ...Object.values(droneFlightDataSample)
-            );
-
-        await addDroneDeliveryTx.wait();
-
-        console.log(
-            `Deployed contracts = ${await factory.getDeployedContracts()}`
+        // Create contract object with deployed address
+        let droneDeliveryContract = new ethers.Contract(
+            droneDeliveryAddr,
+            droneDeliveryFactory.interface,
+            pilot
         );
+
+        // console.log(
+        //     `[Verifiy] DeliveryId in DroneDelivery = ${await droneDeliveryContract.getDeliveryId()}`
+        // );
+
+        // Init flightdata for drone delivery
+        droneFlightDataSample.pilot.pilotAddress = pilot.address;
+        droneFlightDataSample.drone.droneAddress = drone.address;
+        await droneDeliveryContract
+            .connect(pilot)
+            .initDelivery(droneFlightDataSample);
+
+        // console.log(
+        //     `Deployed contracts = ${
+        //         (await factory.getDeployedContracts()).length
+        //     }`
+        // );
 
         expect((await factory.getDeployedContracts()).length).to.equal(1);
         expect(await factory.deployedContracts(0)).to.not.equal(0);
 
-        return;
+        // ############################ 2nd DroneDelivery
+        // console.log("############################ 2nd DroneDelivery");
+        // Magics happens
+        salt = 2;
+        bytecode = ethers.utils.arrayify(
+            ethers.utils.hexConcat([
+                droneDeliveryFactory.bytecode,
+                droneDeliveryFactory.interface.encodeDeploy([
+                    delivery.address,
+                    deliveries[1].deliveryId,
+                    conops.address,
+                    accessControl.address,
+                    starwingsMaster.address,
+                ]),
+            ])
+        );
 
-        const addDroneDeliveryTx2 = await factory
+        // Create droneDelivery instance
+        result = await factory.connect(pilot).deploy(bytecode, salt, {
+            gasLimit: 9000000,
+        });
+
+        // Get event values
+        temp = await result.wait();
+        droneDeliveryAddr = temp.events?.filter((x) => {
+            return x.event === "Deployed";
+        })[0].args.addr;
+
+        // console.log(`[DroneDelivery] deployed at ${droneDeliveryAddr}`);
+        // console.log(`[DeliveryId] used ${deliveries[1].deliveryId}`);
+
+        // Create contract object with deployed address
+        droneDeliveryContract = new ethers.Contract(
+            droneDeliveryAddr,
+            droneDeliveryFactory.interface,
+            pilot
+        );
+
+        // console.log(
+        //     `[Verifiy] DeliveryId in DroneDelivery = ${await droneDeliveryContract.getDeliveryId()}`
+        // );
+
+        // Init flightdata for drone delivery
+        droneFlightDataSample.pilot.pilotAddress = pilot.address;
+        droneFlightDataSample.drone.droneAddress = drone.address;
+        await droneDeliveryContract
             .connect(pilot)
-            .newDroneDelivery(
-                deliveries[1].deliveryId,
-                ...Object.values(droneFlightDataSample)
-            );
-        await addDroneDeliveryTx2.wait();
+            .initDelivery(droneFlightDataSample);
 
-        // Verify Contract Addresses creation
         const addressesFromFactory = await factory.getDeployedContracts();
+        // console.log(`Deployed contracts = ${addressesFromFactory.length}`);
 
         expect((await factory.getDeployedContracts()).length).to.equal(2);
         expect(addressesFromFactory[0]).to.not.equal(0);
         expect(addressesFromFactory[1]).to.not.equal(0);
         expect(addressesFromFactory[0]).to.not.equal(addressesFromFactory[1]);
 
+        // Global checks
         const addressesFromStarwingsMaster =
             await starwingsMaster.getDroneFlightAddressList();
 
@@ -233,21 +310,5 @@ describe("DroneFlightFactory", function () {
         expect(
             (await starwingsMaster.getDrone(drone.address)).flightAddresses[1]
         ).to.be.equal(addressesFromStarwingsMaster[1]);
-
-        // Verify contracts deployement
-        const DroneDelivery = await ethers.getContractFactory("DroneDelivery");
-        const droneDelivery0 = await DroneDelivery.attach(
-            addressesFromFactory[0]
-        );
-        const droneDelivery1 = await DroneDelivery.attach(
-            addressesFromFactory[1]
-        );
-
-        expect(await droneDelivery0.getDeliveryId()).to.be.equal(
-            deliveries[0].deliveryId
-        );
-        expect(await droneDelivery1.getDeliveryId()).to.be.equal(
-            deliveries[1].deliveryId
-        );
     });
 });

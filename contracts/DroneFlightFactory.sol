@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "./interfaces/IStarwingsMaster.sol";
 import "./interfaces/IDeliveryManager.sol";
+import "./interfaces/IDroneFlight.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 /**
@@ -47,53 +48,42 @@ contract DroneFlightFactory {
             }
         }
 
+        deployedContracts.push(addr);
+
         emit Deployed(addr, salt);
     }
 
-    function newDroneDelivery(
-        string memory _deliveryId,
-        address _drone,
-        uint256 _conopsId,
-        uint256 _flightDatetime,
-        uint256 _flightDuration,
-        string memory _depart,
-        string memory _destination,
-        address droneDeliveryAddr
-    )
-        external
-        onlyRole(StarwingsDataLib.PILOT_ROLE)
-        returns (address droneDeliveryAddress)
-    {
-        StarwingsDataLib.FlightData memory flightData = StarwingsDataLib
-            .FlightData(
-                starwingsMaster.getPilot(msg.sender),
-                starwingsMaster.getDrone(_drone),
-                _conopsId,
-                _flightDatetime,
-                _flightDuration,
-                _depart,
-                _destination
-            );
+    // function newDroneDelivery(
+    //     string memory _deliveryId,
+    //     address _drone,
+    //     uint256 _conopsId,
+    //     uint256 _flightDatetime,
+    //     uint256 _flightDuration,
+    //     string memory _depart,
+    //     string memory _destination,
+    //     address droneDeliveryAddr
+    // )
+    //     external
+    //     onlyRole(StarwingsDataLib.PILOT_ROLE)
+    //     returns (address droneDeliveryAddress)
+    // {
+    //     // StarwingsDataLib.FlightData memory flightData = StarwingsDataLib
+    //     //     .FlightData(
+    //     //         starwingsMaster.getPilot(msg.sender),
+    //     //         starwingsMaster.getDrone(_drone),
+    //     //         _conopsId,
+    //     //         _flightDatetime,
+    //     //         _flightDuration,
+    //     //         _depart,
+    //     //         _destination
+    //     //     );
 
-        IDeliveryManager deliveryManager = IDeliveryManager(
-            starwingsMaster.getDeliveryManager()
-        );
+    //     // IDeliveryManager deliveryManager = IDeliveryManager(
+    //     //     starwingsMaster.getDeliveryManager()
+    //     // );
 
-        deployedContracts.push(droneDeliveryAddr);
-
-        starwingsMaster.addDroneFlight(
-            droneDeliveryAddr,
-            flightData.pilot.pilotAddress,
-            flightData.drone.droneAddress
-        );
-
-        deliveryManager.setDeliveryState(
-            _deliveryId,
-            IDeliveryManager.DeliveryState(3)
-        );
-
-        return address(droneDeliveryAddr);
-    }
+    //     return address(droneDeliveryAddr);
+    // }
 
     // function _newDroneDelivery(
     //     string memory _deliveryId,
