@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { Button, Col, Modal, Row } from "react-bootstrap";
 import { ethers } from "ethers";
 import StarwingsMasterArtifact from "../../artifacts/contracts/StarwingsMaster.sol/StarwingsMaster.json";
@@ -9,11 +9,37 @@ const contractAddresses = require("../../contractAddresses.json");
 
 const StarwingsMasterAddress = contractAddresses.StarwingsMaster;
 
+function useInterval(callback, delay) {
+    const savedCallback = useRef(callback);
+
+    // Remember the latest callback if it changes.
+    useLayoutEffect(() => {
+        savedCallback.current = callback;
+    }, [callback]);
+
+    // Set up the interval.
+    useEffect(() => {
+        // Don't schedule if no delay is specified.
+        // Note: 0 is a valid value for delay.
+        if (!delay && delay !== 0) {
+            return;
+        }
+
+        const id = setInterval(() => savedCallback.current(), delay);
+
+        return () => clearInterval(id);
+    }, [delay]);
+}
+
 function FlightsContent({ state }) {
     const [flights, setFlights] = useState([]);
     const [starwingsMaster, setStarwingsMaster] = useState({});
     const [viewDetails, setViewDetails] = useState(-1);
     const [cardGroupSize, setCardGroupSize] = useState(3);
+
+    useInterval(() => {
+        getFlights();
+    }, 10000);
 
     useEffect(() => {
         if (state.provider) {
@@ -39,8 +65,24 @@ function FlightsContent({ state }) {
             let flightsInfo = [];
             for (let address of flightsAddresses) {
                 const provider = new ethers.Contract(address, droneDeliveryArtifact.abi, state.provider);
-                const infos = await provider.flightInfoDisplay();
+                let infos = await provider.flightInfoDisplay();
+                [0, 1, 2].map((val) => {
+                    (async () => {
+                        let value = await provider.getPreFlightChecks(val);
+                        infos = [...infos, value];
+                    })();
+                });
+                [0, 1, 2].map((val) => {
+                    (async () => {
+                        let value = await provider.getPostFlightChecks(val);
+                        infos = [...infos, value];
+                    })();
+                });
+                // const preFlightCheck = await.provider
                 flightsInfo.push(infos);
+                // provider.on("DeliveryCreated", (deliveryId) => {
+                //     getDeliveries();
+                // });
             }
             setFlights(flightsInfo);
         } catch (error) {

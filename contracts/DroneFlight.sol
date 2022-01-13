@@ -27,10 +27,10 @@ abstract contract DroneFlight is Ownable {
 
     // 2. Events
 
-    event PreFlightCheck(CheckType _checkType);
-    event PostFlightCheck(CheckType _checkType);
-    event AirRiskValidated(uint256 _airRiskId);
-    event AirRiskCanceled(uint256 _airRiskId);
+    // event PreFlightCheck(CheckType _checkType);
+    // event PostFlightCheck(CheckType _checkType);
+    // event AirRiskValidated(uint256 _airRiskId);
+    // event AirRiskCanceled(uint256 _airRiskId);
     event CancelFlight();
     event ChangeFlightStatus(FlightState _status);
 
@@ -133,7 +133,7 @@ abstract contract DroneFlight is Ownable {
         require(!preChecks.checkType[_checkType], "already checked");
         preChecks.checkType[_checkType] = true;
 
-        emit PreFlightCheck(_checkType);
+        // emit PreFlightCheck(_checkType);
     }
 
     function postFlightChecks(CheckType _checkType)
@@ -143,7 +143,7 @@ abstract contract DroneFlight is Ownable {
         require(!postChecks.checkType[_checkType], "already checked");
         postChecks.checkType[_checkType] = true;
 
-        emit PostFlightCheck(_checkType);
+        // emit PostFlightCheck(_checkType);
     }
 
     function getPreFlightChecks(CheckType _checkType)
@@ -230,7 +230,7 @@ abstract contract DroneFlight is Ownable {
         airRisks[_airRiskId].validated = true;
         _allowToFlight();
 
-        emit AirRiskValidated(_airRiskId);
+        // emit AirRiskValidated(_airRiskId);
     }
 
     function cancelAirRisk(uint256 _airRiskId)
@@ -241,7 +241,7 @@ abstract contract DroneFlight is Ownable {
         airRisks[_airRiskId].validated = false;
         _allowToFlight();
 
-        emit AirRiskCanceled(_airRiskId);
+        // emit AirRiskCanceled(_airRiskId);
     }
 
     function viewAirRisks()

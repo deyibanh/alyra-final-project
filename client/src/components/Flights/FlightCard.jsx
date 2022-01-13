@@ -1,21 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Row, Card, Col, Image, Stack, OverlayTrigger, Tooltip } from "react-bootstrap";
-// import deliveredLogo from "../../img/delivered.png";
-// import pickedupLogo from "../../img/drone.png";
-// import engineLogo from "../../img/engine.png";
-// import batteryLogo from "../../img/battery.png";
-// import telecomLogo from "../../img/telecom.png";
-// import droneLogo from "../../img/drone-solo.png";
-// import pilotLogo from "../../img/pilot.png";
-// import cautionLogo from "../../img/caution.png";
 import deliveredLogo from "../../img/delivered.png";
-import pickedupLogo from "../../img/delivered.png";
-import engineLogo from "../../img/delivered.png";
-import batteryLogo from "../../img/delivered.png";
-import telecomLogo from "../../img/delivered.png";
-import droneLogo from "../../img/delivered.png";
-import pilotLogo from "../../img/delivered.png";
-import cautionLogo from "../../img/delivered.png";
+import pickedupLogo from "../../img/drone.png";
+import engineLogo from "../../img/engine.png";
+import batteryLogo from "../../img/battery.png";
+import telecomLogo from "../../img/telecom.png";
+import droneLogo from "../../img/drone-solo.png";
+import pilotLogo from "../../img/pilot.png";
+import cautionLogo from "../../img/caution.png";
 
 import FlightState from "./FlightState";
 
