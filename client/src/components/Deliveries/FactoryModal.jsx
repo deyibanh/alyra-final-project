@@ -3,6 +3,7 @@ import { Button, Col, Form, FormControl, InputGroup, Modal, Row } from "react-bo
 import ConopsArtifact from "../../artifacts/contracts/ConopsManager.sol/ConopsManager.json";
 import FactoryArtifact from "../../artifacts/contracts/DroneFlightFactory.sol/DroneFlightFactory.json";
 import DroneDeliveryArtifact from "../../artifacts/contracts/DroneDelivery.sol/DroneDelivery.json";
+import StarwingsDataLibArtifact from "../../artifacts/contracts/librairies/StarwingsDataLib.sol/StarwingsDataLib.json";
 import { ethers } from "ethers";
 import { buildCreate2Address, numberToUint256 } from "../../utils/create2helper";
 import FlightPlanForm from "./FlightPlanForm";
@@ -82,6 +83,47 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
     };
 
     const submitFlight = async () => {
+        // Prepare flightdata
+        const flightData = {
+            pilot: {
+                index: 0,
+                isDeleted: false,
+                name: "",
+                pilotAddress: "",
+                flightAddresses: [],
+            },
+            drone: {
+                index: 0,
+                isDeleted: false,
+                droneId: "",
+                droneType: "",
+                droneAddress: "",
+                flightAddresses: [],
+            },
+            conopsId: 0,
+            flightDatetime: 0,
+            flightDuration: 0,
+            depart: "",
+            destination: "",
+        };
+
+        // Get Pilot
+        const pilot = await StarwingsMasterSigner.getPilot(state.accounts[0]);
+        flightData.pilot.index = pilot.index;
+        flightData.pilot.isDeleted = pilot.isDeleted;
+        flightData.pilot.name = pilot.name;
+        flightData.pilot.pilotAddress = pilot.pilotAddress;
+        flightData.pilot.flightAddresses = pilot.flightAddresses;
+
+        // Get drone
+        const drone = await StarwingsMasterSigner.getDrone(formData.drone);
+        flightData.drone.index = drone.index;
+        flightData.drone.isDeleted = drone.isDeleted;
+        flightData.drone.droneId = drone.droneId;
+        flightData.drone.droneType = drone.droneType;
+        flightData.drone.droneAddress = drone.droneAddress;
+        flightData.drone.flightAddresses = drone.flightAddresses;
+
         // Build byteCode for factory deploy
         const droneDeliveryIface = new ethers.utils.Interface(DroneDeliveryArtifact.abi);
         const salt = Date.now();
@@ -105,6 +147,7 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
                 formData.deliveryId, // _deliveryId
                 cm, // _conopsManager
                 ac, // _accessControlAddress
+                StarwingsMasterSigner.address,
             ]),
         ]);
 
@@ -121,17 +164,17 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
         // wait for tx to be proceeded, and contract to be created
         await newDroneDeliveryAddr.wait();
 
+        flightData.conopsId = ethers.BigNumber.from(formData.conopsId);
+        flightData.flightDatetime = Date.parse(formData.flightDatetime) / 1000;
+        flightData.flightDuration = ethers.BigNumber.from(formData.flightDuration);
+        flightData.depart = formData.depart;
+        flightData.destination = formData.destination;
+
+        console.log(flightData);
+
         // Now initialize droneDelivery contract with data
-        const tx = await flightFactory.signer.newDroneDelivery(
-            formData.deliveryId,
-            formData.drone,
-            ethers.BigNumber.from(formData.conopsId),
-            Date.parse(formData.flightDatetime) / 1000,
-            ethers.BigNumber.from(formData.flightDuration),
-            formData.depart,
-            formData.destination,
-            computedAddr
-        );
+        let droneDeliverySigner = new ethers.Contract(computedAddr, DroneDeliveryArtifact.abi, state.signer);
+        const tx = await droneDeliverySigner.initDelivery(flightData);
         await tx;
         onHide();
     };

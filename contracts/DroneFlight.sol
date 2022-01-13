@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IConopsManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
+import "hardhat/console.sol";
 
 abstract contract DroneFlight is Ownable {
     using StarwingsDataLib for StarwingsDataLib.FlightData;
@@ -38,7 +39,7 @@ abstract contract DroneFlight is Ownable {
      * @dev Check the msg.sender's role.
      */
     modifier onlyRole(bytes32 _role) {
-        require(accessControl.hasRole(_role, msg.sender), "Access refused");
+        require(accessControl.hasRole(_role, msg.sender), "Not role");
         _;
     }
 
@@ -102,32 +103,19 @@ abstract contract DroneFlight is Ownable {
     {
         conopsManager = IConopsManager(_conopsManager);
         accessControl = IAccessControl(_accessControlAddress);
-        // datas.pilot = data.pilot;
-        // datas.drone = data.drone;
-        // datas.conopsId = data.conopsId;
-        // // datas.droneAddr = data.droneAddr;
-        // // datas.piloteAddr = data.piloteAddr;
-        // // datas.droneType = data.droneType;
-        // // datas.droneId = data.droneId;
-        // datas.depart = data.depart;
-        // datas.destination = data.destination;
-        // datas.flightDuration = data.flightDuration;
-        // datas.flightDatetime = data.flightDatetime;
-        // _setupAirRisk();
     }
 
-    function setFlightData(StarwingsDataLib.FlightData memory data)
-        external
-        onlyRole(StarwingsDataLib.PILOT_ROLE)
-        onlyOwner
-    {
+    function setFlightData(StarwingsDataLib.FlightData memory data) internal {
+        // console.log("[Contract Debug] owner:%s", owner());
+        // console.log("[Contract Debug] sender:%s", msg.sender);
+        // console.log(
+        //     "[Contract Debug] role:%s",
+        //     accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender)
+        // );
         datas.pilot = data.pilot;
         datas.drone = data.drone;
         datas.conopsId = data.conopsId;
-        // datas.droneAddr = data.droneAddr;
-        // datas.piloteAddr = data.piloteAddr;
-        // datas.droneType = data.droneType;
-        // datas.droneId = data.droneId;
+
         datas.depart = data.depart;
         datas.destination = data.destination;
         datas.flightDuration = data.flightDuration;
