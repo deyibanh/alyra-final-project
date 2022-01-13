@@ -2,7 +2,6 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/IAccessControl.sol";
-import "./DroneDelivery.sol";
 import "./interfaces/IStarwingsMaster.sol";
 import "./interfaces/IDeliveryManager.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
@@ -18,9 +17,10 @@ contract DroneFlightFactory {
     IAccessControl private accessControl;
     IStarwingsMaster private starwingsMaster;
     address[] public deployedContracts;
+    event Deployed(address addr, uint256 salt);
 
     modifier onlyRole(bytes32 _role) {
-        require(accessControl.hasRole(_role, msg.sender), "Access refused");
+        require(accessControl.hasRole(_role, msg.sender), "Access Refused");
         _;
     }
 
@@ -35,6 +35,21 @@ contract DroneFlightFactory {
         starwingsMaster = IStarwingsMaster(starwingsMasterAddress);
     }
 
+    function deploy(bytes memory code, uint256 salt)
+        external
+        onlyRole(StarwingsDataLib.PILOT_ROLE)
+    {
+        address addr;
+        assembly {
+            addr := create2(0, add(code, 0x20), mload(code), salt)
+            if iszero(extcodesize(addr)) {
+                revert(0, 0)
+            }
+        }
+
+        emit Deployed(addr, salt);
+    }
+
     function newDroneDelivery(
         string memory _deliveryId,
         address _drone,
@@ -42,53 +57,71 @@ contract DroneFlightFactory {
         uint256 _flightDatetime,
         uint256 _flightDuration,
         string memory _depart,
-        string memory _destination
-    ) external onlyRole(StarwingsDataLib.PILOT_ROLE) returns (address droneDeliveryAddress) {
-        StarwingsDataLib.Pilot memory pilot = starwingsMaster.getPilot(
-            msg.sender
-        );
-        StarwingsDataLib.Drone memory drone = starwingsMaster.getDrone(_drone);
-
-        StarwingsDataLib.FlightData memory flightData = StarwingsDataLib.FlightData(
-            pilot,
-            drone,
-            _conopsId,
-            _flightDatetime,
-            _flightDuration,
-            _depart,
-            _destination
-        );
-
-        droneDeliveryAddress = _newDroneDelivery(_deliveryId, flightData);
-    }
-
-    function _newDroneDelivery(
-        string memory _deliveryId,
-        StarwingsDataLib.FlightData memory flightData
+        string memory _destination,
+        address droneDeliveryAddr
     )
-        internal
+        external
+        onlyRole(StarwingsDataLib.PILOT_ROLE)
         returns (address droneDeliveryAddress)
     {
-        IDeliveryManager deliveryManager = IDeliveryManager(starwingsMaster.getDeliveryManager());
+        StarwingsDataLib.FlightData memory flightData = StarwingsDataLib
+            .FlightData(
+                starwingsMaster.getPilot(msg.sender),
+                starwingsMaster.getDrone(_drone),
+                _conopsId,
+                _flightDatetime,
+                _flightDuration,
+                _depart,
+                _destination
+            );
 
-        DroneDelivery droneDelivery = new DroneDelivery(
-            starwingsMaster.getDeliveryManager(),
-            _deliveryId,
-            starwingsMaster.getConopsManager(),
-            starwingsMaster.getAccessControlAddress(),
-            flightData
+        IDeliveryManager deliveryManager = IDeliveryManager(
+            starwingsMaster.getDeliveryManager()
         );
 
-        droneDeliveryAddress = address(droneDelivery);
-        deployedContracts.push(droneDeliveryAddress);
+        deployedContracts.push(droneDeliveryAddr);
+
         starwingsMaster.addDroneFlight(
-            droneDeliveryAddress,
+            droneDeliveryAddr,
             flightData.pilot.pilotAddress,
             flightData.drone.droneAddress
         );
 
-        deliveryManager.setDeliveryState(_deliveryId, IDeliveryManager.DeliveryState(3));
+        deliveryManager.setDeliveryState(
+            _deliveryId,
+            IDeliveryManager.DeliveryState(3)
+        );
+
+        return address(droneDeliveryAddr);
     }
+
+    // function _newDroneDelivery(
+    //     string memory _deliveryId,
+    //     StarwingsDataLib.FlightData memory flightData
+    // )
+    //     internal
+    //     returns (address droneDeliveryAddress)
+    // {
+    //     IDeliveryManager deliveryManager = IDeliveryManager(starwingsMaster.getDeliveryManager());
+
+    //     DroneDelivery droneDelivery = new DroneDelivery(
+    //         starwingsMaster.getDeliveryManager(),
+    //         _deliveryId,
+    //         starwingsMaster.getConopsManager(),
+    //         starwingsMaster.getAccessControlAddress(),
+    //         flightData
+    //     );
+
+    //     droneDeliveryAddress = address(droneDelivery);
+    //     deployedContracts.push(droneDeliveryAddress);
+    //     starwingsMaster.addDroneFlight(
+    //         droneDeliveryAddress,
+    //         flightData.pilot.pilotAddress,
+    //         flightData.drone.droneAddress
+    //     );
+
+    //     deliveryManager.setDeliveryState(_deliveryId, IDeliveryManager.DeliveryState(3));
+    // }
 
     function getDeployedContracts() external view returns (address[] memory) {
         return deployedContracts;

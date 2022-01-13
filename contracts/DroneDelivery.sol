@@ -15,11 +15,12 @@ contract DroneDelivery is DroneFlight {
     constructor(
         address _deliveryManager,
         string memory _deliveryId,
-        // DroneFlight
         address _conopsManager,
-        address _accessControlAddress,
-        StarwingsDataLib.FlightData memory data
-    ) DroneFlight(_conopsManager, _accessControlAddress, data) {
+        address _accessControlAddress
+    )
+        // StarwingsDataLib.FlightData memory data
+        DroneFlight(_conopsManager, _accessControlAddress)
+    {
         deliveryManager = _deliveryManager;
         deliveryId = _deliveryId;
     }
@@ -76,7 +77,7 @@ contract DroneDelivery is DroneFlight {
             droneParcelDelivered,
             allowedToFlight,
             datas,
-            droneFlightState,  
+            droneFlightState,
             pilotFlightState,
             riskEvent,
             airRisks
