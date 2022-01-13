@@ -104,6 +104,8 @@ async function main() {
     const rolePilot = await SWAccessControl.PILOT_ROLE();
     const roleDrone = await SWAccessControl.DRONE_ROLE();
 
+    console.log("######## Create Sample data");
+
     // Pilot 1
     await StarwingsMaster.addPilot(
         "0x80F528b2d0F010fC1cF85D98a3050b3f6194BD61",
@@ -115,6 +117,8 @@ async function main() {
         "0x80F528b2d0F010fC1cF85D98a3050b3f6194BD61"
     );
 
+    console.log("### Pilot 1 added");
+
     // Pilot 2
     await StarwingsMaster.addPilot(
         "0x9FAB777bb961d2db84e1f4b3D27A165B88aC015f",
@@ -125,6 +129,8 @@ async function main() {
         rolePilot,
         "0x9FAB777bb961d2db84e1f4b3D27A165B88aC015f"
     );
+
+    console.log("### Pilot 2 added");
 
     // Drone 1
     await StarwingsMaster.addDrone(
@@ -138,6 +144,8 @@ async function main() {
         "0x86b6946BE885ba92e1D8BE3d9D3Ce257EeaB8215"
     );
 
+    console.log("### Drone 1 added");
+
     // Drone 2
     await StarwingsMaster.addDrone(
         "0xBfD3358f360143885409b9a3cC84E3831C113D5e",
@@ -149,6 +157,8 @@ async function main() {
         roleDrone,
         "0xBfD3358f360143885409b9a3cC84E3831C113D5e"
     );
+
+    console.log("### Drone 2 added");
 
     // Delivery 1
     await DeliveryManager.newDelivery({
@@ -163,6 +173,8 @@ async function main() {
         toHubId: 300,
     });
 
+    console.log("### Delivery 1 added");
+
     // Delivery 2
     await DeliveryManager.newDelivery({
         deliveryId: "",
@@ -175,6 +187,8 @@ async function main() {
         fromHubId: 100,
         toHubId: 700,
     });
+
+    console.log("### Delivery 2 added");
 
     // Conops 1
     await ConopsManager.addConops(
@@ -191,6 +205,8 @@ async function main() {
         0 // arc
     );
 
+    console.log("### Conops 1 added");
+
     // Conops 1
     await ConopsManager.addConops(
         "Villedieu 7 km", // name
@@ -205,6 +221,10 @@ async function main() {
         4, // grc
         0 // arc
     );
+
+    console.log("### Conops 2 added");
+
+    console.log("########### DONE !");
 }
 
 const storeContractAddresses = (jsonData) => {
