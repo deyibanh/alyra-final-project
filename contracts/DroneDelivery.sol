@@ -2,25 +2,110 @@
 pragma solidity ^0.8.9;
 
 import "./DroneFlight.sol";
+import "./interfaces/IStarwingsMaster.sol";
+import "./interfaces/IDeliveryManager.sol";
+import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
+import "hardhat/console.sol";
 
 contract DroneDelivery is DroneFlight {
-    uint256 private deliveryId;
+    string private deliveryId;
     address private deliveryManager;
+    address private starwingsMaster;
+    bool private droneParcelPickedUp;
+    bool private droneParcelDelivered;
+
+    event ParcelPickedUp();
+    event ParcelDelivered();
 
     constructor(
         address _deliveryManager,
-        uint256 _deliveryId,
-        // DroneFlight
+        string memory _deliveryId,
         address _conopsManager,
         address _accessControlAddress,
-        StarwingsDataLib.FlightData memory data
-    ) DroneFlight(_conopsManager, _accessControlAddress, data) {
-
+        address _starwingsMaster
+    )
+        // StarwingsDataLib.FlightData memory data
+        DroneFlight(_conopsManager, _accessControlAddress)
+    {
+        starwingsMaster = _starwingsMaster;
         deliveryManager = _deliveryManager;
         deliveryId = _deliveryId;
     }
 
-    function getDeliveryId() external view returns (uint256) {
+    function initDelivery(StarwingsDataLib.FlightData memory data)
+        external
+        onlyRole(StarwingsDataLib.PILOT_ROLE)
+    {
+        setFlightData(data);
+
+        IStarwingsMaster(starwingsMaster).addDroneFlight(
+            address(this),
+            data.pilot.pilotAddress,
+            data.drone.droneAddress
+        );
+
+        IDeliveryManager(deliveryManager).setDeliveryState(
+            deliveryId,
+            IDeliveryManager.DeliveryState(3)
+        );
+    }
+
+    function getDeliveryId() external view returns (string memory) {
         return deliveryId;
+    }
+
+    function pickUp() external onlyRole(StarwingsDataLib.DRONE_ROLE) {
+        require(!droneParcelPickedUp, "parcel already pickedUp");
+        droneParcelPickedUp = true;
+        _allowToFlight();
+
+        emit ParcelPickedUp();
+    }
+
+    function deliver() external onlyRole(StarwingsDataLib.DRONE_ROLE) {
+        require(droneParcelPickedUp, "parcel not picked up before");
+        droneParcelDelivered = true;
+
+        emit ParcelDelivered();
+    }
+
+    function isParcelPickedUp() external view returns (bool) {
+        return droneParcelPickedUp;
+    }
+
+    function isParcelDelivered() external view returns (bool) {
+        return droneParcelDelivered;
+    }
+
+    function _customAllowToFlight() internal view override returns (bool) {
+        return droneParcelPickedUp;
+    }
+
+    function flightInfoDisplay()
+        external
+        view
+        returns (
+            string memory,
+            bool,
+            bool,
+            bool,
+            StarwingsDataLib.FlightData memory,
+            FlightState,
+            FlightState,
+            Event[] memory,
+            StarwingsDataLib.AirRisk[] memory
+        )
+    {
+        return (
+            deliveryId,
+            droneParcelPickedUp,
+            droneParcelDelivered,
+            allowedToFlight,
+            datas,
+            droneFlightState,
+            pilotFlightState,
+            riskEvent,
+            airRisks
+        );
     }
 }

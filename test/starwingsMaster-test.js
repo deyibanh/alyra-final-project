@@ -6,6 +6,7 @@ let ConopsManager;
 let DeliveryManager;
 let StarwingsMaster;
 let DroneFlightFactory;
+// eslint-disable-next-line no-unused-vars
 let owner;
 let notAdmin;
 let pilot;

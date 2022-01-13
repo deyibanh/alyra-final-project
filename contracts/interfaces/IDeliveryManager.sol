@@ -6,6 +6,7 @@ interface IDeliveryManager {
         noInfo,
         registered,
         atHub,
+        planned,
         inDelivery,
         arrived,
         delivered

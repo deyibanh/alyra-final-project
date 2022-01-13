@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Col, Nav, Row, Tab } from "react-bootstrap";
-import ConopsContent from "../components/Flights/ConopsContent";
-import PilotsContent from "../components/Flights/PilotsContent";
+import FlightsContent from "../components/Flights/FlightsContent";
 import "./Flights.css";
 
 function Flights(props) {
@@ -14,19 +13,10 @@ function Flights(props) {
             <h1>Flights</h1>
 
             <div className="FlightsMenu">
-                <Tab.Container id="left-tabs-example" defaultActiveKey="conops">
+                <Tab.Container id="left-tabs-example" defaultActiveKey="flights">
                     <Row>
                         <Col sm={3}>
                             <Nav variant="pills" className="flex-column">
-                                <Nav.Item>
-                                    <Nav.Link eventKey="conops">CONOPS</Nav.Link>
-                                </Nav.Item>
-                                <Nav.Item>
-                                    <Nav.Link eventKey="pilots">Pilots</Nav.Link>
-                                </Nav.Item>
-                                <Nav.Item>
-                                    <Nav.Link eventKey="drones">Drones</Nav.Link>
-                                </Nav.Item>
                                 <Nav.Item>
                                     <Nav.Link eventKey="flights">Flights</Nav.Link>
                                 </Nav.Item>
@@ -34,21 +24,8 @@ function Flights(props) {
                         </Col>
                         <Col sm={9}>
                             <Tab.Content>
-                                <Tab.Pane eventKey="conops">
-                                    <ConopsContent state={state} />
-                                </Tab.Pane>
-                                <Tab.Pane eventKey="pilots">
-                                    <PilotsContent
-                                        state={state}
-                                        StarwingsMasterProvider={StarwingsMasterProvider}
-                                        StarwingsMasterSigner={StarwingsMasterSigner}
-                                    ></PilotsContent>
-                                </Tab.Pane>
-                                <Tab.Pane eventKey="drones">
-                                    <div>There is no drones yet.</div>
-                                </Tab.Pane>
                                 <Tab.Pane eventKey="flights">
-                                    <div>There is no flights yet.</div>
+                                    <FlightsContent state={state} />
                                 </Tab.Pane>
                             </Tab.Content>
                         </Col>

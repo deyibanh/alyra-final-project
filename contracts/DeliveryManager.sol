@@ -62,6 +62,7 @@ contract DeliveryManager is IDeliveryManager {
         _delivery.deliveryId = uint256(
             keccak256(
                 abi.encodePacked(
+                    blockhash(block.number - 1),
                     block.timestamp,
                     _delivery.fromAddr,
                     _delivery.toAddr,
@@ -73,10 +74,10 @@ contract DeliveryManager is IDeliveryManager {
         deliveries.push(_delivery);
         deliveriesIndex[_delivery.deliveryId] = deliveries.length - 1;
 
-        console.log("[Contract Debug] DeliveryId:%s", _delivery.deliveryId);
-        console.log("[Contract Debug] OrderId:%s", _delivery.supplierOrderId);
-        console.log("[Contract Debug] toAddr:%s", _delivery.toAddr);
-        console.log("[Contract Debug] fromAddr:%s", _delivery.fromAddr);
+        // console.log("[Contract Debug] DeliveryId:%s", _delivery.deliveryId);
+        // console.log("[Contract Debug] OrderId:%s", _delivery.supplierOrderId);
+        // console.log("[Contract Debug] toAddr:%s", _delivery.toAddr);
+        // console.log("[Contract Debug] fromAddr:%s", _delivery.fromAddr);
 
         emit DeliveryCreated(_delivery.deliveryId);
 
@@ -92,7 +93,7 @@ contract DeliveryManager is IDeliveryManager {
         view
         returns (Delivery memory)
     {
-        console.log("[Contract Debug] get DeliveryId:%s", _deliveryId);
+        //console.log("[Contract Debug] get DeliveryId:%s", _deliveryId);
 
         uint256 tabIndex = deliveriesIndex[_deliveryId];
 
@@ -102,10 +103,10 @@ contract DeliveryManager is IDeliveryManager {
             "Delivery does not exist"
         );
 
-        console.log(
-            "[Contract Debug] get toAddr:%s",
-            deliveries[tabIndex].toAddr
-        );
+        // console.log(
+        //     "[Contract Debug] get toAddr:%s",
+        //     deliveries[tabIndex].toAddr
+        // );
 
         return deliveries[tabIndex];
     }

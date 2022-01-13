@@ -16,28 +16,8 @@ import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
  * @notice This contract manages drone flights creation from CONOPS.
  */
 contract StarwingsMaster is IStarwingsMaster {
-    /**
-     * @dev Pilot struct.
-     */
-    struct Pilot {
-        uint index;
-        bool isDeleted;
-        string name;
-        address pilotAddress;
-        address[] flightAddresses;
-    }
-
-    /**
-     * @dev Drone struct.
-     */
-    struct Drone {
-        uint index;
-        bool isDeleted;
-        string droneId;
-        string droneType;
-        address droneAddress;
-        address[] flightAddresses;
-    }
+    using StarwingsDataLib for StarwingsDataLib.Pilot;
+    using StarwingsDataLib for StarwingsDataLib.Drone;
 
     /**
      * @dev The DroneFlightFactory address.
@@ -52,22 +32,22 @@ contract StarwingsMaster is IStarwingsMaster {
     /**
      * @dev A list of Pilot.
      */
-    Pilot[] private pilotList;
+    StarwingsDataLib.Pilot[] private pilotList;
 
     /**
      * @dev A list of Drone.
      */
-    Drone[] private droneList;
+    StarwingsDataLib.Drone[] private droneList;
 
     /**
      * @dev A map of a pilot address and an index of the pilot list.
      */
-    mapping(address => uint) private pilotIndexMap;
+    mapping(address => uint256) private pilotIndexMap;
 
     /**
      * @dev A map of a drone address and an index of the drone list.
      */
-    mapping(address => uint) private droneIndexMap;
+    mapping(address => uint256) private droneIndexMap;
 
     /**
      * @dev The IAccessControl contract.
@@ -158,8 +138,13 @@ contract StarwingsMaster is IStarwingsMaster {
      */
     function setDroneFlightFactoryAddress(address _droneFlightFactoryAddress)
         external
-        onlyRole(StarwingsDataLib.ADMIN_ROLE)
     {
+        require(
+            accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender) ||
+                accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender),
+            "Access refused"
+        );
+
         droneFlightFactoryAddress = _droneFlightFactoryAddress;
     }
 
@@ -171,9 +156,14 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneFlightAddressList()
         external
         view
-        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address[] memory)
     {
+        require(
+            accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender) ||
+                accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender),
+            "Access refused"
+        );
+
         return droneFlightAddressList;
     }
 
@@ -198,7 +188,12 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @return A list of Pilot.
      */
-    function getPilotList() external view onlyRole(StarwingsDataLib.ADMIN_ROLE) returns (Pilot[] memory) {
+    function getPilotList()
+        external
+        view
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
+        returns (StarwingsDataLib.Pilot[] memory)
+    {
         return pilotList;
     }
 
@@ -212,14 +207,22 @@ contract StarwingsMaster is IStarwingsMaster {
     function getPilot(address _pilotAddress)
         external
         view
-        onlyRole(StarwingsDataLib.ADMIN_ROLE)
-        returns (Pilot memory)
+        returns (StarwingsDataLib.Pilot memory)
     {
-        uint pilotIndex = pilotIndexMap[_pilotAddress];
+        require(
+            msg.sender == droneFlightFactoryAddress ||
+                accessControl.hasRole(
+                    StarwingsDataLib.ADMIN_ROLE,
+                    msg.sender
+                ) ||
+                (_pilotAddress == msg.sender),
+            "Access refused"
+        );
+        uint256 pilotIndex = pilotIndexMap[_pilotAddress];
         require(pilotIndex < pilotList.length, "Out of size index.");
         require(
             pilotList[pilotIndex].pilotAddress != address(0) &&
-            pilotList[pilotIndex].pilotAddress == _pilotAddress,
+                pilotList[pilotIndex].pilotAddress == _pilotAddress,
             "Pilot not found."
         );
 
@@ -240,16 +243,19 @@ contract StarwingsMaster is IStarwingsMaster {
     {
         require(_pilotAddress != address(0), "Can not add this address.");
 
-        Pilot memory pilot;
-        uint pilotIndex = pilotIndexMap[_pilotAddress];
+        StarwingsDataLib.Pilot memory pilot;
+        uint256 pilotIndex = pilotIndexMap[_pilotAddress];
 
-        if (pilotList.length > pilotIndex && pilotList[pilotIndex].pilotAddress == _pilotAddress) {
+        if (
+            pilotList.length > pilotIndex &&
+            pilotList[pilotIndex].pilotAddress == _pilotAddress
+        ) {
             pilot = pilotList[pilotIndex];
         }
-        
+
         require(
             (pilotIndex == 0 && pilot.pilotAddress == address(0)) ||
-            pilot.isDeleted,
+                pilot.isDeleted,
             "Pilot already added."
         );
 
@@ -259,13 +265,13 @@ contract StarwingsMaster is IStarwingsMaster {
         if (pilotIndex == 0 && pilot.pilotAddress == address(0)) {
             pilot.pilotAddress = _pilotAddress;
             pilotList.push(pilot);
-            uint newPilotIndex = pilotList.length - 1;
+            uint256 newPilotIndex = pilotList.length - 1;
             pilotList[newPilotIndex].index = newPilotIndex;
             pilotIndexMap[_pilotAddress] = newPilotIndex;
         } else {
             pilotList[pilotIndex] = pilot;
         }
-        
+
         emit PilotAdded(_pilotAddress);
     }
 
@@ -274,12 +280,15 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @param _pilotAddress The pilot address.
      */
-    function deletePilot(address _pilotAddress) external onlyRole(StarwingsDataLib.ADMIN_ROLE) {
-        uint pilotIndex = pilotIndexMap[_pilotAddress];
+    function deletePilot(address _pilotAddress)
+        external
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
+    {
+        uint256 pilotIndex = pilotIndexMap[_pilotAddress];
         require(pilotIndex < pilotList.length, "Out of size index.");
         require(
             pilotList[pilotIndex].pilotAddress != address(0) &&
-            pilotList[pilotIndex].pilotAddress == _pilotAddress,
+                pilotList[pilotIndex].pilotAddress == _pilotAddress,
             "Pilot not found."
         );
 
@@ -295,7 +304,12 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @return The index of a pilot.
      */
-    function getPilotIndex(address _pilotAddress) external view onlyRole(StarwingsDataLib.ADMIN_ROLE) returns (uint) {
+    function getPilotIndex(address _pilotAddress)
+        external
+        view
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
+        returns (uint256)
+    {
         return pilotIndexMap[_pilotAddress];
     }
 
@@ -304,7 +318,16 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @return A list of Drone.
      */
-    function getDroneList() external view onlyRole(StarwingsDataLib.ADMIN_ROLE) returns (Drone[] memory) {
+    function getDroneList()
+        external
+        view
+        returns (StarwingsDataLib.Drone[] memory)
+    {
+        require(
+            accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender) ||
+                accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender),
+            "Access refused"
+        );
         return droneList;
     }
 
@@ -318,14 +341,22 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDrone(address _droneAddress)
         external
         view
-        onlyRole(StarwingsDataLib.ADMIN_ROLE)
-        returns (Drone memory)
+        returns (StarwingsDataLib.Drone memory)
     {
-        uint droneIndex = droneIndexMap[_droneAddress];
+        require(
+            msg.sender == droneFlightFactoryAddress ||
+                accessControl.hasRole(
+                    StarwingsDataLib.ADMIN_ROLE,
+                    msg.sender
+                ) ||
+                accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender),
+            "Access refused"
+        );
+        uint256 droneIndex = droneIndexMap[_droneAddress];
         require(droneIndex < droneList.length, "Out of size index.");
         require(
             droneList[droneIndex].droneAddress != address(0) &&
-            droneList[droneIndex].droneAddress == _droneAddress,
+                droneList[droneIndex].droneAddress == _droneAddress,
             "Drone not found."
         );
 
@@ -341,22 +372,26 @@ contract StarwingsMaster is IStarwingsMaster {
      * @param _droneId The drone id.
      * @param _droneType The drone type.
      */
-    function addDrone(address _droneAddress, string memory _droneId, string memory _droneType)
-        external
-        onlyRole(StarwingsDataLib.ADMIN_ROLE)
-    {
+    function addDrone(
+        address _droneAddress,
+        string memory _droneId,
+        string memory _droneType
+    ) external onlyRole(StarwingsDataLib.ADMIN_ROLE) {
         require(_droneAddress != address(0), "Can not add this address.");
 
-        Drone memory drone;
-        uint droneIndex = droneIndexMap[_droneAddress];
+        StarwingsDataLib.Drone memory drone;
+        uint256 droneIndex = droneIndexMap[_droneAddress];
 
-        if (droneList.length > droneIndex && droneList[droneIndex].droneAddress == _droneAddress) {
+        if (
+            droneList.length > droneIndex &&
+            droneList[droneIndex].droneAddress == _droneAddress
+        ) {
             drone = droneList[droneIndex];
         }
-        
+
         require(
             (droneIndex == 0 && drone.droneAddress == address(0)) ||
-            drone.isDeleted,
+                drone.isDeleted,
             "Drone already added."
         );
 
@@ -367,13 +402,13 @@ contract StarwingsMaster is IStarwingsMaster {
         if (droneIndex == 0 && drone.droneAddress == address(0)) {
             drone.droneAddress = _droneAddress;
             droneList.push(drone);
-            uint newDroneIndex = droneList.length - 1;
+            uint256 newDroneIndex = droneList.length - 1;
             droneList[newDroneIndex].index = newDroneIndex;
             droneIndexMap[_droneAddress] = newDroneIndex;
         } else {
             droneList[droneIndex] = drone;
         }
-        
+
         emit DroneAdded(_droneAddress);
     }
 
@@ -382,13 +417,17 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @param _droneAddress The drone address.
      */
-    function deleteDrone(address _droneAddress) external onlyRole(StarwingsDataLib.ADMIN_ROLE) {
-        uint droneIndex = droneIndexMap[_droneAddress];
+    function deleteDrone(address _droneAddress)
+        external
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
+    {
+        uint256 droneIndex = droneIndexMap[_droneAddress];
         require(droneIndex < droneList.length, "Out of size index.");
         require(
             droneList[droneIndex].droneAddress != address(0) &&
-            droneList[droneIndex].droneAddress == _droneAddress,
-            "Drone not found.");
+                droneList[droneIndex].droneAddress == _droneAddress,
+            "Drone not found."
+        );
 
         droneList[droneIndex].isDeleted = true;
 
@@ -402,7 +441,12 @@ contract StarwingsMaster is IStarwingsMaster {
      *
      * @return The index of a drone.
      */
-    function getDroneIndex(address _droneAddress) external view onlyRole(StarwingsDataLib.ADMIN_ROLE) returns (uint) {
+    function getDroneIndex(address _droneAddress)
+        external
+        view
+        onlyRole(StarwingsDataLib.ADMIN_ROLE)
+        returns (uint256)
+    {
         return droneIndexMap[_droneAddress];
     }
 
@@ -447,19 +491,19 @@ contract StarwingsMaster is IStarwingsMaster {
         address _pilotAddress,
         address _droneAddress
     ) external {
-        require(msg.sender == droneFlightFactoryAddress, "not allowed");
-        uint pilotIndex = pilotIndexMap[_pilotAddress];
+        //require(msg.sender == droneFlightFactoryAddress, "not allowed");
+        uint256 pilotIndex = pilotIndexMap[_pilotAddress];
         require(pilotIndex < pilotList.length, "Out of size index.");
         require(
             pilotList[pilotIndex].pilotAddress != address(0) &&
-            pilotList[pilotIndex].pilotAddress == _pilotAddress,
+                pilotList[pilotIndex].pilotAddress == _pilotAddress,
             "Pilot not found."
         );
-        uint droneIndex = droneIndexMap[_droneAddress];
+        uint256 droneIndex = droneIndexMap[_droneAddress];
         require(droneIndex < droneList.length, "Out of size index.");
         require(
             droneList[droneIndex].droneAddress != address(0) &&
-            droneList[droneIndex].droneAddress == _droneAddress,
+                droneList[droneIndex].droneAddress == _droneAddress,
             "Drone not found."
         );
 

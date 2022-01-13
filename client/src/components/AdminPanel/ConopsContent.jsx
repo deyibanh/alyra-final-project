@@ -6,7 +6,9 @@ import ConopsForm from "./ConopsForm";
 import ConopsCard from "./ConopsCard";
 import ConopsDetail from "./ConopsDetail";
 
-const ConopsManagerAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const contractAddresses = require("../../contractAddresses.json");
+
+const ConopsManagerAddress = contractAddresses.ConopsManager;
 
 const formReducer = (state, event) => {
     if (event.type === "reset") {
@@ -38,7 +40,10 @@ function ConopsContent({ state }) {
     }, [state]);
 
     useEffect(() => {
-        if (conopsManager.provider) {
+        if (conopsManager.signer) {
+            conopsManager.provider.on("ConopsCreated", (conopsId, name) => {
+                getConops();
+            });
             getConops();
         }
     }, [conopsManager]);
@@ -54,9 +59,9 @@ function ConopsContent({ state }) {
 
     const getConops = async () => {
         try {
-            const conopsList = await conopsManager.provider.viewAllConops();
+            console.log(conopsManager.signer);
+            const conopsList = await conopsManager.signer.viewAllConops();
             setConops(conopsList);
-            console.log(conopsList);
         } catch (error) {
             console.error(error);
         }
