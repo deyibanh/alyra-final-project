@@ -2,10 +2,15 @@
 pragma solidity ^0.8.9;
 
 import "./DroneFlight.sol";
+import "./interfaces/IStarwingsMaster.sol";
+import "./interfaces/IDeliveryManager.sol";
+import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
+import "hardhat/console.sol";
 
 contract DroneDelivery is DroneFlight {
     string private deliveryId;
     address private deliveryManager;
+    address private starwingsMaster;
     bool private droneParcelPickedUp;
     bool private droneParcelDelivered;
 
@@ -16,13 +21,33 @@ contract DroneDelivery is DroneFlight {
         address _deliveryManager,
         string memory _deliveryId,
         address _conopsManager,
-        address _accessControlAddress
+        address _accessControlAddress,
+        address _starwingsMaster
     )
         // StarwingsDataLib.FlightData memory data
         DroneFlight(_conopsManager, _accessControlAddress)
     {
+        starwingsMaster = _starwingsMaster;
         deliveryManager = _deliveryManager;
         deliveryId = _deliveryId;
+    }
+
+    function initDelivery(StarwingsDataLib.FlightData memory data)
+        external
+        onlyRole(StarwingsDataLib.PILOT_ROLE)
+    {
+        setFlightData(data);
+
+        IStarwingsMaster(starwingsMaster).addDroneFlight(
+            address(this),
+            data.pilot.pilotAddress,
+            data.drone.droneAddress
+        );
+
+        IDeliveryManager(deliveryManager).setDeliveryState(
+            deliveryId,
+            IDeliveryManager.DeliveryState(3)
+        );
     }
 
     function getDeliveryId() external view returns (string memory) {

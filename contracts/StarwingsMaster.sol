@@ -483,7 +483,7 @@ contract StarwingsMaster is IStarwingsMaster {
         address _pilotAddress,
         address _droneAddress
     ) external {
-        require(msg.sender == droneFlightFactoryAddress, "not allowed");
+        //require(msg.sender == droneFlightFactoryAddress, "not allowed");
         uint256 pilotIndex = pilotIndexMap[_pilotAddress];
         require(pilotIndex < pilotList.length, "Out of size index.");
         require(
