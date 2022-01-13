@@ -138,8 +138,13 @@ contract StarwingsMaster is IStarwingsMaster {
      */
     function setDroneFlightFactoryAddress(address _droneFlightFactoryAddress)
         external
-        onlyRole(StarwingsDataLib.ADMIN_ROLE)
     {
+        require(
+            accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender) ||
+                accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender),
+            "Access refused"
+        );
+
         droneFlightFactoryAddress = _droneFlightFactoryAddress;
     }
 
@@ -151,9 +156,14 @@ contract StarwingsMaster is IStarwingsMaster {
     function getDroneFlightAddressList()
         external
         view
-        onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address[] memory)
     {
+        require(
+            accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender) ||
+                accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender),
+            "Access refused"
+        );
+
         return droneFlightAddressList;
     }
 

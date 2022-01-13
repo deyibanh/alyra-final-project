@@ -82,19 +82,19 @@ async function main() {
     /**
      * Test actors *
      *
-     * Admin   : 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (Acct0)
-     * Pilot 1 : 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (Acct1)
-     * Pilot 2 : 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc (Acct2)
-     * Drone 1 : 0x90f79bf6eb2c4f870365e785982e1f101e93b906 (Acct3)
-     * Drone 2 : 0x15d34aaf54267db7d7c367839aaf71a00a2c6a65 (Acct4)
+     * Admin   : 0x74b890e6ADbBF8770904aA4d258760a755b43FE6 (0)
+     * Pilot 1 : 0x80F528b2d0F010fC1cF85D98a3050b3f6194BD61 (2)
+     * Pilot 2 : 0x9FAB777bb961d2db84e1f4b3D27A165B88aC015f (3)
+     * Drone 1 : 0x86b6946BE885ba92e1D8BE3d9D3Ce257EeaB8215 (4)
+     * Drone 2 : 0xBfD3358f360143885409b9a3cC84E3831C113D5e (5)
      *
      * Deliveries *
      *
-     * From : Pharmacie Le Tertre (0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc) (Acct5)
-     * To : Francois Brobeck (0x976ea74026e726554db657fa54763abd0c3a0aa9) (Acct6)
+     * From : Pharmacie Le Tertre (0x96aA1dEc85E3F454FC1F9A196faB2AC33b554f9B) (8)
+     * To : Francois Brobeck (0x2042f92fc8B323E0F3FC05173ec96269475f819e) (6)
      *
-     * From : Pharmacie Le Tertre (0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc) (Acct5)
-     * To : Jean-Philippe BONHOMME (0x14dc79964da2c08b23698b3d3cc7ca32193d9955) (Acct7)
+     * From : Pharmacie Le Tertre (0x96aA1dEc85E3F454FC1F9A196faB2AC33b554f9B) (8)
+     * To : Jean-Philippe BONHOMME (0x7169D3cBb875e97Ad8966402A3b1af7Dc8f4F57f) (7)
      *
      * Conops *
      *
@@ -106,48 +106,48 @@ async function main() {
 
     // Pilot 1
     await StarwingsMaster.addPilot(
-        "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+        "0x80F528b2d0F010fC1cF85D98a3050b3f6194BD61",
         "Joanna"
     );
 
     await SWAccessControl.grantRole(
         rolePilot,
-        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+        "0x80F528b2d0F010fC1cF85D98a3050b3f6194BD61"
     );
 
     // Pilot 2
     await StarwingsMaster.addPilot(
-        "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+        "0x9FAB777bb961d2db84e1f4b3D27A165B88aC015f",
         "Florian"
     );
 
     await SWAccessControl.grantRole(
         rolePilot,
-        "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"
+        "0x9FAB777bb961d2db84e1f4b3D27A165B88aC015f"
     );
 
     // Drone 1
     await StarwingsMaster.addDrone(
-        "0x90f79bf6eb2c4f870365e785982e1f101e93b906",
+        "0x86b6946BE885ba92e1D8BE3d9D3Ce257EeaB8215",
         "UAS-FR-239271",
         "DJI Matrice 600 Pro"
     );
 
     await SWAccessControl.grantRole(
         roleDrone,
-        "0x90f79bf6eb2c4f870365e785982e1f101e93b906"
+        "0x86b6946BE885ba92e1D8BE3d9D3Ce257EeaB8215"
     );
 
     // Drone 2
     await StarwingsMaster.addDrone(
-        "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
+        "0xBfD3358f360143885409b9a3cC84E3831C113D5e",
         "UAS-FR-170981",
         "Vertix"
     );
 
     await SWAccessControl.grantRole(
         roleDrone,
-        "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65"
+        "0xBfD3358f360143885409b9a3cC84E3831C113D5e"
     );
 
     // Delivery 1
@@ -156,9 +156,9 @@ async function main() {
         supplierOrderId: "O798325",
         state: 0,
         from: "Pharmacie Le Tertre",
-        fromAddr: "0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc",
+        fromAddr: "0x96aA1dEc85E3F454FC1F9A196faB2AC33b554f9B",
         to: "Francois Brobeck",
-        toAddr: "0x976ea74026e726554db657fa54763abd0c3a0aa9",
+        toAddr: "0x2042f92fc8B323E0F3FC05173ec96269475f819e",
         fromHubId: 100,
         toHubId: 300,
     });
@@ -169,9 +169,9 @@ async function main() {
         supplierOrderId: "O312607",
         state: 0,
         from: "Pharmacie Le Tertre",
-        fromAddr: "0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc",
+        fromAddr: "0x96aA1dEc85E3F454FC1F9A196faB2AC33b554f9B",
         to: "Jean-Philippe BONHOMME",
-        toAddr: "0x14dc79964da2c08b23698b3d3cc7ca32193d9955",
+        toAddr: "0x7169D3cBb875e97Ad8966402A3b1af7Dc8f4F57f",
         fromHubId: 100,
         toHubId: 700,
     });

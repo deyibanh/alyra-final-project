@@ -1,11 +1,12 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.9;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IConopsManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
-abstract contract DroneFlight {
+abstract contract DroneFlight is Ownable {
     using StarwingsDataLib for StarwingsDataLib.FlightData;
 
     // 1. State variables
@@ -96,13 +97,30 @@ abstract contract DroneFlight {
     }
 
     // 5. Constructor
-    constructor(
-        address _conopsManager,
-        address _accessControlAddress,
-        StarwingsDataLib.FlightData memory data
-    ) {
+    constructor(address _conopsManager, address _accessControlAddress)
+    //StarwingsDataLib.FlightData memory data
+    {
         conopsManager = IConopsManager(_conopsManager);
         accessControl = IAccessControl(_accessControlAddress);
+        // datas.pilot = data.pilot;
+        // datas.drone = data.drone;
+        // datas.conopsId = data.conopsId;
+        // // datas.droneAddr = data.droneAddr;
+        // // datas.piloteAddr = data.piloteAddr;
+        // // datas.droneType = data.droneType;
+        // // datas.droneId = data.droneId;
+        // datas.depart = data.depart;
+        // datas.destination = data.destination;
+        // datas.flightDuration = data.flightDuration;
+        // datas.flightDatetime = data.flightDatetime;
+        // _setupAirRisk();
+    }
+
+    function setFlightData(StarwingsDataLib.FlightData memory data)
+        external
+        onlyRole(StarwingsDataLib.PILOT_ROLE)
+        onlyOwner
+    {
         datas.pilot = data.pilot;
         datas.drone = data.drone;
         datas.conopsId = data.conopsId;

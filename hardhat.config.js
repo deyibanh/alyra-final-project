@@ -4,6 +4,7 @@ require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
+require("hardhat-contract-sizer");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -38,39 +39,55 @@ module.exports = {
         },
         ropsten: {
             url: process.env.INFURA_ROPSTEN_URL || "",
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [process.env.PRIVATE_KEY]
-                    : [],
+            accounts: {
+                mnemonic:
+                    process.env.MNEMONIC !== undefined
+                        ? process.env.MNEMONIC
+                        : "",
+            },
         },
         fantom_testnet: {
             url: process.env.FANTOM_TESTNET_URL || "",
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [process.env.PRIVATE_KEY]
-                    : [],
+            accounts: {
+                mnemonic:
+                    process.env.MNEMONIC !== undefined
+                        ? process.env.MNEMONIC
+                        : "",
+            },
         },
         arbitrum_testnet: {
             url: process.env.ARBITRUM_TESTNET_URL || "",
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [process.env.PRIVATE_KEY]
-                    : [],
+            accounts: {
+                mnemonic:
+                    process.env.MNEMONIC !== undefined
+                        ? process.env.MNEMONIC
+                        : "",
+            },
         },
         polygon_testnet: {
             url: process.env.POLYGON_TESTNET_URL || "",
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [process.env.PRIVATE_KEY]
-                    : [],
+            accounts: {
+                mnemonic:
+                    process.env.MNEMONIC !== undefined
+                        ? process.env.MNEMONIC
+                        : "",
+            },
         },
         optimism_testnet: {
             url: process.env.OPTIMISM_TESTNET_URL || "",
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [process.env.PRIVATE_KEY]
-                    : [],
+            accounts: {
+                mnemonic:
+                    process.env.MNEMONIC !== undefined
+                        ? process.env.MNEMONIC
+                        : "",
+            },
         },
+    },
+    contractSizer: {
+        alphaSort: true,
+        disambiguatePaths: false,
+        runOnCompile: true,
+        strict: true,
     },
     settings: {
         optimizer: {

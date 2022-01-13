@@ -1,3 +1,4 @@
+/* eslint-disable no-unreachable */
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
@@ -28,6 +29,7 @@ const droneFlightDataSample = {
     flightDuration: 10,
     depart: "Earth",
     destination: "Moon",
+    droneDeliveryAddr: "",
 };
 
 const deliverySample = {
@@ -41,6 +43,8 @@ const deliverySample = {
     fromHubId: "007",
     toHubId: "0056",
 };
+
+let droneDeliveryFactory;
 
 const deploy = async () => {
     [owner, pilot, drone] = await ethers.getSigners();
@@ -109,6 +113,8 @@ const deploy = async () => {
         pilotSample._pilotName
     );
 
+    droneDeliveryFactory = await ethers.getContractFactory("DroneDelivery");
+
     return [factory, accessControl];
 };
 
@@ -119,11 +125,26 @@ describe("DroneFlightFactory", function () {
 
     it("Should revert due to caller not pilot", async () => {
         expect((await factory.getDeployedContracts()).length).to.equal(0);
-        await expect(
-            factory
-                .connect(owner)
-                .newDroneDelivery(0, ...Object.values(droneFlightDataSample))
-        ).to.be.revertedWith("Access refused");
+
+        // Magics happens
+        const salt = 1;
+        const bytecode = ethers.utils.arrayify(
+            ethers.utils.hexConcat([
+                droneDeliveryFactory.bytecode,
+                droneDeliveryFactory.interface.encodeDeploy([
+                    delivery.address,
+                    "TEST",
+                    conops.address,
+                    accessControl.address,
+                ]),
+            ])
+        );
+
+        const result = factory.connect(owner).deploy(bytecode, salt, {
+            gasLimit: 9000000,
+        });
+
+        await expect(result).to.be.revertedWith("Access Refused");
     });
 
     it("Should deploy 2 new DroneDelivery contract", async () => {
@@ -131,6 +152,36 @@ describe("DroneFlightFactory", function () {
         await delivery.newDelivery(deliverySample);
         const deliveries = await delivery.getAllDeliveries();
         expect((await factory.getDeployedContracts()).length).to.equal(0);
+
+        // Magics happens
+        const salt = 1;
+        const bytecode = ethers.utils.arrayify(
+            ethers.utils.hexConcat([
+                droneDeliveryFactory.bytecode,
+                droneDeliveryFactory.interface.encodeDeploy([
+                    delivery.address,
+                    deliveries[0].deliveryId,
+                    conops.address,
+                    accessControl.address,
+                ]),
+            ])
+        );
+
+        // Create droneDelivery instance
+        const result = await factory.connect(pilot).deploy(bytecode, salt, {
+            gasLimit: 9000000,
+        });
+
+        // Get event values
+        const temp = await result.wait();
+        const deliveryAddr = temp.events?.filter((x) => {
+            return x.event === "Deployed";
+        })[0].args.addr;
+
+        console.log(`Delivery created ${deliveryAddr}`);
+
+        droneFlightDataSample.droneDeliveryAddr = deliveryAddr;
+
         const addDroneDeliveryTx = await factory
             .connect(pilot)
             .newDroneDelivery(
@@ -140,8 +191,14 @@ describe("DroneFlightFactory", function () {
 
         await addDroneDeliveryTx.wait();
 
+        console.log(
+            `Deployed contracts = ${await factory.getDeployedContracts()}`
+        );
+
         expect((await factory.getDeployedContracts()).length).to.equal(1);
         expect(await factory.deployedContracts(0)).to.not.equal(0);
+
+        return;
 
         const addDroneDeliveryTx2 = await factory
             .connect(pilot)
