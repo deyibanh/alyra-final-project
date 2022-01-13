@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Row, Card, Col, Image, Stack, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Row, Card, Col, Image, Stack, OverlayTrigger, Tooltip, Popover, ListGroup, Button } from "react-bootstrap";
 import deliveredLogo from "../../img/delivered.png";
 import pickedupLogo from "../../img/drone.png";
 import engineLogo from "../../img/engine.png";
@@ -11,6 +11,12 @@ import cautionLogo from "../../img/caution.png";
 
 import FlightState from "./FlightState";
 
+const airRiskType = {
+    0: "Aerodrome",
+    1: "CHU",
+    2: "Military Base",
+};
+
 function FlightCard({ flight, changeVisibility, id }) {
     const [flightInfo, setFlightInfo] = useState();
 
@@ -18,7 +24,6 @@ function FlightCard({ flight, changeVisibility, id }) {
         <Card>
             <Card.Body>
                 <Card.Title className="text-start d-flex align-items-center">
-                    {/* <Row> */}
                     <Col sm={3}>
                         <Stack gap={2} direction="horizontal">
                             {flight[2] ? (
@@ -57,8 +62,8 @@ function FlightCard({ flight, changeVisibility, id }) {
                                 <OverlayTrigger
                                     overlay={
                                         <Tooltip>
-                                            {flight[7].map((r) => (
-                                                <h6 key={e}>r.dateTime - r.risk</h6>
+                                            {flight[7].map((r, i) => (
+                                                <h6 key={i}>r.dateTime - r.risk</h6>
                                             ))}
                                         </Tooltip>
                                     }
@@ -69,9 +74,41 @@ function FlightCard({ flight, changeVisibility, id }) {
                                 //     <Image src={cautionLogo} alt="" fluid style={{ height: "1.2rem" }} />
                                 // </OverlayTrigger>
                             )}
+                            {flight[8].length > 0 && (
+                                <OverlayTrigger
+                                    overlay={
+                                        <Popover id="popover-basic">
+                                            <Popover.Header as="h6">Air risks</Popover.Header>
+                                            <Popover.Body>
+                                                <ListGroup variant="flush">
+                                                    {flight[8].map((r, i) => (
+                                                        <ListGroup.Item key={i}>
+                                                            {r.validated ? "✔" : "❌"} {r.name} -{" "}
+                                                            {airRiskType[r.riskType]}
+                                                        </ListGroup.Item>
+                                                    ))}
+                                                </ListGroup>
+                                            </Popover.Body>
+                                        </Popover>
+                                        // <Tooltip>
+                                        //     {flight[8].map((r, i) => (
+                                        //         <h6 key={i}>
+                                        //             {r.name} - {airRiskType[r.riskType]} - {r.validated ? "✔" : "❌"}
+                                        //         </h6>
+                                        //     ))}
+                                        // </Tooltip>
+                                    }
+                                >
+                                    <Button variant="outline-primary" size="sm">
+                                        Air Risk
+                                    </Button>
+                                </OverlayTrigger>
+                                // <OverlayTrigger overlay={<Tooltip>dqs</Tooltip>}>
+                                //     <Image src={cautionLogo} alt="" fluid style={{ height: "1.2rem" }} />
+                                // </OverlayTrigger>
+                            )}
                         </Stack>
                     </Col>
-                    {/* </Row> */}
                 </Card.Title>
                 <hr />
                 <Card.Text>
