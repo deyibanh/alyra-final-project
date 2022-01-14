@@ -7,8 +7,8 @@ import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 import "hardhat/console.sol";
 
 /**
- *   @title Conops
- *   @author Damien
+ *  @title Conops
+ *  @author Damien
  *  @notice This contract manage all the conops. Admins can add a simple Conop^s and enable/disable it
  */
 contract ConopsManager is IConopsManager {

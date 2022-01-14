@@ -112,7 +112,9 @@ contract DroneFlightFactory {
 
     //     deliveryManager.setDeliveryState(_deliveryId, IDeliveryManager.DeliveryState(3));
     // }
-
+    /**
+     *  @notice Return all deployed contrats addresses
+     */
     function getDeployedContracts() external view returns (address[] memory) {
         return deployedContracts;
     }

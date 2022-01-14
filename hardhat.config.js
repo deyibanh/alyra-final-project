@@ -4,6 +4,7 @@ require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
+require("hardhat-docgen");
 // require("hardhat-contract-sizer");
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -99,7 +100,12 @@ module.exports = {
         enabled: process.env.REPORT_GAS !== undefined,
         currency: "USD",
     },
-    // etherscan: {
-    //     apiKey: process.env.ETHERSCAN_API_KEY,
-    // },
+    etherscan: {
+        apiKey: process.env.OPTIMISM_API_KEY,
+    },
+    docgen: {
+        path: "./docs/natspec",
+        clear: true,
+        runOnCompile: true,
+    },
 };
