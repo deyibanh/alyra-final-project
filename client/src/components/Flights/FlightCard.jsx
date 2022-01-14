@@ -25,12 +25,6 @@ import FlightState from "./FlightState";
 import { ethers } from "ethers";
 import DroneDeliveryArtifact from "../../artifacts/contracts/DroneDelivery.sol/DroneDelivery.json";
 
-const airRiskType = {
-    0: "Aerodrome",
-    1: "CHU",
-    2: "Military Base",
-};
-
 const flightState = {
     0: "Pre flight",
     1: "Canceled",
@@ -38,6 +32,12 @@ const flightState = {
     3: "Paused",
     4: "Aborted",
     5: "Ended",
+};
+
+const airRiskType = {
+    0: "Aerodrome",
+    1: "CHU",
+    2: "Military Base",
 };
 
 function FlightCard({ flight, changeVisibility, id, state }) {
@@ -94,12 +94,12 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                     <Card.Title className="text-start d-flex align-items-center">
                         <Col sm={3}>
                             <Stack gap={2} direction="horizontal">
-                                {parcelState === 2 ? (
+                                {flight[2] ? (
                                     <OverlayTrigger overlay={<Tooltip>Parcel delivered</Tooltip>}>
                                         <Image src={deliveredLogo} alt="" fluid style={{ height: "1.7rem" }} />
                                     </OverlayTrigger>
                                 ) : (
-                                    parcelState == 1 && (
+                                    flight[1] && (
                                         <OverlayTrigger overlay={<Tooltip>in delivery</Tooltip>}>
                                             <Image src={pickedupLogo} alt="" fluid style={{ height: "1.7rem" }} />
                                         </OverlayTrigger>
@@ -130,7 +130,6 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                                     <OverlayTrigger
                                         overlay={
                                             <Tooltip>
-                                                {console.log(flight[7])}
                                                 {flight[7].map((r, i) => (
                                                     <h6 key={i}>r.dateTime - r.risk</h6>
                                                 ))}
