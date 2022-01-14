@@ -102,8 +102,8 @@ contract DroneDelivery is DroneFlight {
             droneParcelDelivered,
             allowedToFlight,
             datas,
-            droneFlightState,
             pilotFlightState,
+            droneFlightState,
             riskEvent,
             airRisks
         );

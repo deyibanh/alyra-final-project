@@ -45,6 +45,7 @@ function FlightCard({ flight, changeVisibility, id, state }) {
     const [show, setShow] = useState(false);
     const piloFlightStateRef = useRef();
     const [droneDelivery, setDroneDelivery] = useState();
+    const [parcelState, setParcelState] = useState(0);
 
     useEffect(() => {
         if (state.provider) {
@@ -55,12 +56,35 @@ function FlightCard({ flight, changeVisibility, id, state }) {
         }
     }, [state]);
 
+    useEffect(() => {
+        const state = flight[1] ? (flight[2] ? 2 : 1) : 0;
+        setParcelState(state);
+    }, [flight]);
+
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
     const submitState = async () => {
-        // const tx = await droneDelivery.signer.changeFlightStatus(piloFlightStateRef.current.value);
-        // await tx;
+        const tx =
+            piloFlightStateRef.current.value == 1
+                ? await droneDelivery.signer.cancelFlight()
+                : await droneDelivery.signer.changeFlightStatus(piloFlightStateRef.current.value);
+        await tx;
+    };
+
+    const parcelAction = async () => {
+        const tx = parcelState === 0 ? droneDelivery.signer.pickUp() : droneDelivery.signer.deliver();
+        await tx;
+    };
+
+    const handlePreChecks = async (check) => {
+        const tx = droneDelivery.signer.preFlightChecks(check);
+        await tx;
+    };
+
+    const handleAirRiskValidation = async (risk) => {
+        const tx = droneDelivery.signer.validateAirRisk(risk);
+        await tx;
     };
 
     return (
@@ -70,12 +94,12 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                     <Card.Title className="text-start d-flex align-items-center">
                         <Col sm={3}>
                             <Stack gap={2} direction="horizontal">
-                                {flight[2] ? (
+                                {parcelState === 2 ? (
                                     <OverlayTrigger overlay={<Tooltip>Parcel delivered</Tooltip>}>
                                         <Image src={deliveredLogo} alt="" fluid style={{ height: "1.7rem" }} />
                                     </OverlayTrigger>
                                 ) : (
-                                    flight[1] && (
+                                    parcelState == 1 && (
                                         <OverlayTrigger overlay={<Tooltip>in delivery</Tooltip>}>
                                             <Image src={pickedupLogo} alt="" fluid style={{ height: "1.7rem" }} />
                                         </OverlayTrigger>
@@ -115,9 +139,6 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                                     >
                                         <Image src={cautionLogo} alt="" fluid style={{ height: "1.7rem" }} />
                                     </OverlayTrigger>
-                                    // <OverlayTrigger overlay={<Tooltip>dqs</Tooltip>}>
-                                    //     <Image src={cautionLogo} alt="" fluid style={{ height: "1.2rem" }} />
-                                    // </OverlayTrigger>
                                 )}
                                 {flight[8].length > 0 && (
                                     <OverlayTrigger
@@ -141,9 +162,6 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                                             Air Risk
                                         </Button>
                                     </OverlayTrigger>
-                                    // <OverlayTrigger overlay={<Tooltip>dqs</Tooltip>}>
-                                    //     <Image src={cautionLogo} alt="" fluid style={{ height: "1.2rem" }} />
-                                    // </OverlayTrigger>
                                 )}
                             </Stack>
                         </Col>
@@ -157,11 +175,13 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                             <Col sm={10}>
                                 <FlightState flightState={flight[5]}></FlightState>
                             </Col>
-                            <Col sm={1}>
-                                <Button variant="outline-primary" size="sm" onClick={handleShow}>
-                                    {">"}
-                                </Button>
-                            </Col>
+                            {flight[5] !== 1 && state.roles.hasPilotRole && (
+                                <Col sm={1}>
+                                    <Button variant="outline-primary" size="sm" onClick={handleShow}>
+                                        {">"}
+                                    </Button>
+                                </Col>
+                            )}
                         </Row>
                     </Card.Text>
                     <hr />
@@ -173,22 +193,118 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                             <Col sm={10}>
                                 <FlightState flightState={flight[6]}></FlightState>
                             </Col>
+                            {flight[5] !== 1 && state.roles.hasDroneRole && (
+                                <Col sm={1}>
+                                    {state.roles.hasDroneRole &&
+                                        ((parcelState === 0 && flight[5] === 0 && (
+                                            <Button
+                                                className="mt-3"
+                                                variant="outline-primary"
+                                                size="sm"
+                                                onClick={() => parcelAction()}
+                                            >
+                                                Grab
+                                            </Button>
+                                        )) ||
+                                            (parcelState === 1 && flight[5] === 5 && "Drop" && (
+                                                <Button
+                                                    className="mt-3"
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    onClick={() => parcelAction()}
+                                                >
+                                                    Drop
+                                                </Button>
+                                            )))}
+                                </Col>
+                            )}
                         </Row>
                     </Card.Text>
-                    <div className="text-end">
-                        <Card.Link href="#" onClick={() => changeVisibility(id)}>
-                            {"Details >"}
-                        </Card.Link>
-                    </div>
                 </Card.Body>
             </Card>
             <Offcanvas show={show} onHide={handleClose} placement="end">
                 <Offcanvas.Header closeButton>
-                    <Offcanvas.Title>Change Flight State</Offcanvas.Title>
+                    <Offcanvas.Title>Update Flight</Offcanvas.Title>
                 </Offcanvas.Header>
                 <Offcanvas.Body>
-                    <h6>Actual state: {flightState[flight[5]]}</h6>
-                    <hr></hr>
+                    {flight[5] === 0 && (
+                        <>
+                            <h5>AirRisk Validation</h5>
+                            <div>
+                                {flight[8].map((r, i) => (
+                                    <div key={i}>
+                                        {r.validated ? "✔" : "❌"} {r.name} - {airRiskType[r.riskType]}
+                                        {!r.validated && (
+                                            <Button
+                                                variant="outline-primary"
+                                                size="sm"
+                                                onClick={() => handleAirRiskValidation(i)}
+                                            >
+                                                val
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                    <hr />
+                    {flight[5] === 0 && (
+                        <>
+                            <h5>Preflight checks:</h5>
+                            <div>
+                                {["Engine", "Battery", "Telecom"].map((e, i) => (
+                                    <div key={i}>
+                                        {e}
+                                        {flight[i + 9] ? (
+                                            "✔"
+                                        ) : (
+                                            <Button
+                                                variant="outline-primary"
+                                                size="sm"
+                                                onClick={() => handlePreChecks(i)}
+                                            >
+                                                check
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                    {flight[5] > 3 && (
+                        <>
+                            <h5>Postflight checks:</h5>
+                            <div>
+                                {["Engine", "Battery", "Telecom"].map((e, i) => (
+                                    <div key={i}>
+                                        {e}
+                                        {flight[i + 9] ? (
+                                            "✔"
+                                        ) : (
+                                            <Button
+                                                variant="outline-primary"
+                                                size="sm"
+                                                onClick={() => handlePostChecks(i)}
+                                            >
+                                                check
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                    <hr />
+                    <h6>
+                        Actual delivery state:{" "}
+                        {(parcelState === 0 && "Parcel wait to be picked up") ||
+                            (parcelState === 1 && "parcel in delivery") ||
+                            (parcelState === 2 && "parcel delivered")}
+                    </h6>
+                    <hr />
+                    <h6>Actual flight state: {flightState[flight[5]]}</h6>
+                    <hr />
                     <h6>Select new state:</h6>
                     <Form.Select name={"flightState"} ref={piloFlightStateRef}>
                         <option value="noConops">Choose State</option>
