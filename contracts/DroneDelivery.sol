@@ -13,6 +13,7 @@ contract DroneDelivery is DroneFlight {
     address private starwingsMaster;
     bool private droneParcelPickedUp;
     bool private droneParcelDelivered;
+    bool private isInit;
 
     event ParcelPickedUp();
     event ParcelDelivered();
@@ -32,16 +33,21 @@ contract DroneDelivery is DroneFlight {
         deliveryId = _deliveryId;
     }
 
-    function initDelivery(StarwingsDataLib.FlightData memory data)
+    /**
+     *  @notice Init the contract with the data of a flight
+     *  @param _data The FlightData to store in the contract
+     */
+    function initDelivery(StarwingsDataLib.FlightData memory _data)
         external
         onlyRole(StarwingsDataLib.PILOT_ROLE)
     {
-        setFlightData(data);
-
+        require(!isInit, "flight already init");
+        setFlightData(_data);
+        isInit = true;
         IStarwingsMaster(starwingsMaster).addDroneFlight(
             address(this),
-            data.pilot.pilotAddress,
-            data.drone.droneAddress
+            _data.pilot.pilotAddress,
+            _data.drone.droneAddress
         );
 
         IDeliveryManager(deliveryManager).setDeliveryState(
@@ -50,10 +56,16 @@ contract DroneDelivery is DroneFlight {
         );
     }
 
+    /**
+     *  @notice Return the deliveryId
+     */
     function getDeliveryId() external view returns (string memory) {
         return deliveryId;
     }
 
+    /**
+     *  @notice Grab the parcel
+     */
     function pickUp() external onlyRole(StarwingsDataLib.DRONE_ROLE) {
         require(!droneParcelPickedUp, "parcel already pickedUp");
         droneParcelPickedUp = true;
@@ -62,6 +74,9 @@ contract DroneDelivery is DroneFlight {
         emit ParcelPickedUp();
     }
 
+    /**
+     *  @notice Drop the parcel
+     */
     function deliver() external onlyRole(StarwingsDataLib.DRONE_ROLE) {
         require(droneParcelPickedUp, "parcel not picked up before");
         droneParcelDelivered = true;
@@ -69,18 +84,23 @@ contract DroneDelivery is DroneFlight {
         emit ParcelDelivered();
     }
 
+    /**
+     *  @notice Return if a parcel has been grabed or not
+     */
     function isParcelPickedUp() external view returns (bool) {
         return droneParcelPickedUp;
     }
 
+    /**
+     *  @notice Return if a parcel has been droped or not
+     */
     function isParcelDelivered() external view returns (bool) {
         return droneParcelDelivered;
     }
 
-    function _customAllowToFlight() internal view override returns (bool) {
-        return droneParcelPickedUp;
-    }
-
+    /**
+     *  @notice Return all information in a single function
+     */
     function flightInfoDisplay()
         external
         view
@@ -107,5 +127,12 @@ contract DroneDelivery is DroneFlight {
             riskEvent,
             airRisks
         );
+    }
+
+    /**
+     *  @dev the proper control of the contract to check if a flight can start
+     */
+    function _customAllowToFlight() internal view override returns (bool) {
+        return droneParcelPickedUp;
     }
 }

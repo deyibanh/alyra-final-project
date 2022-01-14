@@ -168,9 +168,6 @@ const deploy = async () => {
         return x.event === "Deployed";
     })[0].args.addr;
 
-    // console.log(`[DroneDelivery] deployed at ${droneDeliveryAddr}`);
-    // console.log(`[DeliveryId] used = 0`);
-
     // Create contract object with deployed address
     droneDelivery = new ethers.Contract(
         droneDeliveryAddr,
@@ -190,15 +187,15 @@ describe("droneflight", function () {
     });
 
     describe("Checks", function () {
-        // it("Should revert with Acces Refused message", async () => {
-        //     await expect(droneDelivery.preFlightChecks(0)).to.be.revertedWith(
-        //         "already checked"
-        //     );
+        it("Should revert with Acces Refused message", async () => {
+            await expect(
+                droneDelivery.connect(owner).preFlightChecks(0)
+            ).to.be.revertedWith("Access Refused");
 
-        //     await expect(droneDelivery.postFlightChecks(0)).to.be.revertedWith(
-        //         "already checked"
-        //     );
-        // });
+            await expect(
+                droneDelivery.connect(owner).postFlightChecks(0)
+            ).to.be.revertedWith("Access Refused");
+        });
 
         it("Should set preflight check_id 0 to true", async () => {
             expect(await droneDelivery.getPreFlightChecks(0)).to.equal(false);
@@ -208,10 +205,10 @@ describe("droneflight", function () {
         });
 
         it("Should set postfligfht check_id 1 to true", async () => {
-            expect(await droneDelivery.getPostFlightChecks(0)).to.equal(false);
+            expect(await droneDelivery.getPostFlightChecks(1)).to.equal(false);
 
-            await droneDelivery.connect(pilot).postFlightChecks(0);
-            expect(await droneDelivery.getPostFlightChecks(0)).to.equal(true);
+            await droneDelivery.connect(pilot).postFlightChecks(1);
+            expect(await droneDelivery.getPostFlightChecks(1)).to.equal(true);
         });
     });
 
@@ -245,13 +242,13 @@ describe("droneflight", function () {
     });
 
     describe("parcel management", function () {
-        // it("Should revert as sender is not Drone", async () => {
-        //     expect(await droneDelivery.isParcelPickedUp()).to.be.equal(false);
+        it("Should revert as sender is not Drone", async () => {
+            expect(await droneDelivery.isParcelPickedUp()).to.be.equal(false);
 
-        //     await expect(droneDelivery.pickUp()).to.be.revertedWith(
-        //         "Access refused"
-        //     );
-        // });
+            await expect(
+                droneDelivery.connect(owner).pickUp()
+            ).to.be.revertedWith("Access Refused");
+        });
         it("should be picked up parcel", async () => {
             expect(await droneDelivery.isParcelPickedUp()).to.equal(false);
             await droneDelivery.connect(drone).pickUp();
@@ -282,13 +279,13 @@ describe("droneflight", function () {
     });
 
     describe("flight status", function () {
-        // it("Should revert as sender is not Pilot or Drone", async () => {
-        //     expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(0);
+        it("Should revert as sender is not Pilot or Drone", async () => {
+            expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(0);
 
-        //     await expect(
-        //         droneDelivery.changeFlightStatus(2)
-        //     ).to.be.revertedWith("Access refused");
-        // });
+            await expect(
+                droneDelivery.connect(owner).changeFlightStatus(2)
+            ).to.be.revertedWith("Access refused");
+        });
 
         it("Should revert as status sent is 1", async () => {
             expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(0);

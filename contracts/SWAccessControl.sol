@@ -5,29 +5,29 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 /** 
-    @title Starwings Acces Control Manager
-    @author Damien
-    @notice This contract manage all the access.
+ *  @title Starwings Acces Control Manager
+ *  @author Damien
+ *  @notice This contract manage all the access.
  */
 contract SWAccessControl is AccessControl {
     bytes32 public ADMIN_ROLE = StarwingsDataLib.ADMIN_ROLE;
     bytes32 public PILOT_ROLE = StarwingsDataLib.PILOT_ROLE;
     bytes32 public DRONE_ROLE = StarwingsDataLib.DRONE_ROLE;
-    // bytes32 public constant PILOT_ROLE = keccak256("PILOT_ROLE");
-    // bytes32 public constant DRONE_ROLE = keccak256("DRONE_ROLE");
-    // bytes32 public constant EXTERNAL_LEVEL_1 = keccak256("EXTERNAL_LEVEL_1");
-    // bytes32 public constant EXTERNAL_LEVEL_2 = keccak256("EXTERNAL_LEVEL_2");
-    // bytes32 public constant EXTERNAL_LEVEL_3 = keccak256("EXTERNAL_LEVEL_3");
 
     constructor() {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(ADMIN_ROLE, msg.sender);
     }
 
-    function setRoleAdmin(bytes32 role, bytes32 adminRole)
+    /**
+     *  @notice set a role as an admin for a specific role
+     *  @param _role Role that will have a new admin
+     *  @param _adminRole Role that will be the new admin of role _role
+     */
+    function setRoleAdmin(bytes32 _role, bytes32 _adminRole)
         external
-        onlyRole(getRoleAdmin(role))
+        onlyRole(getRoleAdmin(_role))
     {
-        _setRoleAdmin(role, adminRole);
+        _setRoleAdmin(_role, _adminRole);
     }
 }
