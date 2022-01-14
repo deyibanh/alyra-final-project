@@ -80,6 +80,7 @@ function FlightsContent({ state }) {
                 });
                 // const preFlightCheck = await.provider
                 flightsInfo.push(infos);
+                // flightsInfo.push(address);
                 // provider.on("DeliveryCreated", (deliveryId) => {
                 //     getDeliveries();
                 // });
@@ -102,7 +103,7 @@ function FlightsContent({ state }) {
                 {flights.map((f, i) =>
                     viewDetails === -1 ? (
                         <Col key={f[0]}>
-                            <FlightCard flight={f} changeVisibility={changeVisibility} id={i} />
+                            <FlightCard flight={f} changeVisibility={changeVisibility} id={i} state={state} />
                         </Col>
                     ) : (
                         viewDetails === i && (
