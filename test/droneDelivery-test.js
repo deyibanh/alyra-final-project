@@ -325,6 +325,9 @@ describe("droneflight", function () {
                 await droneDelivery.connect(pilot).validateAirRisk(0);
                 await droneDelivery.connect(pilot).validateAirRisk(1);
                 await droneDelivery.connect(drone).pickUp();
+                await droneDelivery.connect(pilot).preFlightChecks(0);
+                await droneDelivery.connect(pilot).preFlightChecks(1);
+                await droneDelivery.connect(pilot).preFlightChecks(2);
             });
 
             it("Should change piloteflightstatus to 2", async () => {

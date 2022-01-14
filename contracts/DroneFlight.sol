@@ -132,6 +132,7 @@ abstract contract DroneFlight is Ownable {
     {
         require(!preChecks.checkType[_checkType], "already checked");
         preChecks.checkType[_checkType] = true;
+        _allowToFlight();
 
         // emit PreFlightCheck(_checkType);
     }
@@ -341,6 +342,11 @@ abstract contract DroneFlight is Ownable {
 
     function _standardAllowToFlight() internal view returns (bool) {
         bool allowed = true;
+
+        allowed =
+            preChecks.checkType[CheckType(0)] &&
+            preChecks.checkType[CheckType(1)] &&
+            preChecks.checkType[CheckType(2)];
 
         if (pilotFlightState == FlightState.Canceled) {
             allowed = false;
