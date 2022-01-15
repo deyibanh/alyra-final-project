@@ -104,6 +104,8 @@ async function main() {
      *
      *
      */
+    const [owner, dummy, pilot1, pilot2, drone1, drone2, to1, to2, from] =
+        await hre.ethers.getSigners();
 
     const rolePilot = await SWAccessControl.PILOT_ROLE();
     const roleDrone = await SWAccessControl.DRONE_ROLE();
@@ -111,56 +113,31 @@ async function main() {
     console.log("######## Create Sample data");
 
     // Pilot 1
-    await StarwingsMaster.addPilot(
-        "0x80F528b2d0F010fC1cF85D98a3050b3f6194BD61",
-        "Joanna"
-    );
-
-    await SWAccessControl.grantRole(
-        rolePilot,
-        "0x80F528b2d0F010fC1cF85D98a3050b3f6194BD61"
-    );
+    await StarwingsMaster.addPilot(pilot1.address, "Joanna");
+    await SWAccessControl.grantRole(rolePilot, pilot1.address);
 
     console.log("### Pilot 1 added");
 
     // Pilot 2
-    await StarwingsMaster.addPilot(
-        "0x9FAB777bb961d2db84e1f4b3D27A165B88aC015f",
-        "Florian"
-    );
-
-    await SWAccessControl.grantRole(
-        rolePilot,
-        "0x9FAB777bb961d2db84e1f4b3D27A165B88aC015f"
-    );
+    await StarwingsMaster.addPilot(pilot2.address, "Florian");
+    await SWAccessControl.grantRole(rolePilot, pilot2.address);
 
     console.log("### Pilot 2 added");
 
     // Drone 1
     await StarwingsMaster.addDrone(
-        "0x86b6946BE885ba92e1D8BE3d9D3Ce257EeaB8215",
+        drone1.address,
         "UAS-FR-239271",
         "DJI Matrice 600 Pro"
     );
 
-    await SWAccessControl.grantRole(
-        roleDrone,
-        "0x86b6946BE885ba92e1D8BE3d9D3Ce257EeaB8215"
-    );
+    await SWAccessControl.grantRole(roleDrone, drone1.address);
 
     console.log("### Drone 1 added");
 
     // Drone 2
-    await StarwingsMaster.addDrone(
-        "0xBfD3358f360143885409b9a3cC84E3831C113D5e",
-        "UAS-FR-170981",
-        "Vertix"
-    );
-
-    await SWAccessControl.grantRole(
-        roleDrone,
-        "0xBfD3358f360143885409b9a3cC84E3831C113D5e"
-    );
+    await StarwingsMaster.addDrone(drone2.address, "UAS-FR-170981", "Vertix");
+    await SWAccessControl.grantRole(roleDrone, drone2.address);
 
     console.log("### Drone 2 added");
 
@@ -170,9 +147,9 @@ async function main() {
         supplierOrderId: "O798325",
         state: 0,
         from: "Pharmacie Le Tertre",
-        fromAddr: "0x96aA1dEc85E3F454FC1F9A196faB2AC33b554f9B",
+        fromAddr: from.address,
         to: "Francois Brobeck",
-        toAddr: "0x2042f92fc8B323E0F3FC05173ec96269475f819e",
+        toAddr: to1.address,
         fromHubId: 100,
         toHubId: 300,
     });
@@ -185,9 +162,9 @@ async function main() {
         supplierOrderId: "O312607",
         state: 0,
         from: "Pharmacie Le Tertre",
-        fromAddr: "0x96aA1dEc85E3F454FC1F9A196faB2AC33b554f9B",
+        fromAddr: from.address,
         to: "Jean-Philippe BONHOMME",
-        toAddr: "0x7169D3cBb875e97Ad8966402A3b1af7Dc8f4F57f",
+        toAddr: to2.address,
         fromHubId: 100,
         toHubId: 700,
     });

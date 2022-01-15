@@ -1,11 +1,14 @@
-# Alyra Final Project
+# <img src="./docs/img/drone.png" height="30"> Starwings <img src="./docs/img/drone.png" height="30">
 
-## Presentation
+## <u>Presentation</u>
 
-This is our Alyra Final Project!<br />
-Let's go to the Moon!
+This is the final project for our Blockchain training @ Alyra
 
-## Team
+The purpose of this project is to offer certification on drones flights data for deliveries.
+
+/!\ Project is still under development /!\
+
+## <u>Team</u>
 
 Managers:
 
@@ -18,33 +21,53 @@ Developers:
 -   [Fabien FRICK](https://github.com/lostmind84)
 -   [Damien SABOURAUD](https://github.com/MB2M)
 
-## Install
+&nbsp;
 
-To install the project, just launch:<br />
-`$> npm install`
+# <img src="./docs/img/coding.png" height="25"> Dapp Setup
 
-## Configuration
+## 1.Install
 
-Create your own `.env` file and add your parameters:
+To install the project, open a terminal at the root folder and execute :<br />
+`$> npm install && npx hardhat compile && cd client && npm install`
 
--   `ETHERSCAN_API_KEY`: The Etherscan API Key.
--   `INFURA_ROPSTEN_URL`: Paste the Infura Ropsten URL and specify the Infura ID.
--   `PRIVATE_KEY`: The account private key that will be used to deploy.
+&nbsp;
 
-## Deployment
+## 2.Configuration
+
+Create your own `.env` file and add your parameters (there is a .env-example file that you can copy):
+
+-   `MNEMONIC`: Your mnemonic.
+-   `OPTIMISM_API_KEY`: Paste your Etherscan for Optimism API key. (https://optimistic.etherscan.io/myapikey) Used for Optimism testnet deployment
+
+&nbsp;
+
+## 3. Deployment
 
 We use Hardhat to deploy the smart contracts.
 
-To compile smart contracts:<br />
+### 3.1 Compile smart contracts:<br />
+
 `$> npx hardhat compile`
 
-To deploy smart contracts on local Hardhat network:<br />
-`$> npx hardhat run scripts/deploy.js`
+### 3.2 Deploy smart contracts :
 
-To deploy smart contracts on specific network (like ropsten or mainnet):<br />
-`$> npx hardhat run scripts/deploy.js --network <YOUR NETWORK NAME>`
+> **On local Hardhat network:<br />**
+> Open a terminal and run : <br /> >`$> npx hardhat node`<br />
+> Open another terminal and run : <br /> >`$> npx hardhat run scripts/deploy.js`
 
-## Docs
+> **On live network (mainnet, ropsten, etc..):<br />**
+> Open a terminal and run : <br /> >`$> npx hardhat run scripts/deploy.js --network <YOUR NETWORK NAME>`
+
+&nbsp;
+
+## 4. Start client
+
+Once contracts are deployed, you can start the client :<br/>
+`>$ cd client; npm start`
+
+&nbsp;
+
+## 5. Docs
 
 Developers documentation:
 
@@ -54,7 +77,10 @@ Developers documentation:
 -   [Natspec](./docs/developers/natspec.md)
 -   [Test Explication](./docs/developers/test_explication.md)
 
+&nbsp;
+
 ## Copyright & License
 
 License MIT<br />
-Copyright (C) 2021
+
+Copyright (C) 2022
