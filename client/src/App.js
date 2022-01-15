@@ -33,8 +33,11 @@ function App() {
     const [StarwingsMasterSigner, setStarwingsMasterSigner] = useState();
     const [SWAccessControl, setSWAccessControl] = useState();
 
-    const reload = async () => {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const reload = async (firstTime) => {
+        let provider;
+        if (firstTime) provider = await getEthersProvider();
+        else provider = new ethers.providers.Web3Provider(window.ethereum);
+
         const signer = provider.getSigner();
         const accounts = await provider.listAccounts();
 
@@ -89,10 +92,10 @@ function App() {
             try {
                 window.ethereum.on("accountsChanged", async function (accounts) {
                     //console.log(`Account changed to ${accounts[0]}`);
-                    await reload();
+                    await reload(false);
                 });
 
-                await reload();
+                await reload(true);
             } catch (error) {
                 console.error(error);
             }

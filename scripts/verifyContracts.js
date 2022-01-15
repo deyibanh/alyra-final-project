@@ -4,7 +4,8 @@ const contracts = require("../client/src/contractAddresses.json");
 async function main() {
     if (hre.network.name === "optimism_testnet") {
         console.log("### Verifying contracts.... ###");
-
+        console.log(contracts.SWAccessControl);
+        console.log(await isContractVerified(contracts.SWAccessControl));
         if (!(await isContractVerified(contracts.SWAccessControl))) {
             console.log("SWAccessControl not verified ! Verifying....");
             await hre.run("verify:verify", {
