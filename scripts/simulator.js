@@ -1,5 +1,6 @@
 require("dotenv").config();
 const ethers = require("ethers");
+const hardhat = require("hardhat");
 const StarwingsMasterArtifact = require("../client/src/artifacts/contracts/StarwingsMaster.sol/StarwingsMaster.json");
 const DeliveryManagerArtifact = require("../client/src/artifacts/contracts/DeliveryManager.sol/DeliveryManager.json");
 const ConopsManagerArtifact = require("../client/src/artifacts/contracts/ConopsManager.sol/ConopsManager.json");
@@ -196,6 +197,10 @@ async function cleanSimulatorData() {
 
 async function simulate() {
     try {
+        const droneDeliveryFactory = await hardhat.ethers.getContractFactory(
+            "DroneDelivery"
+        );
+
         const rolePilot = await SWAccessControl.connect(
             adminWallet
         ).PILOT_ROLE();
@@ -267,18 +272,73 @@ async function simulate() {
             `Creating DroneDelivery for deliveryId: ${delivery1.deliveryId}...`
         );
 
-        // droneDeliveryAddress = ;
-
-        await DroneFlightFactory.connect(pilot1Wallet).newDroneDelivery(
-            delivery1.deliveryId,
-            drone1Wallet.address,
-            ethers.BigNumber.from(2), // conopsID
-            new Date("01/02/2022") / 1000,
-            ethers.BigNumber.from(1),
-            conops1.startingPoint,
-            conops1.endPoint,
-            droneDeliveryAddress
+        const pilot1 = await StarwingsMaster.connect(pilot1Wallet).getPilot(
+            pilot1Wallet.address
         );
+        const drone1 = await StarwingsMaster.connect(pilot1Wallet).getDrone(
+            drone1Wallet.address
+        );
+        const droneFlightDataSample = {
+            pilot: pilot1,
+            drone: drone1,
+            conopsId: 2,
+            flightDatetime: new Date("01/02/2022") / 1000,
+            flightDuration: 1,
+            depart: conops1.startingPoint,
+            destination: conops1.endPoint,
+        };
+        // console.log(droneFlightDataSample);
+        const salt = Date.now();
+
+        const bytecode = ethers.utils.arrayify(
+            ethers.utils.hexConcat([
+                droneDeliveryFactory.bytecode,
+                droneDeliveryFactory.interface.encodeDeploy([
+                    DeliveryManagerAddress,
+                    "TEST",
+                    ConopsManagerAddress,
+                    SWAccessControlAddress,
+                    StarwingsMasterAddress,
+                ]),
+            ])
+        );
+        const result = await DroneFlightFactory.connect(pilot1Wallet).deploy(
+            bytecode,
+            salt,
+            {
+                gasLimit: 9000000,
+            }
+        );
+
+        // // Get event values
+        const temp = await result.wait();
+        const droneDeliveryAddr = temp.events?.filter((x) => {
+            return x.event === "Deployed";
+        })[0].args.addr;
+
+        // console.log(`[DroneDelivery] deployed at ${droneDeliveryAddr}`);
+        // console.log(`[DeliveryId] used ${deliveries[0].deliveryId}`);
+
+        // Create contract object with deployed address
+        const DroneDelivery = new ethers.Contract(
+            droneDeliveryAddr,
+            droneDeliveryFactory.interface
+        );
+
+        await DroneDelivery.connect(pilot1Wallet).initDelivery(
+            droneFlightDataSample
+        );
+
+        // await DroneFlightFactory.connect(pilot1Wallet).newDroneDelivery(
+        //     delivery1.deliveryId,
+        //     drone1Wallet.address,
+        //     ethers.BigNumber.from(2), // conopsID
+        //     new Date("01/02/2022") / 1000,
+        //     ethers.BigNumber.from(1),
+        //     conops1.startingPoint,
+        //     conops1.endPoint,
+        //     droneDeliveryAddress
+        // );
 
         console.log("5) Pre-Flight Checks");
         const droneDeliveryAddresses = await DroneFlightFactory.connect(
@@ -289,19 +349,49 @@ async function simulate() {
             DroneDeliveryArtifact.abi
         );
         await droneDelivery1.connect(pilot1Wallet).preFlightChecks(0);
-        console.log("Pre-flight - Check motor OK");
+        const preFlightCheckMotor = await droneDelivery1
+            .connect(pilot1Wallet)
+            .getPreFlightChecks(0);
+        console.log(
+            `Pre-flight for deliveryId: ${delivery1.deliveryId} - Check motor ${preFlightCheckMotor}`
+        );
         await droneDelivery1.connect(pilot1Wallet).preFlightChecks(1);
-        console.log("Pre-flight - Check battery OK");
+        const preFlightCheckBattery = await droneDelivery1
+            .connect(pilot1Wallet)
+            .getPreFlightChecks(1);
+        console.log(
+            `Pre-flight for deliveryId: ${delivery1.deliveryId} - Check battery ${preFlightCheckBattery}`
+        );
         await droneDelivery1.connect(pilot1Wallet).preFlightChecks(2);
-        console.log("Pre-flight - Check control station OK");
+        const preFlightCheckControlStation = await droneDelivery1
+            .connect(pilot1Wallet)
+            .getPreFlightChecks(2);
+        console.log(
+            `Pre-flight for deliveryId: ${delivery1.deliveryId} - Check control station ${preFlightCheckControlStation}`
+        );
 
         console.log("9) Post-Flight Checks");
         await droneDelivery1.connect(pilot1Wallet).postFlightChecks(0);
-        console.log("Post-flight - Check motor OK");
+        const postFlightCheckMotor = await droneDelivery1
+            .connect(pilot1Wallet)
+            .getPostFlightChecks(0);
+        console.log(
+            `Post-flight for deliveryId: ${delivery1.deliveryId} - Check motor ${postFlightCheckMotor}`
+        );
         await droneDelivery1.connect(pilot1Wallet).postFlightChecks(1);
-        console.log("Post-flight - Check battery OK");
+        const postFlightCheckBattery = await droneDelivery1
+            .connect(pilot1Wallet)
+            .getPostFlightChecks(1);
+        console.log(
+            `Post-flight for deliveryId: ${delivery1.deliveryId} - Check battery ${postFlightCheckBattery}`
+        );
         await droneDelivery1.connect(pilot1Wallet).postFlightChecks(2);
-        console.log("Post-flight - Check control station OK");
+        const postFlightCheckControlStation = await droneDelivery1
+            .connect(pilot1Wallet)
+            .getPostFlightChecks(2);
+        console.log(
+            `Post-flight for deliveryId: ${delivery1.deliveryId} - Check control station ${postFlightCheckControlStation}`
+        );
     } catch (error) {
         console.error(error);
     }
