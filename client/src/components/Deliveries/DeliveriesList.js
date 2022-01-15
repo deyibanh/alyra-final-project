@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useReducer, Fragment } from "react";
 import { ethers } from "ethers";
 import DeliveryArtifact from "../../artifacts/contracts/DeliveryManager.sol/DeliveryManager.json";
-import { Button, Col, Modal, Row } from "react-bootstrap";
+import { Button, Col, Modal, Row, Toast, ToastContainer } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import DeliveryForm from "./DeliveryForm";
 import FactoryModal from "./FactoryModal";
@@ -30,6 +30,7 @@ function DeliveriesList(props) {
     const [pending, setPending] = useState(true);
     const [factoryModalIsShown, setFactoryModalIsShown] = useState(false);
     const [selectedDeliveryId, setSelectedDeliveryId] = useState();
+    const [tooltip, setTooltip] = useState({ show: false, title: "Undefined", body: "None", variant: "" });
 
     const hideFactoryModal = () => {
         setFactoryModalIsShown(false);
@@ -52,9 +53,16 @@ function DeliveriesList(props) {
         }
     }, [deliveryManager]);
 
+    const toggleTooltip = (show) =>
+        setTooltip({ show: show, title: tooltip.title, body: tooltip.body, variant: tooltip.variant });
+    const showTooltip = function (title, body, variant) {
+        setTooltip({ show: true, title: title, body: body, variant: variant });
+    };
+
     const getDeliveries = async () => {
         //console.log("getDeliveries start !");
         setPending(true);
+        toggleTooltip(false);
         try {
             const deliveriesList = await deliveryManager.provider.getAllDeliveries();
             setDeliveriesList(deliveriesList);
@@ -84,19 +92,26 @@ function DeliveriesList(props) {
     };
 
     const submitCreateDelivery = async () => {
-        const delivery = {
-            deliveryId: "",
-            supplierOrderId: formData.orderId,
-            state: 0,
-            from: formData.from,
-            fromAddr: ethers.utils.getAddress(formData.fromAccount),
-            to: formData.to,
-            toAddr: ethers.utils.getAddress(formData.toAccount),
-            fromHubId: Number(formData.fromHubId),
-            toHubId: Number(formData.toHubId),
-        };
-        const tx = await deliveryManager.signer.newDelivery(delivery);
-        await tx;
+        try {
+            const delivery = {
+                deliveryId: "",
+                supplierOrderId: formData.orderId,
+                state: 0,
+                from: formData.from,
+                fromAddr: ethers.utils.getAddress(formData.fromAccount),
+                to: formData.to,
+                toAddr: ethers.utils.getAddress(formData.toAccount),
+                fromHubId: Number(formData.fromHubId),
+                toHubId: Number(formData.toHubId),
+            };
+            const tx = await deliveryManager.signer.newDelivery(delivery);
+            await tx;
+            showTooltip("Transaciton sent !", tx.hash, "success");
+        } catch (error) {
+            //console.log(error);
+            showTooltip("Error", error?.data?.message, "danger");
+        }
+
         hideModal();
     };
 
@@ -169,25 +184,35 @@ function DeliveriesList(props) {
     //console.log(props);
     return (
         <div>
-            {deliveriesList.length === 0 && <div>No deliveries.</div>}
-            <Row className="justify-content-end">
-                <Col
-                    sm="auto"
-                    onClick={async () => {
-                        await getDeliveries();
-                    }}
-                >
-                    <Button variant="primary">Refresh</Button>
-                </Col>
-                <Col sm="auto" onClick={showModal}>
-                    <Button variant="primary">+ Add Delivery</Button>
-                </Col>
-            </Row>
-            <Row className="g-2 mt-2">
-                <Col>
-                    <DataTable columns={columns} data={deliveriesList} progressPending={pending} />
-                </Col>
-            </Row>
+            {deliveriesList.length === 0 ? (
+                <div>No deliveries.</div>
+            ) : (
+                <Fragment>
+                    <Row>
+                        <Col>
+                            <i>Only pilots are able to process deliveries</i>
+                        </Col>
+                    </Row>
+                    <Row className="justify-content-end">
+                        <Col
+                            sm="auto"
+                            onClick={async () => {
+                                await getDeliveries();
+                            }}
+                        >
+                            <Button variant="primary">Refresh</Button>
+                        </Col>
+                        <Col sm="auto" onClick={showModal}>
+                            <Button variant="primary">+ Add Delivery</Button>
+                        </Col>
+                    </Row>
+                    <Row className="g-2 mt-2">
+                        <Col>
+                            <DataTable columns={columns} data={deliveriesList} progressPending={pending} />
+                        </Col>
+                    </Row>
+                </Fragment>
+            )}
             <Modal
                 show={modalIsShown}
                 onHide={hideModal}
@@ -217,6 +242,15 @@ function DeliveriesList(props) {
                 deliveryId={selectedDeliveryId}
                 StarwingsMasterSigner={props.StarwingsMasterSigner}
             />
+
+            <ToastContainer className="p-3" position="bottom-end">
+                <Toast show={tooltip.show} onClose={toggleTooltip} bg={tooltip.variant}>
+                    <Toast.Header>
+                        <strong className="me-auto">{tooltip.title}</strong>
+                    </Toast.Header>
+                    <Toast.Body>{tooltip.body}</Toast.Body>
+                </Toast>
+            </ToastContainer>
         </div>
     );
 }

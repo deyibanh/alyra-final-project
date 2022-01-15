@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Col, Form, FormControl, Badge, Modal, Row } from "react-bootstrap";
+import { Button, Col, Form, FormControl, Badge, Modal, Row, Toast, ToastContainer } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import "./PilotsContent.css";
 
@@ -10,6 +10,7 @@ function PilotsContent(props) {
     const [inputAddPilotName, setInputAddPilotName] = useState("");
     const [modalIsShown, setModalIsShown] = useState(false);
     const [pending, setPending] = useState(true);
+    const [tooltip, setTooltip] = useState({ show: false, title: "Undefined", body: "None", variant: "" });
 
     useEffect(() => {
         if (StarwingsMasterSigner) {
@@ -24,6 +25,12 @@ function PilotsContent(props) {
             });
         }
     }, [StarwingsMasterSigner]);
+
+    const toggleTooltip = (show) =>
+        setTooltip({ show: show, title: tooltip.title, body: tooltip.body, variant: tooltip.variant });
+    const showTooltip = function (title, body, variant) {
+        setTooltip({ show: true, title: title, body: body, variant: variant });
+    };
 
     function onChangeInputAddPilot(event) {
         event.preventDefault();
@@ -45,7 +52,15 @@ function PilotsContent(props) {
 
     async function onSubmitAddPilot(event) {
         event.preventDefault();
-        await StarwingsMasterSigner.addPilot(inputAddPilot, inputAddPilotName);
+        try {
+            const tx = await StarwingsMasterSigner.addPilot(inputAddPilot, inputAddPilotName);
+            //console.log(tx);
+            showTooltip("Transaciton sent !", tx.hash, "success");
+        } catch (error) {
+            //console.log(error);
+            showTooltip("Error", error?.data?.message, "danger");
+        }
+
         setInputAddPilot("");
         setInputAddPilotName("");
         hideModal();
@@ -53,6 +68,7 @@ function PilotsContent(props) {
 
     const getPilotList = async () => {
         setPending(true);
+        toggleTooltip(false);
         try {
             const pilotAddressListResult = await StarwingsMasterSigner.getPilotList();
             setPilotAddressList(pilotAddressListResult);
@@ -166,6 +182,14 @@ function PilotsContent(props) {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            <ToastContainer className="p-3" position="bottom-end">
+                <Toast show={tooltip.show} onClose={toggleTooltip} bg={tooltip.variant}>
+                    <Toast.Header>
+                        <strong className="me-auto">{tooltip.title}</strong>
+                    </Toast.Header>
+                    <Toast.Body>{tooltip.body}</Toast.Body>
+                </Toast>
+            </ToastContainer>
         </div>
     );
 }
