@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Col, Form, FormControl, Badge, Modal, Row } from "react-bootstrap";
+import { Button, Col, Form, FormControl, Badge, Modal, Row, Toast, ToastContainer } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 
 function DronesContent(props) {
@@ -10,6 +10,7 @@ function DronesContent(props) {
     const [inputAddDroneType, setInputAddDroneType] = useState("");
     const [modalIsShown, setModalIsShown] = useState(false);
     const [pending, setPending] = useState(true);
+    const [tooltip, setTooltip] = useState({ show: false, title: "Undefined", body: "None", variant: "" });
 
     useEffect(() => {
         if (StarwingsMasterSigner) {
@@ -24,6 +25,12 @@ function DronesContent(props) {
             });
         }
     }, [StarwingsMasterSigner]);
+
+    const toggleTooltip = (show) =>
+        setTooltip({ show: show, title: tooltip.title, body: tooltip.body, variant: tooltip.variant });
+    const showTooltip = function (title, body, variant) {
+        setTooltip({ show: true, title: title, body: body, variant: variant });
+    };
 
     function onChangeInputAddDrone(event) {
         event.preventDefault();
@@ -50,7 +57,14 @@ function DronesContent(props) {
 
     async function onSubmitAddDrone(event) {
         event.preventDefault();
-        await StarwingsMasterSigner.addDrone(inputAddDrone, inputAddDroneId, inputAddDroneType);
+
+        try {
+            const tx = await StarwingsMasterSigner.addDrone(inputAddDrone, inputAddDroneId, inputAddDroneType);
+            showTooltip("Transaciton sent !", tx.hash, "success");
+        } catch (error) {
+            showTooltip("Error", error?.data?.message, "danger");
+        }
+
         setInputAddDrone("");
         setInputAddDroneId("");
         setInputAddDroneType("");
@@ -59,6 +73,7 @@ function DronesContent(props) {
 
     const getDroneList = async () => {
         setPending(true);
+        toggleTooltip(false);
         try {
             const droneAddressListResult = await StarwingsMasterSigner.getDroneList();
             setDroneAddressList(droneAddressListResult);
@@ -178,6 +193,14 @@ function DronesContent(props) {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            <ToastContainer className="p-3" position="bottom-end">
+                <Toast show={tooltip.show} onClose={toggleTooltip} bg={tooltip.variant}>
+                    <Toast.Header>
+                        <strong className="me-auto">{tooltip.title}</strong>
+                    </Toast.Header>
+                    <Toast.Body>{tooltip.body}</Toast.Body>
+                </Toast>
+            </ToastContainer>
         </div>
     );
 }
