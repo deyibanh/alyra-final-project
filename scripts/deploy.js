@@ -4,6 +4,7 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
+const sleep = require("util").promisify(setTimeout);
 
 async function main() {
     // Hardhat always runs the compile task when running scripts with its command
@@ -14,7 +15,6 @@ async function main() {
     // await hre.run('compile');
 
     // We get the contract to deploy
-
     // Access control
     const SWAccessControlArtifact = await hre.ethers.getContractFactory(
         "SWAccessControl"
@@ -45,7 +45,9 @@ async function main() {
         SWAccessControl.address
     );
     await ConopsManager.deployed();
+
     await DeliveryManager.deployed();
+
     console.log("ConopsManager deployed to:", ConopsManager.address);
     console.log("DeliveryManager deployed to:", DeliveryManager.address);
 
@@ -56,6 +58,7 @@ async function main() {
     );
 
     await StarwingsMaster.deployed();
+
     console.log("StarwingsMaster deployed to:", StarwingsMaster.address);
 
     const DroneFlightFactory = await DroneFlightFactoryArtifact.deploy(
@@ -64,6 +67,7 @@ async function main() {
     );
 
     await DroneFlightFactory.deployed();
+
     console.log("DroneFlightFactory deployed to:", DroneFlightFactory.address);
 
     StarwingsMaster.setDroneFlightFactoryAddress(DroneFlightFactory.address);
@@ -225,6 +229,53 @@ async function main() {
     console.log("### Conops 2 added");
 
     console.log("########### DONE !");
+
+    if (hre.network.name === "optimism_testnet") {
+        console.log("### Verifying contracts in 10 secs ###");
+        sleep(10000);
+        if (!(await isContractVerified(SWAccessControl.address))) {
+            await hre.run("verify:verify", {
+                address: SWAccessControl.address,
+                constructorArguments: [],
+            });
+        }
+
+        if (!(await isContractVerified(ConopsManager.address))) {
+            await hre.run("verify:verify", {
+                address: ConopsManager.address,
+                constructorArguments: [SWAccessControl.address],
+            });
+        }
+
+        if (!(await isContractVerified(DeliveryManager.address))) {
+            console.log("dee");
+            await hre.run("verify:verify", {
+                address: DeliveryManager.address,
+                constructorArguments: [SWAccessControl.address],
+            });
+        }
+
+        if (!(await isContractVerified(StarwingsMaster.address))) {
+            await hre.run("verify:verify", {
+                address: StarwingsMaster.address,
+                constructorArguments: [
+                    SWAccessControl.address,
+                    ConopsManager.address,
+                    DeliveryManager.address,
+                ],
+            });
+        }
+
+        if (!(await isContractVerified(DroneFlightFactory.address))) {
+            await hre.run("verify:verify", {
+                address: DroneFlightFactory.address,
+                constructorArguments: [
+                    SWAccessControl.address,
+                    StarwingsMaster.address,
+                ],
+            });
+        }
+    }
 }
 
 const storeContractAddresses = (jsonData) => {
@@ -239,6 +290,27 @@ const storeContractAddresses = (jsonData) => {
             }
         }
     );
+};
+
+const isContractVerified = async (address) => {
+    const getJSON = require("get-json");
+
+    const path =
+        "https://api-kovan-optimistic.etherscan.io/api?module=contract&action=getABI&address=" +
+        address;
+    let status;
+    await getJSON(path, function (error, response) {
+        const state = JSON.parse(response.status);
+        if (error) {
+            console.log(error);
+        }
+        if (state === 1) {
+            status = true;
+        } else {
+            status = false;
+        }
+    });
+    return status;
 };
 
 // We recommend this pattern to be able to use async/await everywhere
