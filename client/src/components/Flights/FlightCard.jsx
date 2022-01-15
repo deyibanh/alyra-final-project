@@ -82,6 +82,11 @@ function FlightCard({ flight, changeVisibility, id, state }) {
         await tx;
     };
 
+    const handlePostChecks = async (check) => {
+        const tx = droneDelivery.signer.postFlightChecks(check);
+        await tx;
+    };
+
     const handleAirRiskValidation = async (risk) => {
         const tx = droneDelivery.signer.validateAirRisk(risk);
         await tx;
@@ -278,7 +283,7 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                                 {["Engine", "Battery", "Telecom"].map((e, i) => (
                                     <div key={i}>
                                         {e}
-                                        {flight[i + 9] ? (
+                                        {flight[i + 12] ? (
                                             "✔"
                                         ) : (
                                             <Button
@@ -309,7 +314,7 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                         <option value="noConops">Choose State</option>
                         {Object.values(flightState).map(
                             (s, i) =>
-                                i > flight[5] && (
+                                ((!flight[3] && i == 1) || (flight[3] && i > flight[5])) && (
                                     <option value={i} key={i}>
                                         {s}
                                     </option>
