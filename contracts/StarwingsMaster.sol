@@ -160,7 +160,7 @@ contract StarwingsMaster is IStarwingsMaster {
     {
         require(
             accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender) ||
-                accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender),
+                accessControl.hasRole(StarwingsDataLib.ADMIN_ROLE, msg.sender) || accessControl.hasRole(StarwingsDataLib.DRONE_ROLE, msg.sender),
             "Access refused"
         );
 

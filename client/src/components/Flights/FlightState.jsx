@@ -59,7 +59,6 @@ function FlightState({ flightState }) {
                 <Steps.Item title="In Progress" description={simpleState === 1 && description()} />
                 <Steps.Item title="End" description={simpleState === 2 && description()} />
             </Steps>
-            <div>{description()}</div>
         </>
     );
 }

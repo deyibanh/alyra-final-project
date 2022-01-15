@@ -66,29 +66,30 @@ function FlightsContent({ state }) {
             for (let address of flightsAddresses) {
                 const provider = new ethers.Contract(address, droneDeliveryArtifact.abi, state.provider);
                 let infos = await provider.flightInfoDisplay();
-                [0, 1, 2].map((val) => {
-                    (async () => {
-                        let value = await provider.getPreFlightChecks(val);
-                        infos = [...infos, value];
-                    })();
-                });
-                [0, 1, 2].map((val) => {
-                    (async () => {
-                        let value = await provider.getPostFlightChecks(val);
-                        infos = [...infos, value];
-                    })();
-                });
-                // const preFlightCheck = await.provider
+                for (let i = 0; i < 3; i++) {
+                    const f = async () => {
+                        return await provider.getPreFlightChecks(i);
+                    };
+                    const val = await f();
+                    infos = [...infos, val];
+                }
+                for (let i = 0; i < 3; i++) {
+                    const f = async () => {
+                        return await provider.getPostFlightChecks(i);
+                    };
+                    const val = await f();
+                    infos = [...infos, val];
+                }
+                infos.push(address);
                 flightsInfo.push(infos);
-                // provider.on("DeliveryCreated", (deliveryId) => {
-                //     getDeliveries();
-                // });
             }
             setFlights(flightsInfo);
         } catch (error) {
             console.error(error);
         }
     };
+
+    //console.log("flightINFO:", flights);
 
     const changeVisibility = (i) => {
         i === -1 ? setCardGroupSize(3) : setCardGroupSize(1);
@@ -102,7 +103,7 @@ function FlightsContent({ state }) {
                 {flights.map((f, i) =>
                     viewDetails === -1 ? (
                         <Col key={f[0]}>
-                            <FlightCard flight={f} changeVisibility={changeVisibility} id={i} />
+                            <FlightCard flight={f} changeVisibility={changeVisibility} id={i} state={state} />
                         </Col>
                     ) : (
                         viewDetails === i && (

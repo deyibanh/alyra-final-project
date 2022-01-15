@@ -88,7 +88,7 @@ function App() {
         (async () => {
             try {
                 window.ethereum.on("accountsChanged", async function (accounts) {
-                    console.log(`Account changed to ${accounts[0]}`);
+                    //console.log(`Account changed to ${accounts[0]}`);
                     await reload();
                 });
 

@@ -13,12 +13,7 @@ abstract contract DroneFlight is Ownable {
     // 1. State variables
     IConopsManager private conopsManager;
     IAccessControl private accessControl;
-
     bool internal allowedToFlight;
-    // Drone events
-    // bool private droneParcelPickUp;
-    // bool private droneTakeOff;
-
     StarwingsDataLib.FlightData internal datas;
     FlightState internal droneFlightState;
     FlightState internal pilotFlightState;
@@ -27,19 +22,21 @@ abstract contract DroneFlight is Ownable {
 
     // 2. Events
 
-    // event PreFlightCheck(CheckType _checkType);
-    // event PostFlightCheck(CheckType _checkType);
-    // event AirRiskValidated(uint256 _airRiskId);
-    // event AirRiskCanceled(uint256 _airRiskId);
+    event PreFlightCheck(CheckType _checkType);
+    event PostFlightCheck(CheckType _checkType);
+    event AirRiskValidated(uint256 _airRiskId);
+    event AirRiskCanceled(uint256 _airRiskId);
     event CancelFlight();
     event ChangeFlightStatus(FlightState _status);
 
     // 3. Modifiers
     /**
-     * @dev Check the msg.sender's role.
+     *  @notice Modifier to restrict function to specific role
+     *  @dev Use the library to retrieve bytes32 values when calling the modifier
+     *  @param _role The role authorize to access the function
      */
     modifier onlyRole(bytes32 _role) {
-        require(accessControl.hasRole(_role, msg.sender), "Not role");
+        require(accessControl.hasRole(_role, msg.sender), "Access Refused");
         _;
     }
 
@@ -105,37 +102,44 @@ abstract contract DroneFlight is Ownable {
         accessControl = IAccessControl(_accessControlAddress);
     }
 
-    function setFlightData(StarwingsDataLib.FlightData memory data) internal {
-        // console.log("[Contract Debug] owner:%s", owner());
-        // console.log("[Contract Debug] sender:%s", msg.sender);
-        // console.log(
-        //     "[Contract Debug] role:%s",
-        //     accessControl.hasRole(StarwingsDataLib.PILOT_ROLE, msg.sender)
-        // );
-        datas.pilot = data.pilot;
-        datas.drone = data.drone;
-        datas.conopsId = data.conopsId;
+    /**
+     *  @notice Setup the data for the flight
+     *  @dev Check the StarwingsLibrary to view the struture
+     *  @param _data A FlightData structure,
+     */
+    function setFlightData(StarwingsDataLib.FlightData memory _data) internal {
+        datas.pilot = _data.pilot;
+        datas.drone = _data.drone;
+        datas.conopsId = _data.conopsId;
 
-        datas.depart = data.depart;
-        datas.destination = data.destination;
-        datas.flightDuration = data.flightDuration;
-        datas.flightDatetime = data.flightDatetime;
+        datas.depart = _data.depart;
+        datas.destination = _data.destination;
+        datas.flightDuration = _data.flightDuration;
+        datas.flightDatetime = _data.flightDatetime;
         _setupAirRisk();
     }
 
     // 6. Fallback — Receive function
     // 7. External visible functions
-
+    /**
+     *  @notice Do the preflight checks of a certain type
+     *  @param _checkType The Checktype to check
+     */
     function preFlightChecks(CheckType _checkType)
         external
         onlyRole(StarwingsDataLib.PILOT_ROLE)
     {
         require(!preChecks.checkType[_checkType], "already checked");
         preChecks.checkType[_checkType] = true;
+        _allowToFlight();
 
-        // emit PreFlightCheck(_checkType);
+        emit PreFlightCheck(_checkType);
     }
 
+    /**
+     *  @notice Do the postflight checks of a certain type
+     *  @param _checkType The Checktype to check
+     */
     function postFlightChecks(CheckType _checkType)
         external
         onlyRole(StarwingsDataLib.PILOT_ROLE)
@@ -143,9 +147,13 @@ abstract contract DroneFlight is Ownable {
         require(!postChecks.checkType[_checkType], "already checked");
         postChecks.checkType[_checkType] = true;
 
-        // emit PostFlightCheck(_checkType);
+        emit PostFlightCheck(_checkType);
     }
 
+    /**
+     *  @notice Return if a specific preflight check has been done
+     *  @param _checkType The Checktype to check
+     */
     function getPreFlightChecks(CheckType _checkType)
         external
         view
@@ -154,6 +162,10 @@ abstract contract DroneFlight is Ownable {
         return preChecks.checkType[_checkType];
     }
 
+    /**
+     *  @notice Return if a specific postflight check has been done
+     *  @param _checkType The Checktype to check
+     */
     function getPostFlightChecks(CheckType _checkType)
         external
         view
@@ -162,51 +174,10 @@ abstract contract DroneFlight is Ownable {
         return postChecks.checkType[_checkType];
     }
 
-    // function checkEngine()
-    //     external
-    //     onlyRole(StarwingsDataLib.PILOT_ROLE)
-    //     returns (bool)
-    // {
-    //     require(!engineCheck, "engine already checked");
-    //     engineCheck = true;
-
-    //     return engineCheck;
-    // }
-
-    // function getEngineCheck() external view returns (bool) {
-    //     return engineCheck;
-    // }
-
-    // function checkBattery()
-    //     external
-    //     onlyRole(StarwingsDataLib.PILOT_ROLE)
-    //     returns (bool)
-    // {
-    //     require(!batteryCheck, "battery already checked");
-    //     batteryCheck = true;
-
-    //     return batteryCheck;
-    // }
-
-    // function getBatteryCheck() external view returns (bool) {
-    //     return batteryCheck;
-    // }
-
-    // function checkControlStation()
-    //     external
-    //     onlyRole(StarwingsDataLib.PILOT_ROLE)
-    //     returns (bool)
-    // {
-    //     require(!controlStationCheck, "station already checked");
-    //     controlStationCheck = true;
-
-    //     return controlStationCheck;
-    // }
-
-    // function getControlStationCheck() external view returns (bool) {
-    //     return controlStationCheck;
-    // }
-
+    /**
+     *  @notice Add a new risk event
+     *  @param _event The event to be add
+     */
     function newRiskEvent(Event memory _event)
         external
         onlyRole(StarwingsDataLib.DRONE_ROLE)
@@ -214,6 +185,10 @@ abstract contract DroneFlight is Ownable {
         riskEvent.push(_event);
     }
 
+    /**
+     *  @notice Return the specified risk event
+     *  @param _eventId The id of event
+     */
     function viewRiskEvent(uint256 _eventId)
         external
         view
@@ -222,6 +197,10 @@ abstract contract DroneFlight is Ownable {
         return riskEvent[_eventId];
     }
 
+    /**
+     *  @notice Validate the air Risk of specified id
+     *  @param _airRiskId The id of airRisk
+     */
     function validateAirRisk(uint256 _airRiskId)
         external
         onlyRole(StarwingsDataLib.PILOT_ROLE)
@@ -230,9 +209,13 @@ abstract contract DroneFlight is Ownable {
         airRisks[_airRiskId].validated = true;
         _allowToFlight();
 
-        // emit AirRiskValidated(_airRiskId);
+        emit AirRiskValidated(_airRiskId);
     }
 
+    /**
+     *  @notice Cancel the air Risk of specified id
+     *  @param _airRiskId The id of airRisk
+     */
     function cancelAirRisk(uint256 _airRiskId)
         external
         onlyRole(StarwingsDataLib.PILOT_ROLE)
@@ -241,9 +224,12 @@ abstract contract DroneFlight is Ownable {
         airRisks[_airRiskId].validated = false;
         _allowToFlight();
 
-        // emit AirRiskCanceled(_airRiskId);
+        emit AirRiskCanceled(_airRiskId);
     }
 
+    /**
+     *  @notice Return all air Risk
+     */
     function viewAirRisks()
         external
         view
@@ -252,6 +238,11 @@ abstract contract DroneFlight is Ownable {
         return airRisks;
     }
 
+    /**
+     *  @notice Cancel the flight
+     *  @dev This function has to be call to cancel the flight.
+     *  Using changeFlightStatus is not possible
+     */
     function cancelFlight() external onlyRole(StarwingsDataLib.PILOT_ROLE) {
         require(
             pilotFlightState == FlightState.PreFlight,
@@ -265,6 +256,13 @@ abstract contract DroneFlight is Ownable {
         emit CancelFlight();
     }
 
+    /**
+     *  @notice Change the status of the flight
+     *  @dev Only Pilot and Drone can call this function
+     *       droneFlightState or pilotFlightState will be 
+     *       called depending of the msg.sender
+     *  @param _status The uint of the FlightState
+     */
     function changeFlightStatus(uint256 _status) external {
         bool isPilot = accessControl.hasRole(
             StarwingsDataLib.PILOT_ROLE,
@@ -309,10 +307,16 @@ abstract contract DroneFlight is Ownable {
         emit ChangeFlightStatus(FlightState(_status));
     }
 
+    /**
+     *  @notice Return the flight status for the drone
+     */
     function viewDroneFlightstatus() external view returns (FlightState) {
         return droneFlightState;
     }
 
+    /**
+     *  @notice Return the flight status for the pilot
+     */
     function viewPilotFlightstatus() external view returns (FlightState) {
         return pilotFlightState;
     }
@@ -320,6 +324,9 @@ abstract contract DroneFlight is Ownable {
     // 8. Public visible functions
     // 9. Internal visible functions
 
+    /**
+     *  @dev Retrieve air AirRisk from the conops and store them
+     */
     function _setupAirRisk() internal {
         StarwingsDataLib.SimpleConops memory conops = conopsManager.viewConops(
             datas.conopsId
@@ -331,16 +338,42 @@ abstract contract DroneFlight is Ownable {
         }
     }
 
+    /**
+     *  @dev Change the droneFlightState
+     *  @param _value The new FlightState
+     */
     function _changeDroneFlightState(FlightState _value) internal {
         droneFlightState = _value;
     }
 
+    /**
+     *  @dev Change the pilotFlightState
+     *  @param _value The new FlightState
+     */
     function _changePilotFlightState(FlightState _value) internal {
         pilotFlightState = _value;
     }
 
+    /**
+     *  @dev call this function if a state change can authorize or not a fly
+     */
+    function _allowToFlight() internal {
+        bool standardAllowed = _standardAllowToFlight();
+        bool customAllowed = _customAllowToFlight();
+
+        allowedToFlight = (standardAllowed && customAllowed);
+    }
+
+    /**
+     *  @dev internal control to see if flying can start
+     */
     function _standardAllowToFlight() internal view returns (bool) {
         bool allowed = true;
+
+        allowed =
+            preChecks.checkType[CheckType(0)] &&
+            preChecks.checkType[CheckType(1)] &&
+            preChecks.checkType[CheckType(2)];
 
         if (pilotFlightState == FlightState.Canceled) {
             allowed = false;
@@ -355,12 +388,10 @@ abstract contract DroneFlight is Ownable {
         return allowed;
     }
 
-    function _allowToFlight() internal {
-        bool standardAllowed = _standardAllowToFlight();
-        bool customAllowed = _customAllowToFlight();
-
-        allowedToFlight = (standardAllowed && customAllowed);
-    }
-
+    /**
+     *  @dev this function is called by _allowToFlight()
+     *  It allow each DroneFlight (DroneDelivery, DroneTaxi, ...) to
+     *  have their proper control/authotirzation
+     */
     function _customAllowToFlight() internal virtual returns (bool);
 }
