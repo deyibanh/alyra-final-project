@@ -338,6 +338,11 @@ async function simulate() {
         DroneDelivery.connect(provider).on("ParcelDelivered", () => {
             console.log(`EVENT - Parcel has been delivered.`);
         });
+        DroneDelivery.connect(provider).on("CheckpointAdded", (checkpoint) => {
+            console.log(
+                `EVENT - Checkpoint (lat, long, time) ${checkpoint} added.`
+            );
+        });
 
         await DroneDelivery.connect(pilot1Wallet).preFlightChecks(0);
         const preFlightCheckMotor = await DroneDelivery.connect(
@@ -406,6 +411,21 @@ async function simulate() {
         // function viewRiskEvent(uint256 _eventId)
         // cancelFlight
         // DroneFlight.changeFlightStatus(uint256 _status)
+        console.log(`Adding checkpoint lat:23; long:27`);
+        await DroneDelivery.connect(drone1Wallet).addCheckpoint({
+            latitude: 23,
+            longitude: 27,
+        });
+        console.log(`Adding checkpoint lat:24; long:27`);
+        await DroneDelivery.connect(drone1Wallet).addCheckpoint({
+            latitude: 24,
+            longitude: 27,
+        });
+        console.log(`Adding checkpoint lat:25; long:27`);
+        await DroneDelivery.connect(drone1Wallet).addCheckpoint({
+            latitude: 25,
+            longitude: 27,
+        });
 
         console.log("9) Drone deliver parcel");
         await DroneDelivery.connect(drone1Wallet).deliver();
