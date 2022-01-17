@@ -12,18 +12,24 @@ import {
     ListGroup,
     Button,
     Form,
+    Badge,
 } from "react-bootstrap";
 import deliveredLogo from "../../img/delivered.png";
 import pickedupLogo from "../../img/drone.png";
-import engineLogo from "../../img/engine.png";
-import batteryLogo from "../../img/battery.png";
-import telecomLogo from "../../img/telecom.png";
+import engineRedLogo from "../../img/engine-red.png";
+import engineGreenLogo from "../../img/engine-green.png";
+import batteryRedLogo from "../../img/battery-red.png";
+import batteryGreenLogo from "../../img/battery-green.png";
+import telecomRedLogo from "../../img/telecom-red.png";
+import telecomGreenLogo from "../../img/telecom-green.png";
 import droneLogo from "../../img/drone-solo.png";
 import pilotLogo from "../../img/pilot.png";
 import cautionLogo from "../../img/caution.png";
 import FlightState from "./FlightState";
 import { ethers } from "ethers";
+import networksExplorer from "../../utils/networks";
 import DroneDeliveryArtifact from "../../artifacts/contracts/DroneDelivery.sol/DroneDelivery.json";
+import { Link } from "react-router-dom";
 
 const flightState = {
     0: "Pre flight",
@@ -40,12 +46,28 @@ const airRiskType = {
     2: "Military Base",
 };
 
+const checks = {
+    0: "Engine",
+    1: "Battery",
+    2: "Telecom",
+};
+
+const eventsName = [
+    "PreFlightCheck",
+    "PostFlightCheck",
+    "AirRiskValidated",
+    "AirRiskCanceled",
+    "CancelFlight",
+    "ChangeFlightStatus",
+];
+
 function FlightCard({ flight, changeVisibility, id, state }) {
     const [flightInfo, setFlightInfo] = useState();
     const [show, setShow] = useState(false);
     const piloFlightStateRef = useRef();
     const [droneDelivery, setDroneDelivery] = useState();
     const [parcelState, setParcelState] = useState(0);
+    const [events, setEvents] = useState([]);
 
     useEffect(() => {
         if (state.provider) {
@@ -55,6 +77,27 @@ function FlightCard({ flight, changeVisibility, id, state }) {
             setDroneDelivery({ provider, signer });
         }
     }, [state]);
+
+    useEffect(() => {
+        if (droneDelivery) {
+            let logs = [];
+            (async () => {
+                // const filter = await droneDelivery.provider.filters.PreFlightCheck();
+                for (let eventName of eventsName) {
+                    const log = await droneDelivery.provider.queryFilter(eventName);
+                    logs = [...logs, ...log];
+                }
+                logs.sort((a, b) => a.blockNumber - b.blockNumber);
+                setEvents(logs);
+            })();
+        }
+    }, [droneDelivery]);
+
+    // useEffect(() => {
+    //     let eventsOrdered = events.sort((a, b) => a.blockNumber - b.blockNumber);
+    // }, [events]);
+
+    console.log(events);
 
     useEffect(() => {
         const state = flight[1] ? (flight[2] ? 2 : 1) : 0;
@@ -92,6 +135,27 @@ function FlightCard({ flight, changeVisibility, id, state }) {
         await tx;
     };
 
+    const eventValue = (e) => {
+        switch (e.event) {
+            case "PreFlightCheck":
+                return checks[e.args[0]];
+            case "PostFlightCheck":
+                return checks[e.args[0]];
+            case "AirRiskValidated":
+                return flight[8][ethers.BigNumber.from(e.args[0]).toString()].name;
+            case "AirRiskCanceled":
+            // return e.args[0];
+            case "CancelFlight":
+                return "";
+            case "ChangeFlightStatus":
+                return flightState[e.args[0]];
+            default:
+                break;
+        }
+    };
+
+    console.log(ethers);
+    console.log(state.provider._network.chainId);
     return (
         <>
             <Card>
@@ -111,22 +175,90 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                                     )
                                 )}
                                 {flight[0].substring(0, 8)}...
+                                <h6>
+                                    <OverlayTrigger
+                                        placement="right"
+                                        trigger="click"
+                                        rootClose
+                                        overlay={
+                                            <Popover id="popover-basic">
+                                                <Popover.Header as="h6">Logs</Popover.Header>
+                                                <Popover.Body>
+                                                    <ListGroup variant="flush">
+                                                        {events.map((e, i) => (
+                                                            <ListGroup.Item key={i}>
+                                                                {e.event}: {eventValue(e)}{" "}
+                                                                {state.provider._network.chainId !== 1337 && (
+                                                                    <a
+                                                                        href={
+                                                                            networksExplorer[
+                                                                                state.provider._network.chainId
+                                                                            ] +
+                                                                            "/tx/" +
+                                                                            e.transactionHash
+                                                                        }
+                                                                    >
+                                                                        ds
+                                                                    </a>
+                                                                )}
+                                                            </ListGroup.Item>
+                                                        ))}
+                                                    </ListGroup>
+                                                </Popover.Body>
+                                            </Popover>
+                                        }
+                                    >
+                                        <Badge pill bg="secondary">
+                                            logs
+                                        </Badge>
+                                    </OverlayTrigger>
+                                </h6>
                             </Stack>
                         </Col>
                         <Col sm={4}>
                             <Stack gap={2} direction="horizontal">
                                 <h6>PreFlight Checks:</h6>
-                                {flight[9] && <Image src={engineLogo} alt="" fluid style={{ height: "1.2rem" }} />}
-                                {flight[10] && <Image src={batteryLogo} alt="" fluid style={{ height: "1.2rem" }} />}
-                                {flight[11] && <Image src={telecomLogo} alt="" fluid style={{ height: "1.2rem" }} />}
+                                <Image
+                                    src={flight[9] ? engineGreenLogo : engineRedLogo}
+                                    alt=""
+                                    fluid
+                                    style={{ height: "1.2rem" }}
+                                />
+                                <Image
+                                    src={flight[10] ? batteryGreenLogo : batteryRedLogo}
+                                    alt=""
+                                    fluid
+                                    style={{ height: "1.2rem" }}
+                                />
+                                <Image
+                                    src={flight[11] ? telecomGreenLogo : telecomRedLogo}
+                                    alt=""
+                                    fluid
+                                    style={{ height: "1.2rem" }}
+                                />
                             </Stack>
                         </Col>
                         <Col sm={4}>
                             <Stack gap={2} direction="horizontal">
                                 <h6>PostFlight Checks:</h6>
-                                {flight[12] && <Image src={engineLogo} alt="" fluid style={{ height: "1.2rem" }} />}
-                                {flight[13] && <Image src={batteryLogo} alt="" fluid style={{ height: "1.2rem" }} />}
-                                {flight[14] && <Image src={telecomLogo} alt="" fluid style={{ height: "1.2rem" }} />}
+                                <Image
+                                    src={flight[12] ? engineGreenLogo : engineRedLogo}
+                                    alt=""
+                                    fluid
+                                    style={{ height: "1.2rem" }}
+                                />
+                                <Image
+                                    src={flight[13] ? batteryGreenLogo : batteryRedLogo}
+                                    alt=""
+                                    fluid
+                                    style={{ height: "1.2rem" }}
+                                />
+                                <Image
+                                    src={flight[14] ? telecomGreenLogo : telecomRedLogo}
+                                    alt=""
+                                    fluid
+                                    style={{ height: "1.2rem" }}
+                                />
                             </Stack>
                         </Col>
                         <Col sm={1}>

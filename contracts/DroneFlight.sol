@@ -33,6 +33,7 @@ abstract contract DroneFlight {
     event AirRiskCanceled(uint256 _airRiskId);
     event CancelFlight();
     event ChangeFlightStatus(FlightState _status);
+    event RiskEvent(Event _status);
     event CheckpointAdded(Checkpoint checkpoint);
 
     /**
@@ -206,6 +207,8 @@ abstract contract DroneFlight {
         onlyDrone
     {
         riskEvent.push(_event);
+
+        emit RiskEvent(_event);
     }
 
     /**
