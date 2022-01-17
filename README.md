@@ -74,7 +74,7 @@ Developers documentation:
 -   [Avoiding Common Attacks](./docs/developers/avoiding_common_attacks.md)
 -   [Deployed Addresses](./docs/developers/deployed_addresses.md)
 -   [Design Pattern Decisions](./docs/developers/design_pattern_decisions.md)
--   [Natspec](./docs/developers/natspec.md)
+-   [Natspec](./docs/natspec)
 -   [Test Explication](./docs/developers/test_explication.md)
 
 &nbsp;

@@ -3,7 +3,7 @@
 import React from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
-import NavWalletStatus from "./NavWalletStatus.js";
+import NavWalletStatus from "./NavWalletStatus.jsx";
 import "./Header.css";
 
 function Header(props) {
@@ -25,6 +25,11 @@ function Header(props) {
                             )}
                             {state.roles &&
                                 (state.roles.hasDefaultAdminRole ||
+                                    state.roles.hasAdminRole ) && (
+                                <Nav.Link href="/dashboard">Dashboard</Nav.Link>
+                            )}
+                            {state.roles &&
+                                (state.roles.hasDefaultAdminRole ||
                                     state.roles.hasAdminRole ||
                                     state.roles.hasPilotRole) && <Nav.Link href="/deliveries">Deliveries</Nav.Link>}
                             {state.roles &&
@@ -32,12 +37,12 @@ function Header(props) {
                                     state.roles.hasAdminRole ||
                                     state.roles.hasPilotRole ||
                                     state.roles.hasDroneRole) && <Nav.Link href="/flights">Flights</Nav.Link>}
-                            {state.roles &&
+                            {/* {state.roles &&
                                 (state.roles.hasDefaultAdminRole ||
                                     state.roles.hasAdminRole ||
                                     state.roles.hasPilotRole) && (
                                 <Nav.Link href="/drone-simulator">Drone Simulator</Nav.Link>
-                            )}
+                            )} */}
                         </Nav>
                         <NavWalletStatus state={state} />
                     </Navbar.Collapse>
