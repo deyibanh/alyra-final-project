@@ -4,6 +4,7 @@ import PilotsContent from "../components/AdminPanel/PilotsContent";
 import DronesContent from "../components/AdminPanel/DronesContent";
 import ConopsContent from "../components/AdminPanel/ConopsContent";
 import "./AdminPanel.css";
+import DashboardContent from "../components/Dashboard/DashboardContent";
 
 function AdminPanel(props) {
     const state = props.state;
@@ -12,27 +13,34 @@ function AdminPanel(props) {
 
     return (
         <div className="AdminPanel">
-            <h1>Admin panel</h1>
+            <h1>Dashboard</h1>
 
             <div className="AdminMenu">
-                <Tab.Container id="left-tabs-example" defaultActiveKey="pilots">
+                <Tab.Container id="left-tabs-example" defaultActiveKey="overview">
                     <Row>
                         <Col sm={3}>
                             <Nav variant="pills" className="flex-column">
                                 <Nav.Item>
+                                    <Nav.Link eventKey="overview">OverView</Nav.Link>
+                                </Nav.Item>
+                                {/* <Nav.Item>
                                     <Nav.Link eventKey="pilots">Pilots</Nav.Link>
                                 </Nav.Item>
                                 <Nav.Item>
                                     <Nav.Link eventKey="drones">Drones</Nav.Link>
-                                </Nav.Item>
-                                <Nav.Item>
-                                    <Nav.Link eventKey="conops">Conops</Nav.Link>
-                                </Nav.Item>
+                                </Nav.Item> */}
                             </Nav>
                         </Col>
                         <Col sm={9}>
                             <Tab.Content>
-                                <Tab.Pane eventKey="pilots">
+                                <Tab.Pane eventKey="overview">
+                                    <DashboardContent
+                                        state={state}
+                                        StarwingsMasterProvider={StarwingsMasterProvider}
+                                        StarwingsMasterSigner={StarwingsMasterSigner}
+                                    />
+                                </Tab.Pane>
+                                {/* <Tab.Pane eventKey="pilots">
                                     <PilotsContent
                                         state={state}
                                         StarwingsMasterProvider={StarwingsMasterProvider}
@@ -45,10 +53,7 @@ function AdminPanel(props) {
                                         StarwingsMasterProvider={StarwingsMasterProvider}
                                         StarwingsMasterSigner={StarwingsMasterSigner}
                                     ></DronesContent>
-                                </Tab.Pane>
-                                <Tab.Pane eventKey="conops">
-                                    <ConopsContent state={state} />
-                                </Tab.Pane>
+                                </Tab.Pane> */}
                             </Tab.Content>
                         </Col>
                     </Row>

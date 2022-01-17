@@ -20,7 +20,7 @@ describe("SWAccessControl", function () {
         await accessControl.deployed();
     });
 
-    describe("default admin", function () {
+    describe("Default Admin", function () {
         it("deployer has default admin role", async function () {
             expect(
                 await accessControl.hasRole(DEFAULT_ADMIN_ROLE, admin.address)
@@ -40,7 +40,7 @@ describe("SWAccessControl", function () {
         });
     });
 
-    describe("granting", function () {
+    describe("Granting", function () {
         beforeEach(async function () {
             await accessControl.grantRole(ROLE, authorized.address);
         });
@@ -61,7 +61,7 @@ describe("SWAccessControl", function () {
         });
     });
 
-    describe("revoking", function () {
+    describe("Revoking", function () {
         it("roles that are not had can be revoked", async function () {
             expect(
                 await accessControl.hasRole(ROLE, authorized.address)
@@ -107,7 +107,7 @@ describe("SWAccessControl", function () {
         });
     });
 
-    describe("renouncing", function () {
+    describe("Renouncing", function () {
         it("roles that are not had can be renounced", async function () {
             await expect(
                 accessControl
@@ -157,7 +157,7 @@ describe("SWAccessControl", function () {
         });
     });
 
-    describe("setting role admin", function () {
+    describe("Setting Role Admin", function () {
         beforeEach(async function () {
             await expect(accessControl.setRoleAdmin(ROLE, OTHER_ROLE))
                 .to.emit(accessControl, "RoleAdminChanged")

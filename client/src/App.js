@@ -9,6 +9,7 @@ import Deliveries from "./pages/Deliveries";
 import Flights from "./pages/Flights";
 import NotFound from "./pages/NotFound";
 import DroneSimulator from "./pages/DroneSimulator";
+import Dashboard from "./pages/Dashboard";
 import getEthersProvider from "./utils/getEthers";
 import "./App.css";
 import { Container } from "react-bootstrap";
@@ -136,6 +137,18 @@ function App() {
                                 path="/admin-panel"
                                 element={
                                     <AdminPanel
+                                        state={state}
+                                        StarwingsMasterProvider={StarwingsMasterProvider}
+                                        StarwingsMasterSigner={StarwingsMasterSigner}
+                                    />
+                                }
+                            />
+                        )}
+                        {state.roles && (state.roles.hasAdminRole || state.roles.hasDefaultAdminRole) && (
+                            <Route
+                                path="/dashboard"
+                                element={
+                                    <Dashboard
                                         state={state}
                                         StarwingsMasterProvider={StarwingsMasterProvider}
                                         StarwingsMasterSigner={StarwingsMasterSigner}

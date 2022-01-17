@@ -24,7 +24,7 @@ describe("Conops", function () {
         await deploy();
     });
 
-    it("Should return the added conops", async () => {
+    it("should return the added conops", async () => {
         expect((await conops.viewAllConops()).length).to.equal(0);
 
         const addConopsTx = await conops.addConops(
@@ -81,7 +81,7 @@ describe("Conops", function () {
     });
 });
 
-describe("Conops activation", () => {
+describe("Conops Activation", () => {
     before(async () => {
         await deploy();
         const addConopsTx = await conops.addConops(

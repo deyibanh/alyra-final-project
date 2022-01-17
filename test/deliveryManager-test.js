@@ -35,7 +35,7 @@ const deploy = async () => {
     await deliveryManager.deployed();
 };
 
-describe("== DeliveryManager", function () {
+describe("DeliveryManager", function () {
     let currentDeliveryId = "";
 
     before(async () => {
@@ -95,7 +95,7 @@ describe("== DeliveryManager", function () {
         expect(result.deliveryId).to.equal(currentDeliveryId);
     });
 
-    it("should updateStatus", async () => {
+    it("should update status", async () => {
         const result = await deliveryManager.getDelivery(currentDeliveryId);
         const oldStatus = result.state;
         const newStatus = 1;
