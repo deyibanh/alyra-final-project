@@ -1,12 +1,16 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
 import "./DroneFlight.sol";
 import "./interfaces/IStarwingsMaster.sol";
 import "./interfaces/IDeliveryManager.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
-import "hardhat/console.sol";
 
+/**
+ *  @title DroneDelivery
+ *  @author Starwings
+ *  @notice This contract iniherits DroneFlight + implement the logic for drones doing deliveries
+ */
 contract DroneDelivery is DroneFlight {
     string private deliveryId;
     address private deliveryManager;
@@ -24,10 +28,7 @@ contract DroneDelivery is DroneFlight {
         address _conopsManager,
         address _accessControlAddress,
         address _starwingsMaster
-    )
-        // StarwingsDataLib.FlightData memory data
-        DroneFlight(_conopsManager, _accessControlAddress)
-    {
+    ) DroneFlight(_conopsManager, _accessControlAddress) {
         starwingsMaster = _starwingsMaster;
         deliveryManager = _deliveryManager;
         deliveryId = _deliveryId;
@@ -42,6 +43,7 @@ contract DroneDelivery is DroneFlight {
         onlyRole(StarwingsDataLib.PILOT_ROLE)
     {
         require(!isInit, "flight already init");
+        require(_data.pilot.pilotAddress == msg.sender, "Init for self only");
         setFlightData(_data);
         isInit = true;
         IStarwingsMaster(starwingsMaster).addDroneFlight(
@@ -66,7 +68,7 @@ contract DroneDelivery is DroneFlight {
     /**
      *  @notice Grab the parcel
      */
-    function pickUp() external onlyRole(StarwingsDataLib.DRONE_ROLE) {
+    function pickUp() external onlyRole(StarwingsDataLib.DRONE_ROLE) onlyDrone {
         require(!droneParcelPickedUp, "parcel already pickedUp");
         droneParcelPickedUp = true;
         _allowToFlight();
@@ -77,7 +79,11 @@ contract DroneDelivery is DroneFlight {
     /**
      *  @notice Drop the parcel
      */
-    function deliver() external onlyRole(StarwingsDataLib.DRONE_ROLE) {
+    function deliver()
+        external
+        onlyRole(StarwingsDataLib.DRONE_ROLE)
+        onlyDrone
+    {
         require(droneParcelPickedUp, "parcel not picked up before");
         droneParcelDelivered = true;
 

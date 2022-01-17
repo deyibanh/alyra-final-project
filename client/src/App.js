@@ -9,6 +9,7 @@ import Deliveries from "./pages/Deliveries";
 import Flights from "./pages/Flights";
 import NotFound from "./pages/NotFound";
 import DroneSimulator from "./pages/DroneSimulator";
+import Dashboard from "./pages/Dashboard";
 import getEthersProvider from "./utils/getEthers";
 import "./App.css";
 import { Container } from "react-bootstrap";
@@ -33,8 +34,11 @@ function App() {
     const [StarwingsMasterSigner, setStarwingsMasterSigner] = useState();
     const [SWAccessControl, setSWAccessControl] = useState();
 
-    const reload = async () => {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const reload = async (firstTime) => {
+        let provider;
+        if (firstTime) provider = await getEthersProvider();
+        else provider = new ethers.providers.Web3Provider(window.ethereum);
+
         const signer = provider.getSigner();
         const accounts = await provider.listAccounts();
 
@@ -89,10 +93,10 @@ function App() {
             try {
                 window.ethereum.on("accountsChanged", async function (accounts) {
                     //console.log(`Account changed to ${accounts[0]}`);
-                    await reload();
+                    await reload(false);
                 });
 
-                await reload();
+                await reload(true);
             } catch (error) {
                 console.error(error);
             }
@@ -133,6 +137,18 @@ function App() {
                                 path="/admin-panel"
                                 element={
                                     <AdminPanel
+                                        state={state}
+                                        StarwingsMasterProvider={StarwingsMasterProvider}
+                                        StarwingsMasterSigner={StarwingsMasterSigner}
+                                    />
+                                }
+                            />
+                        )}
+                        {state.roles && (state.roles.hasAdminRole || state.roles.hasDefaultAdminRole) && (
+                            <Route
+                                path="/dashboard"
+                                element={
+                                    <Dashboard
                                         state={state}
                                         StarwingsMasterProvider={StarwingsMasterProvider}
                                         StarwingsMasterSigner={StarwingsMasterSigner}

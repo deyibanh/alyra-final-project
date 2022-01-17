@@ -17,28 +17,16 @@ let drone2;
 async function deploy() {
     [owner, notAdmin, pilot, pilot2, drone, drone2] = await ethers.getSigners();
 
-    const SWAccessControlArtifact = await ethers.getContractFactory(
-        "SWAccessControl"
-    );
-    const ConopsManagerArtifact = await ethers.getContractFactory(
-        "ConopsManager"
-    );
-    const DeliveryManagerArtifact = await ethers.getContractFactory(
-        "DeliveryManager"
-    );
-    const StarwingsMasterArtifact = await ethers.getContractFactory(
-        "StarwingsMaster"
-    );
-    const DroneFlightFactoryArtifact = await ethers.getContractFactory(
-        "DroneFlightFactory"
-    );
+    const SWAccessControlArtifact = await ethers.getContractFactory("SWAccessControl");
+    const ConopsManagerArtifact = await ethers.getContractFactory("ConopsManager");
+    const DeliveryManagerArtifact = await ethers.getContractFactory("DeliveryManager");
+    const StarwingsMasterArtifact = await ethers.getContractFactory("StarwingsMaster");
+    const DroneFlightFactoryArtifact = await ethers.getContractFactory("DroneFlightFactory");
 
     SWAccessControl = await SWAccessControlArtifact.deploy();
     await SWAccessControl.deployed();
     ConopsManager = await ConopsManagerArtifact.deploy(SWAccessControl.address);
-    DeliveryManager = await DeliveryManagerArtifact.deploy(
-        SWAccessControl.address
-    );
+    DeliveryManager = await DeliveryManagerArtifact.deploy(SWAccessControl.address);
     await ConopsManager.deployed();
     await DeliveryManager.deployed();
     StarwingsMaster = await StarwingsMasterArtifact.deploy(
@@ -47,10 +35,7 @@ async function deploy() {
         DeliveryManager.address
     );
     await StarwingsMaster.deployed();
-    DroneFlightFactory = await DroneFlightFactoryArtifact.deploy(
-        SWAccessControl.address,
-        StarwingsMaster.address
-    );
+    DroneFlightFactory = await DroneFlightFactoryArtifact.deploy(SWAccessControl.address, StarwingsMaster.address);
     await DroneFlightFactory.deployed();
 }
 
@@ -61,9 +46,9 @@ describe("StarwingsMaster", function () {
 
     context("Get DroneFlight", function () {
         it("should not get the DroneFlightFactory address if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).getDroneFlightFactoryAddress()
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).getDroneFlightFactoryAddress()).to.be.revertedWith(
+                "Access refused"
+            );
         });
 
         it("should set the DroneFlightFactory address.", async function () {
@@ -79,9 +64,7 @@ describe("StarwingsMaster", function () {
 
         it("should not set the DroneFlightFactory address if sender has not the admin role.", async function () {
             await expect(
-                StarwingsMaster.connect(notAdmin).setDroneFlightFactoryAddress(
-                    DroneFlightFactory.address
-                )
+                StarwingsMaster.connect(notAdmin).setDroneFlightFactoryAddress(DroneFlightFactory.address)
             ).to.be.revertedWith("Access refused");
         });
 
@@ -92,15 +75,15 @@ describe("StarwingsMaster", function () {
         });
 
         it("should not get the list of DroneFlight address if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).getDroneFlightAddressList()
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).getDroneFlightAddressList()).to.be.revertedWith(
+                "Access refused"
+            );
         });
 
         it("should not get the DroneFlight address if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).getDroneFlightAddress(0)
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).getDroneFlightAddress(0)).to.be.revertedWith(
+                "Access refused"
+            );
         });
     });
 
@@ -242,30 +225,24 @@ describe("StarwingsMaster", function () {
 
     context("Pilot", function () {
         it("should not get the list of Pilot if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).getPilotList()
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).getPilotList()).to.be.revertedWith("Access refused");
         });
 
         it("should not get the Pilot if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).getPilot(
-                    ethers.constants.AddressZero
-                )
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).getPilot(ethers.constants.AddressZero)).to.be.revertedWith(
+                "Access refused"
+            );
         });
 
         it("should not get the Pilot if Pilot index out of the list size.", async function () {
-            await expect(
-                StarwingsMaster.getPilot(ethers.constants.AddressZero)
-            ).to.be.revertedWith("Out of size index.");
+            await expect(StarwingsMaster.getPilot(ethers.constants.AddressZero)).to.be.revertedWith(
+                "Out of size index."
+            );
         });
 
         it("should not get the Pilot if Pilot not exist.", async function () {
             await StarwingsMaster.addPilot(pilot.address, "Pilot Name");
-            await expect(
-                StarwingsMaster.getPilot(ethers.constants.AddressZero)
-            ).to.be.revertedWith("Pilot not found.");
+            await expect(StarwingsMaster.getPilot(ethers.constants.AddressZero)).to.be.revertedWith("Pilot not found.");
         });
 
         it("should add a Pilot if it is a new address.", async function () {
@@ -273,9 +250,7 @@ describe("StarwingsMaster", function () {
             let result = await StarwingsMaster.getPilotList();
             expect(result).to.eql(expectResult);
 
-            await expect(
-                StarwingsMaster.addPilot(pilot.address, "Pilot Name")
-            ).to.emit(StarwingsMaster, "PilotAdded");
+            await expect(StarwingsMaster.addPilot(pilot.address, "Pilot Name")).to.emit(StarwingsMaster, "PilotAdded");
 
             result = await StarwingsMaster.getPilotList();
             expect(result.length).to.equal(1);
@@ -288,9 +263,10 @@ describe("StarwingsMaster", function () {
             result = await StarwingsMaster.getPilotIndex(pilot.address);
             expect(result.toNumber()).to.equal(0);
 
-            await expect(
-                StarwingsMaster.addPilot(pilot2.address, "Pilot2 Name")
-            ).to.emit(StarwingsMaster, "PilotAdded");
+            await expect(StarwingsMaster.addPilot(pilot2.address, "Pilot2 Name")).to.emit(
+                StarwingsMaster,
+                "PilotAdded"
+            );
 
             result = await StarwingsMaster.getPilotList();
             expect(result.length).to.equal(2);
@@ -309,9 +285,7 @@ describe("StarwingsMaster", function () {
             let result = await StarwingsMaster.getPilotList();
             expect(result).to.eql(expectResult);
 
-            await expect(
-                StarwingsMaster.addPilot(pilot.address, "Pilot Name")
-            ).to.emit(StarwingsMaster, "PilotAdded");
+            await expect(StarwingsMaster.addPilot(pilot.address, "Pilot Name")).to.emit(StarwingsMaster, "PilotAdded");
 
             result = await StarwingsMaster.getPilotList();
             expect(result.length).to.equal(1);
@@ -323,9 +297,10 @@ describe("StarwingsMaster", function () {
 
             await StarwingsMaster.deletePilot(pilot.address);
 
-            await expect(
-                StarwingsMaster.addPilot(pilot.address, "New Pilot Name")
-            ).to.emit(StarwingsMaster, "PilotAdded");
+            await expect(StarwingsMaster.addPilot(pilot.address, "New Pilot Name")).to.emit(
+                StarwingsMaster,
+                "PilotAdded"
+            );
 
             result = await StarwingsMaster.getPilotList();
             expect(result.length).to.equal(1);
@@ -337,19 +312,16 @@ describe("StarwingsMaster", function () {
         });
 
         it("should not add a Pilot if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).addPilot(
-                    pilot.address,
-                    "Pilot Name"
-                )
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).addPilot(pilot.address, "Pilot Name")).to.be.revertedWith(
+                "Access refused"
+            );
         });
 
         it("should not add a Pilot if it is not a new address and it has not been deleted.", async function () {
             await StarwingsMaster.addPilot(pilot.address, "Pilot Name");
-            await expect(
-                StarwingsMaster.addPilot(pilot.address, "Pilot Name")
-            ).to.be.revertedWith("Pilot already added.");
+            await expect(StarwingsMaster.addPilot(pilot.address, "Pilot Name")).to.be.revertedWith(
+                "Pilot already added."
+            );
         });
 
         it("should delete a Pilot.", async function () {
@@ -363,10 +335,7 @@ describe("StarwingsMaster", function () {
             expect(result[1].isDeleted).to.equal(false);
             expect(result[1].pilotAddress).to.equal(pilot2.address);
 
-            await expect(StarwingsMaster.deletePilot(pilot.address)).to.emit(
-                StarwingsMaster,
-                "PilotDeleted"
-            );
+            await expect(StarwingsMaster.deletePilot(pilot.address)).to.emit(StarwingsMaster, "PilotDeleted");
 
             result = await StarwingsMaster.getPilotList();
             expect(result.length).to.equal(2);
@@ -375,10 +344,7 @@ describe("StarwingsMaster", function () {
             expect(result[1].isDeleted).to.equal(false);
             expect(result[1].pilotAddress).to.equal(pilot2.address);
 
-            await expect(StarwingsMaster.deletePilot(pilot2.address)).to.emit(
-                StarwingsMaster,
-                "PilotDeleted"
-            );
+            await expect(StarwingsMaster.deletePilot(pilot2.address)).to.emit(StarwingsMaster, "PilotDeleted");
             result = await StarwingsMaster.getPilotList();
             expect(result.length).to.equal(2);
             expect(result[0].isDeleted).to.equal(true);
@@ -388,61 +354,49 @@ describe("StarwingsMaster", function () {
         });
 
         it("should not delete a Pilot if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).deletePilot(pilot.address)
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).deletePilot(pilot.address)).to.be.revertedWith(
+                "Access refused"
+            );
         });
 
         it("should not delete the Pilot if Pilot not exist.", async function () {
             await StarwingsMaster.addPilot(pilot.address, "Pilot Name");
-            await expect(
-                StarwingsMaster.getPilot(ethers.constants.AddressZero)
-            ).to.be.revertedWith("Pilot not found.");
+            await expect(StarwingsMaster.getPilot(ethers.constants.AddressZero)).to.be.revertedWith("Pilot not found.");
         });
 
         it("should not delete the Pilot if Pilot index out of the list size.", async function () {
-            await expect(
-                StarwingsMaster.deletePilot(ethers.constants.AddressZero)
-            ).to.be.revertedWith("Out of size index.");
+            await expect(StarwingsMaster.deletePilot(ethers.constants.AddressZero)).to.be.revertedWith(
+                "Out of size index."
+            );
         });
 
         it("should not get the Pilot index if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).getPilotIndex(pilot.address)
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).getPilotIndex(pilot.address)).to.be.revertedWith(
+                "Access refused"
+            );
         });
     });
 
     context("Drone", function () {
         it("should not get the list of Drone if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).getDroneList()
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).getDroneList()).to.be.revertedWith("Access refused");
         });
 
         it("should not get the Drone if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).getDrone(
-                    ethers.constants.AddressZero
-                )
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).getDrone(ethers.constants.AddressZero)).to.be.revertedWith(
+                "Access refused"
+            );
         });
 
         it("should not get the Drone if Drone index out of the list size.", async function () {
-            await expect(
-                StarwingsMaster.getDrone(ethers.constants.AddressZero)
-            ).to.be.revertedWith("Out of size index.");
+            await expect(StarwingsMaster.getDrone(ethers.constants.AddressZero)).to.be.revertedWith(
+                "Out of size index."
+            );
         });
 
         it("should not get the Drone if Drone not exist.", async function () {
-            await StarwingsMaster.addDrone(
-                pilot.address,
-                "Drone ID",
-                "Drone Type"
-            );
-            await expect(
-                StarwingsMaster.getDrone(ethers.constants.AddressZero)
-            ).to.be.revertedWith("Drone not found.");
+            await StarwingsMaster.addDrone(pilot.address, "Drone ID", "Drone Type");
+            await expect(StarwingsMaster.getDrone(ethers.constants.AddressZero)).to.be.revertedWith("Drone not found.");
         });
 
         it("should add a Drone if it is a new address.", async function () {
@@ -450,13 +404,10 @@ describe("StarwingsMaster", function () {
             let result = await StarwingsMaster.getDroneList();
             expect(result).to.eql(expectResult);
 
-            await expect(
-                StarwingsMaster.addDrone(
-                    drone.address,
-                    "Drone ID",
-                    "Drone Type"
-                )
-            ).to.emit(StarwingsMaster, "DroneAdded");
+            await expect(StarwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type")).to.emit(
+                StarwingsMaster,
+                "DroneAdded"
+            );
 
             result = await StarwingsMaster.getDroneList();
             expect(result.length).to.equal(1);
@@ -470,13 +421,10 @@ describe("StarwingsMaster", function () {
             result = await StarwingsMaster.getDroneIndex(drone.address);
             expect(result.toNumber()).to.equal(0);
 
-            await expect(
-                StarwingsMaster.addDrone(
-                    drone2.address,
-                    "Drone2 ID",
-                    "Drone2 Type"
-                )
-            ).to.emit(StarwingsMaster, "DroneAdded");
+            await expect(StarwingsMaster.addDrone(drone2.address, "Drone2 ID", "Drone2 Type")).to.emit(
+                StarwingsMaster,
+                "DroneAdded"
+            );
 
             result = await StarwingsMaster.getDroneList();
             expect(result.length).to.equal(2);
@@ -496,13 +444,10 @@ describe("StarwingsMaster", function () {
             let result = await StarwingsMaster.getDroneList();
             expect(result).to.eql(expectResult);
 
-            await expect(
-                StarwingsMaster.addDrone(
-                    drone.address,
-                    "Drone ID",
-                    "Drone Type"
-                )
-            ).to.emit(StarwingsMaster, "DroneAdded");
+            await expect(StarwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type")).to.emit(
+                StarwingsMaster,
+                "DroneAdded"
+            );
 
             result = await StarwingsMaster.getDroneList();
             expect(result.length).to.equal(1);
@@ -515,13 +460,10 @@ describe("StarwingsMaster", function () {
 
             await StarwingsMaster.deleteDrone(drone.address);
 
-            await expect(
-                StarwingsMaster.addDrone(
-                    drone.address,
-                    "New Drone ID",
-                    "New Drone Type"
-                )
-            ).to.emit(StarwingsMaster, "DroneAdded");
+            await expect(StarwingsMaster.addDrone(drone.address, "New Drone ID", "New Drone Type")).to.emit(
+                StarwingsMaster,
+                "DroneAdded"
+            );
 
             result = await StarwingsMaster.getDroneList();
             expect(result.length).to.equal(1);
@@ -535,40 +477,20 @@ describe("StarwingsMaster", function () {
 
         it("should not add a Drone if sender has not the admin role.", async function () {
             await expect(
-                StarwingsMaster.connect(notAdmin).addDrone(
-                    drone.address,
-                    "Drone ID",
-                    "Drone Type"
-                )
+                StarwingsMaster.connect(notAdmin).addDrone(drone.address, "Drone ID", "Drone Type")
             ).to.be.revertedWith("Access refused");
         });
 
         it("should not add a Drone if it is not a new address and it has not been deleted.", async function () {
-            await StarwingsMaster.addDrone(
-                drone.address,
-                "Drone ID",
-                "Drone Type"
+            await StarwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type");
+            await expect(StarwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type")).to.be.revertedWith(
+                "Drone already added."
             );
-            await expect(
-                StarwingsMaster.addDrone(
-                    drone.address,
-                    "Drone ID",
-                    "Drone Type"
-                )
-            ).to.be.revertedWith("Drone already added.");
         });
 
         it("should delete a Drone.", async function () {
-            await StarwingsMaster.addDrone(
-                drone.address,
-                "Drone ID",
-                "Drone Type"
-            );
-            await StarwingsMaster.addDrone(
-                drone2.address,
-                "Drone2 ID",
-                "Drone2 Type"
-            );
+            await StarwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type");
+            await StarwingsMaster.addDrone(drone2.address, "Drone2 ID", "Drone2 Type");
 
             let result = await StarwingsMaster.getDroneList();
             expect(result.length).to.equal(2);
@@ -577,10 +499,7 @@ describe("StarwingsMaster", function () {
             expect(result[1].isDeleted).to.equal(false);
             expect(result[1].droneAddress).to.equal(drone2.address);
 
-            await expect(StarwingsMaster.deleteDrone(drone.address)).to.emit(
-                StarwingsMaster,
-                "DroneDeleted"
-            );
+            await expect(StarwingsMaster.deleteDrone(drone.address)).to.emit(StarwingsMaster, "DroneDeleted");
 
             result = await StarwingsMaster.getDroneList();
             expect(result.length).to.equal(2);
@@ -589,10 +508,7 @@ describe("StarwingsMaster", function () {
             expect(result[1].isDeleted).to.equal(false);
             expect(result[1].droneAddress).to.equal(drone2.address);
 
-            await expect(StarwingsMaster.deleteDrone(drone2.address)).to.emit(
-                StarwingsMaster,
-                "DroneDeleted"
-            );
+            await expect(StarwingsMaster.deleteDrone(drone2.address)).to.emit(StarwingsMaster, "DroneDeleted");
             result = await StarwingsMaster.getDroneList();
             expect(result.length).to.equal(2);
             expect(result[0].isDeleted).to.equal(true);
@@ -602,32 +518,26 @@ describe("StarwingsMaster", function () {
         });
 
         it("should not delete a Drone if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).deleteDrone(drone.address)
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).deleteDrone(drone.address)).to.be.revertedWith(
+                "Access refused"
+            );
         });
 
         it("should not delete a Drone if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).deleteDrone(drone.address)
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).deleteDrone(drone.address)).to.be.revertedWith(
+                "Access refused"
+            );
         });
 
         it("should not delete the Drone if Drone not exist.", async function () {
-            await StarwingsMaster.addDrone(
-                drone.address,
-                "Drone ID",
-                "Drone Type"
-            );
-            await expect(
-                StarwingsMaster.getDrone(ethers.constants.AddressZero)
-            ).to.be.revertedWith("Drone not found.");
+            await StarwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type");
+            await expect(StarwingsMaster.getDrone(ethers.constants.AddressZero)).to.be.revertedWith("Drone not found.");
         });
 
         it("should not get the Drone index if sender has not the admin role.", async function () {
-            await expect(
-                StarwingsMaster.connect(notAdmin).getDroneIndex(pilot.address)
-            ).to.be.revertedWith("Access refused");
+            await expect(StarwingsMaster.connect(notAdmin).getDroneIndex(pilot.address)).to.be.revertedWith(
+                "Access refused"
+            );
         });
     });
 

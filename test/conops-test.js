@@ -24,7 +24,7 @@ describe("Conops", function () {
         await deploy();
     });
 
-    it("Should return the added conops", async () => {
+    it("should return the added conops", async () => {
         expect((await conops.viewAllConops()).length).to.equal(0);
 
         const addConopsTx = await conops.addConops(
@@ -81,7 +81,7 @@ describe("Conops", function () {
     });
 });
 
-describe("Conops activation", () => {
+describe("Conops Activation", () => {
     before(async () => {
         await deploy();
         const addConopsTx = await conops.addConops(
@@ -104,9 +104,7 @@ describe("Conops activation", () => {
     it("should disable conops", async () => {
         // const disableConopsTx = await conops.disable(0);
         // await disableConopsTx.wait();
-        await expect(conops.disable(0))
-            .to.emit(conops, "ConopsDisable")
-            .withArgs(0);
+        await expect(conops.disable(0)).to.emit(conops, "ConopsDisable").withArgs(0);
         // eslint-disable-next-line no-unused-expressions
         expect((await conops.viewConops(0)).activated).to.be.false;
     });

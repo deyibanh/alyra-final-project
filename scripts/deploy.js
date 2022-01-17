@@ -4,7 +4,6 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
-const sleep = require("util").promisify(setTimeout);
 
 async function main() {
     // Hardhat always runs the compile task when running scripts with its command
@@ -16,34 +15,20 @@ async function main() {
 
     // We get the contract to deploy
     // Access control
-    const SWAccessControlArtifact = await hre.ethers.getContractFactory(
-        "SWAccessControl"
-    );
-    const ConopsManagerArtifact = await hre.ethers.getContractFactory(
-        "ConopsManager"
-    );
-    const DeliveryManagerArtifact = await hre.ethers.getContractFactory(
-        "DeliveryManager"
-    );
-    const StarwingsMasterArtifact = await hre.ethers.getContractFactory(
-        "StarwingsMaster"
-    );
+    const SWAccessControlArtifact = await hre.ethers.getContractFactory("SWAccessControl");
+    const ConopsManagerArtifact = await hre.ethers.getContractFactory("ConopsManager");
+    const DeliveryManagerArtifact = await hre.ethers.getContractFactory("DeliveryManager");
+    const StarwingsMasterArtifact = await hre.ethers.getContractFactory("StarwingsMaster");
 
-    const DroneFlightFactoryArtifact = await hre.ethers.getContractFactory(
-        "DroneFlightFactory"
-    );
+    const DroneFlightFactoryArtifact = await hre.ethers.getContractFactory("DroneFlightFactory");
 
     const SWAccessControl = await SWAccessControlArtifact.deploy();
     await SWAccessControl.deployed();
 
     console.log("SWAccessControl deployed to:", SWAccessControl.address);
 
-    const ConopsManager = await ConopsManagerArtifact.deploy(
-        SWAccessControl.address
-    );
-    const DeliveryManager = await DeliveryManagerArtifact.deploy(
-        SWAccessControl.address
-    );
+    const ConopsManager = await ConopsManagerArtifact.deploy(SWAccessControl.address);
+    const DeliveryManager = await DeliveryManagerArtifact.deploy(SWAccessControl.address);
     await ConopsManager.deployed();
 
     await DeliveryManager.deployed();
@@ -104,8 +89,7 @@ async function main() {
      *
      *
      */
-    const [owner, dummy, pilot1, pilot2, drone1, drone2, to1, to2, from] =
-        await hre.ethers.getSigners();
+    const [owner, dummy, pilot1, pilot2, drone1, drone2, to1, to2, from] = await hre.ethers.getSigners();
 
     const rolePilot = await SWAccessControl.PILOT_ROLE();
     const roleDrone = await SWAccessControl.DRONE_ROLE();
@@ -125,11 +109,7 @@ async function main() {
     console.log("### Pilot 2 added");
 
     // Drone 1
-    await StarwingsMaster.addDrone(
-        drone1.address,
-        "UAS-FR-239271",
-        "DJI Matrice 600 Pro"
-    );
+    await StarwingsMaster.addDrone(drone1.address, "UAS-FR-239271", "DJI Matrice 600 Pro");
 
     await SWAccessControl.grantRole(roleDrone, drone1.address);
 
@@ -207,88 +187,84 @@ async function main() {
 
     console.log("########### DONE !");
 
-    if (hre.network.name === "optimism_testnet") {
-        console.log("### Verifying contracts in 10 secs ###");
-        sleep(10000);
-        if (!(await isContractVerified(SWAccessControl.address))) {
-            await hre.run("verify:verify", {
-                address: SWAccessControl.address,
-                constructorArguments: [],
-            });
-        }
+    // if (hre.network.name === "optimism_testnet") {
+    //     console.log("### Verifying contracts in 10 secs ###");
+    //     sleep(10000);
+    //     if (!(await isContractVerified(SWAccessControl.address))) {
+    //         await hre.run("verify:verify", {
+    //             address: SWAccessControl.address,
+    //             constructorArguments: [],
+    //         });
+    //     }
 
-        if (!(await isContractVerified(ConopsManager.address))) {
-            await hre.run("verify:verify", {
-                address: ConopsManager.address,
-                constructorArguments: [SWAccessControl.address],
-            });
-        }
+    //     if (!(await isContractVerified(ConopsManager.address))) {
+    //         await hre.run("verify:verify", {
+    //             address: ConopsManager.address,
+    //             constructorArguments: [SWAccessControl.address],
+    //         });
+    //     }
 
-        if (!(await isContractVerified(DeliveryManager.address))) {
-            console.log("dee");
-            await hre.run("verify:verify", {
-                address: DeliveryManager.address,
-                constructorArguments: [SWAccessControl.address],
-            });
-        }
+    //     if (!(await isContractVerified(DeliveryManager.address))) {
+    //         console.log("dee");
+    //         await hre.run("verify:verify", {
+    //             address: DeliveryManager.address,
+    //             constructorArguments: [SWAccessControl.address],
+    //         });
+    //     }
 
-        if (!(await isContractVerified(StarwingsMaster.address))) {
-            await hre.run("verify:verify", {
-                address: StarwingsMaster.address,
-                constructorArguments: [
-                    SWAccessControl.address,
-                    ConopsManager.address,
-                    DeliveryManager.address,
-                ],
-            });
-        }
+    //     if (!(await isContractVerified(StarwingsMaster.address))) {
+    //         await hre.run("verify:verify", {
+    //             address: StarwingsMaster.address,
+    //             constructorArguments: [
+    //                 SWAccessControl.address,
+    //                 ConopsManager.address,
+    //                 DeliveryManager.address,
+    //             ],
+    //         });
+    //     }
 
-        if (!(await isContractVerified(DroneFlightFactory.address))) {
-            await hre.run("verify:verify", {
-                address: DroneFlightFactory.address,
-                constructorArguments: [
-                    SWAccessControl.address,
-                    StarwingsMaster.address,
-                ],
-            });
-        }
-    }
+    //     if (!(await isContractVerified(DroneFlightFactory.address))) {
+    //         await hre.run("verify:verify", {
+    //             address: DroneFlightFactory.address,
+    //             constructorArguments: [
+    //                 SWAccessControl.address,
+    //                 StarwingsMaster.address,
+    //             ],
+    //         });
+    //     }
+    // }
 }
 
 const storeContractAddresses = (jsonData) => {
     const fs = require("fs");
 
-    fs.writeFileSync(
-        "./client/src/contractAddresses.json",
-        JSON.stringify(jsonData),
-        function (err) {
-            if (err) {
-                console.log(err);
-            }
-        }
-    );
-};
-
-const isContractVerified = async (address) => {
-    const getJSON = require("get-json");
-
-    const path =
-        "https://api-kovan-optimistic.etherscan.io/api?module=contract&action=getABI&address=" +
-        address;
-    let status;
-    await getJSON(path, function (error, response) {
-        const state = JSON.parse(response.status);
-        if (error) {
-            console.log(error);
-        }
-        if (state === 1) {
-            status = true;
-        } else {
-            status = false;
+    fs.writeFileSync("./client/src/contractAddresses.json", JSON.stringify(jsonData), function (err) {
+        if (err) {
+            console.log(err);
         }
     });
-    return status;
 };
+
+// const isContractVerified = async (address) => {
+//     const getJSON = require("get-json");
+
+//     const path =
+//         "https://api-kovan-optimistic.etherscan.io/api?module=contract&action=getABI&address=" +
+//         address;
+//     let status;
+//     await getJSON(path, function (error, response) {
+//         const state = JSON.parse(response.status);
+//         if (error) {
+//             console.log(error);
+//         }
+//         if (state === 1) {
+//             status = true;
+//         } else {
+//             status = false;
+//         }
+//     });
+//     return status;
+// };
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

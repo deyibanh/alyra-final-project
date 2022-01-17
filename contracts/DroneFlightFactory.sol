@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/IAccessControl.sol";
@@ -8,8 +8,8 @@ import "./interfaces/IDroneFlight.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
 
 /**
- *   @title DroneFlightFactory
- *   @author Damien
+ *  @title DroneFlightFactory
+ *  @author Damien
  *  @notice This contract serve as a factory for deploying new DroneFlight contract of different types.
  */
 contract DroneFlightFactory {
@@ -17,9 +17,15 @@ contract DroneFlightFactory {
 
     IAccessControl private accessControl;
     IStarwingsMaster private starwingsMaster;
+
     address[] public deployedContracts;
     event Deployed(address addr, uint256 salt);
 
+    /**
+     *  @notice Modifier to restrict function to specific role
+     *  @dev Use the library to retrieve bytes32 values when calling the modifier
+     *  @param _role The role authorize to access the function
+     */
     modifier onlyRole(bytes32 _role) {
         require(accessControl.hasRole(_role, msg.sender), "Access Refused");
         _;
@@ -36,6 +42,11 @@ contract DroneFlightFactory {
         starwingsMaster = IStarwingsMaster(starwingsMasterAddress);
     }
 
+    /**
+     *  @notice Deploy a new instance of the contract's bytecode
+     *  @param code The byte code of the contract to deploy
+     *  @param salt Salt
+     */
     function deploy(bytes memory code, uint256 salt)
         external
         onlyRole(StarwingsDataLib.PILOT_ROLE)
@@ -53,65 +64,6 @@ contract DroneFlightFactory {
         emit Deployed(addr, salt);
     }
 
-    // function newDroneDelivery(
-    //     string memory _deliveryId,
-    //     address _drone,
-    //     uint256 _conopsId,
-    //     uint256 _flightDatetime,
-    //     uint256 _flightDuration,
-    //     string memory _depart,
-    //     string memory _destination,
-    //     address droneDeliveryAddr
-    // )
-    //     external
-    //     onlyRole(StarwingsDataLib.PILOT_ROLE)
-    //     returns (address droneDeliveryAddress)
-    // {
-    //     // StarwingsDataLib.FlightData memory flightData = StarwingsDataLib
-    //     //     .FlightData(
-    //     //         starwingsMaster.getPilot(msg.sender),
-    //     //         starwingsMaster.getDrone(_drone),
-    //     //         _conopsId,
-    //     //         _flightDatetime,
-    //     //         _flightDuration,
-    //     //         _depart,
-    //     //         _destination
-    //     //     );
-
-    //     // IDeliveryManager deliveryManager = IDeliveryManager(
-    //     //     starwingsMaster.getDeliveryManager()
-    //     // );
-
-    //     return address(droneDeliveryAddr);
-    // }
-
-    // function _newDroneDelivery(
-    //     string memory _deliveryId,
-    //     StarwingsDataLib.FlightData memory flightData
-    // )
-    //     internal
-    //     returns (address droneDeliveryAddress)
-    // {
-    //     IDeliveryManager deliveryManager = IDeliveryManager(starwingsMaster.getDeliveryManager());
-
-    //     DroneDelivery droneDelivery = new DroneDelivery(
-    //         starwingsMaster.getDeliveryManager(),
-    //         _deliveryId,
-    //         starwingsMaster.getConopsManager(),
-    //         starwingsMaster.getAccessControlAddress(),
-    //         flightData
-    //     );
-
-    //     droneDeliveryAddress = address(droneDelivery);
-    //     deployedContracts.push(droneDeliveryAddress);
-    //     starwingsMaster.addDroneFlight(
-    //         droneDeliveryAddress,
-    //         flightData.pilot.pilotAddress,
-    //         flightData.drone.droneAddress
-    //     );
-
-    //     deliveryManager.setDeliveryState(_deliveryId, IDeliveryManager.DeliveryState(3));
-    // }
     /**
      *  @notice Return all deployed contrats addresses
      */

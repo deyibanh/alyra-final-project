@@ -4,7 +4,8 @@ const contracts = require("../client/src/contractAddresses.json");
 async function main() {
     if (hre.network.name === "optimism_testnet") {
         console.log("### Verifying contracts.... ###");
-
+        console.log(contracts.SWAccessControl);
+        console.log(await isContractVerified(contracts.SWAccessControl));
         if (!(await isContractVerified(contracts.SWAccessControl))) {
             console.log("SWAccessControl not verified ! Verifying....");
             await hre.run("verify:verify", {
@@ -33,11 +34,7 @@ async function main() {
             console.log("StarwingsMaster not verified ! Verifying....");
             await hre.run("verify:verify", {
                 address: contracts.StarwingsMaster,
-                constructorArguments: [
-                    contracts.SWAccessControl,
-                    contracts.ConopsManager,
-                    contracts.DeliveryManager,
-                ],
+                constructorArguments: [contracts.SWAccessControl, contracts.ConopsManager, contracts.DeliveryManager],
             });
         }
 
@@ -45,10 +42,7 @@ async function main() {
             console.log("DroneFlightFactory not verified ! Verifying....");
             await hre.run("verify:verify", {
                 address: contracts.DroneFlightFactory,
-                constructorArguments: [
-                    contracts.SWAccessControl,
-                    contracts.StarwingsMaster,
-                ],
+                constructorArguments: [contracts.SWAccessControl, contracts.StarwingsMaster],
             });
         }
     }
@@ -57,9 +51,7 @@ async function main() {
 const isContractVerified = async (address) => {
     const getJSON = require("get-json");
 
-    const path =
-        "https://api-kovan-optimistic.etherscan.io/api?module=contract&action=getABI&address=" +
-        address;
+    const path = "https://api-kovan-optimistic.etherscan.io/api?module=contract&action=getABI&address=" + address;
     let status;
     await getJSON(path, function (error, response) {
         const state = JSON.parse(response.status);
