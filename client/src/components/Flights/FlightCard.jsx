@@ -91,13 +91,7 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                 setEvents(logs);
             })();
         }
-    }, [droneDelivery]);
-
-    // useEffect(() => {
-    //     let eventsOrdered = events.sort((a, b) => a.blockNumber - b.blockNumber);
-    // }, [events]);
-
-    console.log(events);
+    }, [flight, droneDelivery]);
 
     useEffect(() => {
         const state = flight[1] ? (flight[2] ? 2 : 1) : 0;
@@ -198,7 +192,7 @@ function FlightCard({ flight, changeVisibility, id, state }) {
                                                                             e.transactionHash
                                                                         }
                                                                     >
-                                                                        ds
+                                                                        &#8594;
                                                                     </a>
                                                                 )}
                                                             </ListGroup.Item>
