@@ -89,7 +89,7 @@ function FlightsContent({ state }) {
         }
     };
 
-    console.log("flightINFO:", flights);
+    //console.log("flightINFO:", flights);
 
     const changeVisibility = (i) => {
         i === -1 ? setCardGroupSize(3) : setCardGroupSize(1);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer } from "react";
-import { Button, Col, Modal, Row } from "react-bootstrap";
+import { Button, Col, Modal, Row, Toast, ToastContainer } from "react-bootstrap";
 import { ethers } from "ethers";
 import ConopsArtifact from "../../artifacts/contracts/ConopsManager.sol/ConopsManager.json";
 import ConopsForm from "./ConopsForm";
@@ -30,6 +30,7 @@ function ConopsContent({ state }) {
     const [formData, setFormData] = useReducer(formReducer, {});
     const [viewDetails, setViewDetails] = useState(-1);
     const [cardGroupSize, setCardGroupSize] = useState(5);
+    const [tooltip, setTooltip] = useState({ show: false, title: "Undefined", body: "None", variant: "" });
 
     useEffect(() => {
         if (state.provider) {
@@ -48,6 +49,12 @@ function ConopsContent({ state }) {
         }
     }, [conopsManager]);
 
+    const toggleTooltip = (show) =>
+        setTooltip({ show: show, title: tooltip.title, body: tooltip.body, variant: tooltip.variant });
+    const showTooltip = function (title, body, variant) {
+        setTooltip({ show: true, title: title, body: body, variant: variant });
+    };
+
     const hideModal = () => {
         setModalIsShown(false);
     };
@@ -59,7 +66,8 @@ function ConopsContent({ state }) {
 
     const getConops = async () => {
         try {
-            console.log(conopsManager.signer);
+            toggleTooltip(false);
+            //console.log(conopsManager.signer);
             const conopsList = await conopsManager.signer.viewAllConops();
             setConops(conopsList);
         } catch (error) {
@@ -68,17 +76,24 @@ function ConopsContent({ state }) {
     };
 
     const submitConops = async () => {
-        const tx = await conopsManager.signer.addConops(
-            formData.name,
-            formData.start,
-            formData.end,
-            formData.crossroad,
-            formData.exclusion,
-            formData.airRisks,
-            Number(formData.GRC),
-            Number(formData.ARC)
-        );
-        await tx;
+        try {
+            const tx = await conopsManager.signer.addConops(
+                formData.name,
+                formData.start,
+                formData.end,
+                formData.crossroad,
+                formData.exclusion,
+                formData.airRisks,
+                Number(formData.GRC),
+                Number(formData.ARC)
+            );
+            await tx;
+            showTooltip("Transaciton sent !", tx.hash, "success");
+        } catch (error) {
+            //console.log(error);
+            showTooltip("Error", error?.data?.message, "danger");
+        }
+
         hideModal();
     };
 
@@ -145,6 +160,14 @@ function ConopsContent({ state }) {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            <ToastContainer className="p-3" position="bottom-end">
+                <Toast show={tooltip.show} onClose={toggleTooltip} bg={tooltip.variant}>
+                    <Toast.Header>
+                        <strong className="me-auto">{tooltip.title}</strong>
+                    </Toast.Header>
+                    <Toast.Body>{tooltip.body}</Toast.Body>
+                </Toast>
+            </ToastContainer>
         </div>
     );
 }
