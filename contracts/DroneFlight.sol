@@ -28,6 +28,7 @@ abstract contract DroneFlight is Ownable {
     event AirRiskCanceled(uint256 _airRiskId);
     event CancelFlight();
     event ChangeFlightStatus(FlightState _status);
+    event RiskEvent(Event _status);
 
     // 3. Modifiers
     /**
@@ -183,6 +184,8 @@ abstract contract DroneFlight is Ownable {
         onlyRole(StarwingsDataLib.DRONE_ROLE)
     {
         riskEvent.push(_event);
+
+        emit RiskEvent(_event);
     }
 
     /**
@@ -259,7 +262,7 @@ abstract contract DroneFlight is Ownable {
     /**
      *  @notice Change the status of the flight
      *  @dev Only Pilot and Drone can call this function
-     *       droneFlightState or pilotFlightState will be 
+     *       droneFlightState or pilotFlightState will be
      *       called depending of the msg.sender
      *  @param _status The uint of the FlightState
      */
