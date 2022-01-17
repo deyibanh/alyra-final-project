@@ -63,7 +63,7 @@ We use Hardhat to deploy the smart contracts.
 ## 4. Start client
 
 Once contracts are deployed, you can start the client :<br/>
-`>$ cd client; npm start`
+`$> cd client; npm start`
 
 &nbsp;
 
@@ -74,7 +74,7 @@ Developers documentation:
 -   [Avoiding Common Attacks](./docs/developers/avoiding_common_attacks.md)
 -   [Deployed Addresses](./docs/developers/deployed_addresses.md)
 -   [Design Pattern Decisions](./docs/developers/design_pattern_decisions.md)
--   [Natspec](./docs/natspec)
+-   [Natspec](./docs/natspec/)
 -   [Test Explication](./docs/developers/test_explication.md)
 
 &nbsp;
