@@ -2,15 +2,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-let factory,
-    accessControl,
-    starwingsMaster,
-    conops,
-    delivery,
-    owner,
-    pilot,
-    pilot2,
-    drone;
+let factory, accessControl, starwingsMaster, conops, delivery, owner, pilot, pilot2, drone;
 
 const pilotSample = {
     _pilotAddress: "",
@@ -103,17 +95,10 @@ const deploy = async () => {
     await delivery.deployed();
 
     const StarwingsMaster = await ethers.getContractFactory("StarwingsMaster");
-    starwingsMaster = await StarwingsMaster.deploy(
-        accessControl.address,
-        conops.address,
-        delivery.address
-    );
+    starwingsMaster = await StarwingsMaster.deploy(accessControl.address, conops.address, delivery.address);
 
     const Factory = await ethers.getContractFactory("DroneFlightFactory");
-    factory = await Factory.deploy(
-        accessControl.address,
-        starwingsMaster.address
-    );
+    factory = await Factory.deploy(accessControl.address, starwingsMaster.address);
     await factory.deployed();
 
     await starwingsMaster.setDroneFlightFactoryAddress(factory.address);
@@ -121,19 +106,12 @@ const deploy = async () => {
     droneSample._droneAddress = drone.address;
     // console.log(`======= Adding Drone [${droneSample._droneAddress}]`);
 
-    await starwingsMaster.addDrone(
-        droneSample._droneAddress,
-        droneSample._droneId,
-        droneSample._droneType
-    );
+    await starwingsMaster.addDrone(droneSample._droneAddress, droneSample._droneId, droneSample._droneType);
     pilotSample._pilotAddress = pilot.address;
 
     // console.log(`======= Adding Pilot [${pilotSample._pilotAddress}]`);
 
-    await starwingsMaster.addPilot(
-        pilotSample._pilotAddress,
-        pilotSample._pilotName
-    );
+    await starwingsMaster.addPilot(pilotSample._pilotAddress, pilotSample._pilotName);
 
     droneDeliveryFactory = await ethers.getContractFactory("DroneDelivery");
 
@@ -209,11 +187,7 @@ describe("DroneFlightFactory", function () {
         // console.log(`[DeliveryId] used ${deliveries[0].deliveryId}`);
 
         // Create contract object with deployed address
-        let droneDeliveryContract = new ethers.Contract(
-            droneDeliveryAddr,
-            droneDeliveryFactory.interface,
-            pilot
-        );
+        let droneDeliveryContract = new ethers.Contract(droneDeliveryAddr, droneDeliveryFactory.interface, pilot);
 
         // console.log(
         //     `[Verifiy] DeliveryId in DroneDelivery = ${await droneDeliveryContract.getDeliveryId()}`
@@ -222,9 +196,7 @@ describe("DroneFlightFactory", function () {
         // Init flightdata for drone delivery
         droneFlightDataSample.pilot.pilotAddress = pilot.address;
         droneFlightDataSample.drone.droneAddress = drone.address;
-        await droneDeliveryContract
-            .connect(pilot)
-            .initDelivery(droneFlightDataSample);
+        await droneDeliveryContract.connect(pilot).initDelivery(droneFlightDataSample);
 
         // console.log(
         //     `Deployed contracts = ${
@@ -267,11 +239,7 @@ describe("DroneFlightFactory", function () {
         // console.log(`[DeliveryId] used ${deliveries[1].deliveryId}`);
 
         // Create contract object with deployed address
-        droneDeliveryContract = new ethers.Contract(
-            droneDeliveryAddr,
-            droneDeliveryFactory.interface,
-            pilot
-        );
+        droneDeliveryContract = new ethers.Contract(droneDeliveryAddr, droneDeliveryFactory.interface, pilot);
 
         // console.log(
         //     `[Verifiy] DeliveryId in DroneDelivery = ${await droneDeliveryContract.getDeliveryId()}`
@@ -280,9 +248,7 @@ describe("DroneFlightFactory", function () {
         // Init flightdata for drone delivery
         droneFlightDataSample.pilot.pilotAddress = pilot.address;
         droneFlightDataSample.drone.droneAddress = drone.address;
-        await droneDeliveryContract
-            .connect(pilot)
-            .initDelivery(droneFlightDataSample);
+        await droneDeliveryContract.connect(pilot).initDelivery(droneFlightDataSample);
 
         const addressesFromFactory = await factory.getDeployedContracts();
         // console.log(`Deployed contracts = ${addressesFromFactory.length}`);
@@ -293,22 +259,21 @@ describe("DroneFlightFactory", function () {
         expect(addressesFromFactory[0]).to.not.equal(addressesFromFactory[1]);
 
         // Global checks
-        const addressesFromStarwingsMaster =
-            await starwingsMaster.getDroneFlightAddressList();
+        const addressesFromStarwingsMaster = await starwingsMaster.getDroneFlightAddressList();
 
         expect(addressesFromFactory).to.be.eql(addressesFromStarwingsMaster);
 
-        expect(
-            (await starwingsMaster.getPilot(pilot.address)).flightAddresses[0]
-        ).to.be.equal(addressesFromStarwingsMaster[0]);
-        expect(
-            (await starwingsMaster.getPilot(pilot.address)).flightAddresses[1]
-        ).to.be.equal(addressesFromStarwingsMaster[1]);
-        expect(
-            (await starwingsMaster.getDrone(drone.address)).flightAddresses[0]
-        ).to.be.equal(addressesFromStarwingsMaster[0]);
-        expect(
-            (await starwingsMaster.getDrone(drone.address)).flightAddresses[1]
-        ).to.be.equal(addressesFromStarwingsMaster[1]);
+        expect((await starwingsMaster.getPilot(pilot.address)).flightAddresses[0]).to.be.equal(
+            addressesFromStarwingsMaster[0]
+        );
+        expect((await starwingsMaster.getPilot(pilot.address)).flightAddresses[1]).to.be.equal(
+            addressesFromStarwingsMaster[1]
+        );
+        expect((await starwingsMaster.getDrone(drone.address)).flightAddresses[0]).to.be.equal(
+            addressesFromStarwingsMaster[0]
+        );
+        expect((await starwingsMaster.getDrone(drone.address)).flightAddresses[1]).to.be.equal(
+            addressesFromStarwingsMaster[1]
+        );
     });
 });

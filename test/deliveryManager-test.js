@@ -15,10 +15,7 @@ const deploy = async () => {
     accessControl = await AccessControl.deploy();
     await accessControl.deployed();
 
-    await accessControl.grantRole(
-        await libDeployed.ADMIN_ROLE(),
-        owner.address
-    );
+    await accessControl.grantRole(await libDeployed.ADMIN_ROLE(), owner.address);
 
     // const hasRoleAdmin = await accessControl.hasRole(
     //     await libDeployed.ADMIN_ROLE(),
@@ -65,9 +62,7 @@ describe("DeliveryManager", function () {
         //     .newDelivery(delivery);
         // deliveryId = await deliveryId.wait();
 
-        const result = await deliveryManager
-            .connect(owner)
-            .newDelivery(delivery);
+        const result = await deliveryManager.connect(owner).newDelivery(delivery);
 
         // Get event values
         const temp = await result.wait();
@@ -75,9 +70,7 @@ describe("DeliveryManager", function () {
             return x.event === "DeliveryCreated";
         })[0].args.deliveryId;
 
-        expect(result)
-            .to.emit(deliveryManager, "DeliveryCreated")
-            .withArgs(currentDeliveryId);
+        expect(result).to.emit(deliveryManager, "DeliveryCreated").withArgs(currentDeliveryId);
 
         // result = await result.wait();
         // console.log(
@@ -100,9 +93,7 @@ describe("DeliveryManager", function () {
         const oldStatus = result.state;
         const newStatus = 1;
 
-        const result2 = await deliveryManager
-            .connect(owner)
-            .setDeliveryState(currentDeliveryId, newStatus);
+        const result2 = await deliveryManager.connect(owner).setDeliveryState(currentDeliveryId, newStatus);
 
         expect(result2)
             .to.emit(deliveryManager, "DeliveryStatusUpdated")

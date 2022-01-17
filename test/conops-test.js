@@ -104,9 +104,7 @@ describe("Conops Activation", () => {
     it("should disable conops", async () => {
         // const disableConopsTx = await conops.disable(0);
         // await disableConopsTx.wait();
-        await expect(conops.disable(0))
-            .to.emit(conops, "ConopsDisable")
-            .withArgs(0);
+        await expect(conops.disable(0)).to.emit(conops, "ConopsDisable").withArgs(0);
         // eslint-disable-next-line no-unused-expressions
         expect((await conops.viewConops(0)).activated).to.be.false;
     });

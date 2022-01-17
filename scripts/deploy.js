@@ -15,34 +15,20 @@ async function main() {
 
     // We get the contract to deploy
     // Access control
-    const SWAccessControlArtifact = await hre.ethers.getContractFactory(
-        "SWAccessControl"
-    );
-    const ConopsManagerArtifact = await hre.ethers.getContractFactory(
-        "ConopsManager"
-    );
-    const DeliveryManagerArtifact = await hre.ethers.getContractFactory(
-        "DeliveryManager"
-    );
-    const StarwingsMasterArtifact = await hre.ethers.getContractFactory(
-        "StarwingsMaster"
-    );
+    const SWAccessControlArtifact = await hre.ethers.getContractFactory("SWAccessControl");
+    const ConopsManagerArtifact = await hre.ethers.getContractFactory("ConopsManager");
+    const DeliveryManagerArtifact = await hre.ethers.getContractFactory("DeliveryManager");
+    const StarwingsMasterArtifact = await hre.ethers.getContractFactory("StarwingsMaster");
 
-    const DroneFlightFactoryArtifact = await hre.ethers.getContractFactory(
-        "DroneFlightFactory"
-    );
+    const DroneFlightFactoryArtifact = await hre.ethers.getContractFactory("DroneFlightFactory");
 
     const SWAccessControl = await SWAccessControlArtifact.deploy();
     await SWAccessControl.deployed();
 
     console.log("SWAccessControl deployed to:", SWAccessControl.address);
 
-    const ConopsManager = await ConopsManagerArtifact.deploy(
-        SWAccessControl.address
-    );
-    const DeliveryManager = await DeliveryManagerArtifact.deploy(
-        SWAccessControl.address
-    );
+    const ConopsManager = await ConopsManagerArtifact.deploy(SWAccessControl.address);
+    const DeliveryManager = await DeliveryManagerArtifact.deploy(SWAccessControl.address);
     await ConopsManager.deployed();
 
     await DeliveryManager.deployed();
@@ -103,8 +89,7 @@ async function main() {
      *
      *
      */
-    const [owner, dummy, pilot1, pilot2, drone1, drone2, to1, to2, from] =
-        await hre.ethers.getSigners();
+    const [owner, dummy, pilot1, pilot2, drone1, drone2, to1, to2, from] = await hre.ethers.getSigners();
 
     const rolePilot = await SWAccessControl.PILOT_ROLE();
     const roleDrone = await SWAccessControl.DRONE_ROLE();
@@ -124,11 +109,7 @@ async function main() {
     console.log("### Pilot 2 added");
 
     // Drone 1
-    await StarwingsMaster.addDrone(
-        drone1.address,
-        "UAS-FR-239271",
-        "DJI Matrice 600 Pro"
-    );
+    await StarwingsMaster.addDrone(drone1.address, "UAS-FR-239271", "DJI Matrice 600 Pro");
 
     await SWAccessControl.grantRole(roleDrone, drone1.address);
 
@@ -257,15 +238,11 @@ async function main() {
 const storeContractAddresses = (jsonData) => {
     const fs = require("fs");
 
-    fs.writeFileSync(
-        "./client/src/contractAddresses.json",
-        JSON.stringify(jsonData),
-        function (err) {
-            if (err) {
-                console.log(err);
-            }
+    fs.writeFileSync("./client/src/contractAddresses.json", JSON.stringify(jsonData), function (err) {
+        if (err) {
+            console.log(err);
         }
-    );
+    });
 };
 
 // const isContractVerified = async (address) => {

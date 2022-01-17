@@ -1,15 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-let droneDelivery,
-    deliveryManager,
-    conops,
-    accessControl,
-    starwingsMaster,
-    factory,
-    owner,
-    pilot,
-    drone;
+let droneDelivery, deliveryManager, conops, accessControl, starwingsMaster, factory, owner, pilot, drone;
 
 const pilotSample = {
     _pilotAddress: "",
@@ -104,42 +96,26 @@ const deploy = async () => {
 
     // STARWINGS MASTER
     const StarwingsMaster = await ethers.getContractFactory("StarwingsMaster");
-    starwingsMaster = await StarwingsMaster.deploy(
-        accessControl.address,
-        conops.address,
-        deliveryManager.address
-    );
+    starwingsMaster = await StarwingsMaster.deploy(accessControl.address, conops.address, deliveryManager.address);
     await starwingsMaster.deployed();
 
     // ADD PILOTE AND DRONE
     droneSample._droneAddress = drone.address;
     // console.log(`======= Adding Drone [${droneSample._droneAddress}]`);
 
-    await starwingsMaster.addDrone(
-        droneSample._droneAddress,
-        droneSample._droneId,
-        droneSample._droneType
-    );
+    await starwingsMaster.addDrone(droneSample._droneAddress, droneSample._droneId, droneSample._droneType);
     pilotSample._pilotAddress = pilot.address;
 
     // console.log(`======= Adding Pilot [${pilotSample._pilotAddress}]`);
 
-    await starwingsMaster.addPilot(
-        pilotSample._pilotAddress,
-        pilotSample._pilotName
-    );
+    await starwingsMaster.addPilot(pilotSample._pilotAddress, pilotSample._pilotName);
 
     // DEPLOY DRONEDELIVERY
-    const droneDeliveryFactory = await ethers.getContractFactory(
-        "DroneDelivery"
-    );
+    const droneDeliveryFactory = await ethers.getContractFactory("DroneDelivery");
 
     // DroneFlightFactory
     const Factory = await ethers.getContractFactory("DroneFlightFactory");
-    factory = await Factory.deploy(
-        accessControl.address,
-        starwingsMaster.address
-    );
+    factory = await Factory.deploy(accessControl.address, starwingsMaster.address);
     await factory.deployed();
 
     // Magics happens
@@ -169,11 +145,7 @@ const deploy = async () => {
     })[0].args.addr;
 
     // Create contract object with deployed address
-    droneDelivery = new ethers.Contract(
-        droneDeliveryAddr,
-        droneDeliveryFactory.interface,
-        pilot
-    );
+    droneDelivery = new ethers.Contract(droneDeliveryAddr, droneDeliveryFactory.interface, pilot);
 
     // Init flightdata for drone delivery
     await droneDelivery.connect(pilot).initDelivery(droneFlightDataSample);
@@ -188,13 +160,9 @@ describe("DroneFlight", function () {
 
     describe("Checks", function () {
         it("should revert with Acces Refused message", async () => {
-            await expect(
-                droneDelivery.connect(owner).preFlightChecks(0)
-            ).to.be.revertedWith("Access Refused");
+            await expect(droneDelivery.connect(owner).preFlightChecks(0)).to.be.revertedWith("Access Refused");
 
-            await expect(
-                droneDelivery.connect(owner).postFlightChecks(0)
-            ).to.be.revertedWith("Access Refused");
+            await expect(droneDelivery.connect(owner).postFlightChecks(0)).to.be.revertedWith("Access Refused");
         });
 
         it("should set preflight check_id 0 to true", async () => {
@@ -233,9 +201,7 @@ describe("DroneFlight", function () {
         it("should add an Engine risk event with timestamp 547856", async () => {
             await droneDelivery.connect(drone).newRiskEvent(riskEvent);
 
-            expect((await droneDelivery.viewRiskEvent(0)).dateTime).to.be.equal(
-                547856
-            );
+            expect((await droneDelivery.viewRiskEvent(0)).dateTime).to.be.equal(547856);
 
             expect((await droneDelivery.viewRiskEvent(0)).risk).to.be.equal(0);
         });
@@ -243,21 +209,20 @@ describe("DroneFlight", function () {
 
     describe("Checkpoints", function () {
         it("should add a checkpoint with latitude 25 and longitude 50", async () => {
-            let checkPointsResult = await droneDelivery
-                .connect(drone)
-                .getCheckpoints();
+            let checkPointsResult = await droneDelivery.connect(drone).getCheckpoints();
             expect(checkPointsResult.length).to.be.equal(0);
+            const expectedTimestamp = new Date().getTime();
 
-            await droneDelivery.connect(drone).addCheckpoint({
+            await droneDelivery.connect(drone).addCheckpoint(expectedTimestamp, {
                 latitude: 25,
                 longitude: 50,
             });
 
-            checkPointsResult = await droneDelivery
-                .connect(drone)
-                .getCheckpoints();
+            checkPointsResult = await droneDelivery.connect(drone).getCheckpoints();
+
             expect(checkPointsResult.length).to.be.equal(1);
 
+            expect(checkPointsResult[0].time).to.be.equal(expectedTimestamp);
             expect(checkPointsResult[0].coordo.latitude).to.be.equal(25);
             expect(checkPointsResult[0].coordo.longitude).to.be.equal(50);
         });
@@ -267,9 +232,7 @@ describe("DroneFlight", function () {
         it("should revert as sender is not Drone", async () => {
             expect(await droneDelivery.isParcelPickedUp()).to.be.equal(false);
 
-            await expect(
-                droneDelivery.connect(owner).pickUp()
-            ).to.be.revertedWith("Access Refused");
+            await expect(droneDelivery.connect(owner).pickUp()).to.be.revertedWith("Access Refused");
         });
         it("should be picked up parcel", async () => {
             expect(await droneDelivery.isParcelPickedUp()).to.equal(false);
@@ -280,15 +243,11 @@ describe("DroneFlight", function () {
         it("should revert as parcel was already picked up", async () => {
             expect(await droneDelivery.isParcelPickedUp()).to.be.equal(false);
             await droneDelivery.connect(drone).pickUp();
-            await expect(
-                droneDelivery.connect(drone).pickUp()
-            ).to.be.revertedWith("parcel already pickedUp");
+            await expect(droneDelivery.connect(drone).pickUp()).to.be.revertedWith("parcel already pickedUp");
         });
         it("should revert as parcel was not pickedup before delivery", async () => {
             expect(await droneDelivery.isParcelPickedUp()).to.be.equal(false);
-            await expect(
-                droneDelivery.connect(drone).deliver()
-            ).to.be.revertedWith("parcel not picked up before");
+            await expect(droneDelivery.connect(drone).deliver()).to.be.revertedWith("parcel not picked up before");
         });
         it("should deliver the parcel", async () => {
             expect(await droneDelivery.isParcelPickedUp()).to.equal(false);
@@ -304,33 +263,31 @@ describe("DroneFlight", function () {
         it("should revert as sender is not Pilot or Drone", async () => {
             expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(0);
 
-            await expect(
-                droneDelivery.connect(owner).changeFlightStatus(2)
-            ).to.be.revertedWith("Access refused");
+            await expect(droneDelivery.connect(owner).changeFlightStatus(2)).to.be.revertedWith("Access refused");
         });
 
         it("should revert as status sent is 1", async () => {
             expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(0);
 
-            await expect(
-                droneDelivery.connect(pilot).changeFlightStatus(1)
-            ).to.be.revertedWith("Cannot cancel flight this way");
+            await expect(droneDelivery.connect(pilot).changeFlightStatus(1)).to.be.revertedWith(
+                "Cannot cancel flight this way"
+            );
         });
 
         it("should revert due to flight not allowed", async () => {
             expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(0);
 
-            await expect(
-                droneDelivery.connect(pilot).changeFlightStatus(2)
-            ).to.be.revertedWith("Flying is not allowed");
+            await expect(droneDelivery.connect(pilot).changeFlightStatus(2)).to.be.revertedWith(
+                "Flying is not allowed"
+            );
         });
 
         it("should revert as status 6 is outside range", async () => {
             expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(0);
 
-            await expect(
-                droneDelivery.connect(pilot).changeFlightStatus(6)
-            ).to.be.revertedWith("Not a valide logical status");
+            await expect(droneDelivery.connect(pilot).changeFlightStatus(6)).to.be.revertedWith(
+                "Not a valide logical status"
+            );
         });
 
         it("should cancel a flight", async () => {
@@ -350,63 +307,43 @@ describe("DroneFlight", function () {
             });
 
             it("should change piloteflightstatus to 2", async () => {
-                expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(
-                    0
-                );
+                expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(0);
                 await droneDelivery.connect(pilot).changeFlightStatus(2);
-                expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(
-                    2
-                );
+                expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(2);
             });
 
             it("should change droneflightstatus to 2", async () => {
-                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(
-                    0
-                );
+                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(0);
                 await droneDelivery.connect(drone).changeFlightStatus(2);
-                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(
-                    2
-                );
+                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(2);
             });
 
             it("should revert due to flight not started (as pilot)", async () => {
-                expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(
-                    0
+                expect(await droneDelivery.viewPilotFlightstatus()).to.be.equal(0);
+                await expect(droneDelivery.connect(pilot).changeFlightStatus(3)).to.be.revertedWith(
+                    "status not allowed"
                 );
-                await expect(
-                    droneDelivery.connect(pilot).changeFlightStatus(3)
-                ).to.be.revertedWith("status not allowed");
             });
 
             it("should revert due to flight not started (as drone)", async () => {
-                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(
-                    0
+                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(0);
+                await expect(droneDelivery.connect(drone).changeFlightStatus(3)).to.be.revertedWith(
+                    "status not allowed"
                 );
-                await expect(
-                    droneDelivery.connect(drone).changeFlightStatus(3)
-                ).to.be.revertedWith("status not allowed");
             });
 
             it("should pause a flight from pilot", async () => {
-                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(
-                    0
-                );
+                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(0);
                 await droneDelivery.connect(drone).changeFlightStatus(2);
                 await droneDelivery.connect(drone).changeFlightStatus(3);
-                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(
-                    3
-                );
+                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(3);
             });
 
             it("should pause a flight from drone", async () => {
-                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(
-                    0
-                );
+                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(0);
                 await droneDelivery.connect(drone).changeFlightStatus(2);
                 await droneDelivery.connect(drone).changeFlightStatus(3);
-                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(
-                    3
-                );
+                expect(await droneDelivery.viewDroneFlightstatus()).to.be.equal(3);
             });
         });
     });

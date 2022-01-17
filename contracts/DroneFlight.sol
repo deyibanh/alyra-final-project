@@ -173,16 +173,17 @@ abstract contract DroneFlight {
     /**
      * @notice Add checkpoint.
      *
+     * @param _time The datetime that the coordinates has been stored.
      * @param _coordinate The coordinates of the checkpoints.
      */
-    function addCheckpoint(Coordinate memory _coordinate)
+    function addCheckpoint(uint _time, Coordinate memory _coordinate)
         external
         onlyRole(StarwingsDataLib.DRONE_ROLE)
         onlyDrone
     {
         Checkpoint memory checkpoint;
+        checkpoint.time = _time;
         checkpoint.coordo = _coordinate;
-        checkpoint.time = block.timestamp;
         checkpoints.push(checkpoint);
 
         emit CheckpointAdded(checkpoint);
