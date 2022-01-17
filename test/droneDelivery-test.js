@@ -241,6 +241,28 @@ describe("droneflight", function () {
         });
     });
 
+    describe("checkpoints", function () {
+        it("Should add a checkpoint with latitude 25 and longitude 50", async () => {
+            let checkPointsResult = await droneDelivery
+                .connect(drone)
+                .getCheckpoints();
+            expect(checkPointsResult.length).to.be.equal(0);
+
+            await droneDelivery.connect(drone).addCheckpoint({
+                latitude: 25,
+                longitude: 50,
+            });
+
+            checkPointsResult = await droneDelivery
+                .connect(drone)
+                .getCheckpoints();
+            expect(checkPointsResult.length).to.be.equal(1);
+
+            expect(checkPointsResult[0].coordo.latitude).to.be.equal(25);
+            expect(checkPointsResult[0].coordo.longitude).to.be.equal(50);
+        });
+    });
+
     describe("parcel management", function () {
         it("Should revert as sender is not Drone", async () => {
             expect(await droneDelivery.isParcelPickedUp()).to.be.equal(false);

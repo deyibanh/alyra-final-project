@@ -29,6 +29,7 @@ abstract contract DroneFlight is Ownable {
     event CancelFlight();
     event ChangeFlightStatus(FlightState _status);
     event RiskEvent(Event _status);
+    event CheckpointAdded(Checkpoint checkpoint);
 
     // 3. Modifiers
     /**
@@ -173,6 +174,29 @@ abstract contract DroneFlight is Ownable {
         returns (bool)
     {
         return postChecks.checkType[_checkType];
+    }
+
+    /**
+     * @notice Add checkpoint.
+     *
+     * @param _coordinate The coordinates of the checkpoints.
+     */
+    function addCheckpoint(Coordinate memory _coordinate) external onlyRole(StarwingsDataLib.DRONE_ROLE) {
+        Checkpoint memory checkpoint;
+        checkpoint.coordo = _coordinate;
+        checkpoint.time = block.timestamp;
+        checkpoints.push(checkpoint);
+
+        emit CheckpointAdded(checkpoint);
+    }
+
+    /**
+     * @notice Get checkpoints.
+     *
+     * @return All checkpoints.
+     */
+    function getCheckpoints() external view returns (Checkpoint[] memory) {
+        return checkpoints;
     }
 
     /**
