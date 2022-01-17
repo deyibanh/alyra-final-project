@@ -1,26 +1,31 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IConopsManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
-import "hardhat/console.sol";
 
-abstract contract DroneFlight is Ownable {
+/**
+ *   @title DroneFlight
+ *   @author Starwings
+ *  @notice This abstract contract is the base class for all droneXXX flight
+ */
+abstract contract DroneFlight {
     using StarwingsDataLib for StarwingsDataLib.FlightData;
 
-    // 1. State variables
     IConopsManager private conopsManager;
     IAccessControl private accessControl;
-    bool internal allowedToFlight;
+
+    Event[] internal riskEvent;
+    // Drone checkpoints
+    Checkpoint[] internal checkpoints;
+    StarwingsDataLib.AirRisk[] internal airRisks;
     StarwingsDataLib.FlightData internal datas;
     FlightState internal droneFlightState;
     FlightState internal pilotFlightState;
     Check internal preChecks;
     Check internal postChecks;
-
-    // 2. Events
+    bool internal allowedToFlight;
 
     event PreFlightCheck(CheckType _checkType);
     event PostFlightCheck(CheckType _checkType);
@@ -30,7 +35,6 @@ abstract contract DroneFlight is Ownable {
     event ChangeFlightStatus(FlightState _status);
     event CheckpointAdded(Checkpoint checkpoint);
 
-    // 3. Modifiers
     /**
      *  @notice Modifier to restrict function to specific role
      *  @dev Use the library to retrieve bytes32 values when calling the modifier
@@ -41,11 +45,21 @@ abstract contract DroneFlight is Ownable {
         _;
     }
 
-    // 4. Structs, arrays, enums
-    Event[] internal riskEvent;
-    // Drone checkpoints
-    Checkpoint[] internal checkpoints;
-    StarwingsDataLib.AirRisk[] internal airRisks;
+    /**
+     *  @notice Modifier to restrict function to the owner (for flight session it is the pilot)
+     */
+    modifier onlyOwner() {
+        require(datas.pilot.pilotAddress == msg.sender, "Only owner");
+        _;
+    }
+
+    /**
+     *  @notice Modifier to restrict function to the owner (for flight session it is the pilot)
+     */
+    modifier onlyDrone() {
+        require(datas.drone.droneAddress == msg.sender, "Only drone");
+        _;
+    }
 
     /**
      *  PreFlight : flight is not started
@@ -95,33 +109,11 @@ abstract contract DroneFlight is Ownable {
         uint256 time;
     }
 
-    // 5. Constructor
-    constructor(address _conopsManager, address _accessControlAddress)
-    //StarwingsDataLib.FlightData memory data
-    {
+    constructor(address _conopsManager, address _accessControlAddress) {
         conopsManager = IConopsManager(_conopsManager);
         accessControl = IAccessControl(_accessControlAddress);
     }
 
-    /**
-     *  @notice Setup the data for the flight
-     *  @dev Check the StarwingsLibrary to view the struture
-     *  @param _data A FlightData structure,
-     */
-    function setFlightData(StarwingsDataLib.FlightData memory _data) internal {
-        datas.pilot = _data.pilot;
-        datas.drone = _data.drone;
-        datas.conopsId = _data.conopsId;
-
-        datas.depart = _data.depart;
-        datas.destination = _data.destination;
-        datas.flightDuration = _data.flightDuration;
-        datas.flightDatetime = _data.flightDatetime;
-        _setupAirRisk();
-    }
-
-    // 6. Fallback — Receive function
-    // 7. External visible functions
     /**
      *  @notice Do the preflight checks of a certain type
      *  @param _checkType The Checktype to check
@@ -129,6 +121,7 @@ abstract contract DroneFlight is Ownable {
     function preFlightChecks(CheckType _checkType)
         external
         onlyRole(StarwingsDataLib.PILOT_ROLE)
+        onlyOwner
     {
         require(!preChecks.checkType[_checkType], "already checked");
         preChecks.checkType[_checkType] = true;
@@ -144,6 +137,7 @@ abstract contract DroneFlight is Ownable {
     function postFlightChecks(CheckType _checkType)
         external
         onlyRole(StarwingsDataLib.PILOT_ROLE)
+        onlyOwner
     {
         require(!postChecks.checkType[_checkType], "already checked");
         postChecks.checkType[_checkType] = true;
@@ -180,7 +174,11 @@ abstract contract DroneFlight is Ownable {
      *
      * @param _coordinate The coordinates of the checkpoints.
      */
-    function addCheckpoint(Coordinate memory _coordinate) external onlyRole(StarwingsDataLib.DRONE_ROLE) {
+    function addCheckpoint(Coordinate memory _coordinate)
+        external
+        onlyRole(StarwingsDataLib.DRONE_ROLE)
+        onlyDrone
+    {
         Checkpoint memory checkpoint;
         checkpoint.coordo = _coordinate;
         checkpoint.time = block.timestamp;
@@ -205,6 +203,7 @@ abstract contract DroneFlight is Ownable {
     function newRiskEvent(Event memory _event)
         external
         onlyRole(StarwingsDataLib.DRONE_ROLE)
+        onlyDrone
     {
         riskEvent.push(_event);
     }
@@ -228,6 +227,7 @@ abstract contract DroneFlight is Ownable {
     function validateAirRisk(uint256 _airRiskId)
         external
         onlyRole(StarwingsDataLib.PILOT_ROLE)
+        onlyOwner
     {
         require(!airRisks[_airRiskId].validated, "airRisk already validated");
         airRisks[_airRiskId].validated = true;
@@ -243,6 +243,7 @@ abstract contract DroneFlight is Ownable {
     function cancelAirRisk(uint256 _airRiskId)
         external
         onlyRole(StarwingsDataLib.PILOT_ROLE)
+        onlyOwner
     {
         require(airRisks[_airRiskId].validated, "airRisk already canceled");
         airRisks[_airRiskId].validated = false;
@@ -267,7 +268,11 @@ abstract contract DroneFlight is Ownable {
      *  @dev This function has to be call to cancel the flight.
      *  Using changeFlightStatus is not possible
      */
-    function cancelFlight() external onlyRole(StarwingsDataLib.PILOT_ROLE) {
+    function cancelFlight()
+        external
+        onlyRole(StarwingsDataLib.PILOT_ROLE)
+        onlyOwner
+    {
         require(
             pilotFlightState == FlightState.PreFlight,
             "flight already started/canceled"
@@ -283,7 +288,7 @@ abstract contract DroneFlight is Ownable {
     /**
      *  @notice Change the status of the flight
      *  @dev Only Pilot and Drone can call this function
-     *       droneFlightState or pilotFlightState will be 
+     *       droneFlightState or pilotFlightState will be
      *       called depending of the msg.sender
      *  @param _status The uint of the FlightState
      */
@@ -347,6 +352,23 @@ abstract contract DroneFlight is Ownable {
 
     // 8. Public visible functions
     // 9. Internal visible functions
+
+    /**
+     *  @notice Setup the data for the flight
+     *  @dev Check the StarwingsLibrary to view the struture
+     *  @param _data A FlightData structure,
+     */
+    function setFlightData(StarwingsDataLib.FlightData memory _data) internal {
+        datas.pilot = _data.pilot;
+        datas.drone = _data.drone;
+        datas.conopsId = _data.conopsId;
+
+        datas.depart = _data.depart;
+        datas.destination = _data.destination;
+        datas.flightDuration = _data.flightDuration;
+        datas.flightDatetime = _data.flightDatetime;
+        _setupAirRisk();
+    }
 
     /**
      *  @dev Retrieve air AirRisk from the conops and store them

@@ -5,23 +5,18 @@ import "./interfaces/IDeliveryManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
-import "hardhat/console.sol";
 
 /**
- *   @title Delivery Master
- *   @author Damien
+ *  @title Delivery Master
+ *  @author Damien
  *  @notice This contract manage all the deliveries.
  */
 contract DeliveryManager is IDeliveryManager {
     using Strings for uint256;
-    // 1. State variables
+
     mapping(string => uint256) private deliveriesIndex;
     Delivery[] private deliveries;
     IAccessControl private accessControl;
-
-    // 2. Events
-
-    // 3. Function Modifiers
 
     /// @notice Modifier to restrict function to specific role
     /// @dev Use the library to retrieve bytes32 values when calling the modifier
@@ -31,14 +26,9 @@ contract DeliveryManager is IDeliveryManager {
         _;
     }
 
-    // 4. Struct, Arrays or Enums
-    // 5. Constructor
     constructor(address accessControlAddress) {
         accessControl = IAccessControl(accessControlAddress);
     }
-
-    // 6. Fallback — Receive function
-    // 7. External visible functions
 
     /// @notice Creates a new delivery
     /// @dev
@@ -73,11 +63,6 @@ contract DeliveryManager is IDeliveryManager {
 
         deliveries.push(_delivery);
         deliveriesIndex[_delivery.deliveryId] = deliveries.length - 1;
-
-        // console.log("[Contract Debug] DeliveryId:%s", _delivery.deliveryId);
-        // console.log("[Contract Debug] OrderId:%s", _delivery.supplierOrderId);
-        // console.log("[Contract Debug] toAddr:%s", _delivery.toAddr);
-        // console.log("[Contract Debug] fromAddr:%s", _delivery.fromAddr);
 
         emit DeliveryCreated(_delivery.deliveryId);
 
@@ -142,8 +127,4 @@ contract DeliveryManager is IDeliveryManager {
     function getAllDeliveries() external view returns (Delivery[] memory) {
         return deliveries;
     }
-
-    // 8. Public visible functions
-    // 9. Internal visible functions
-    // 10. Private visible functions
 }
