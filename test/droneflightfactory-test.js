@@ -145,7 +145,7 @@ describe("DroneFlightFactory", function () {
         await deploy();
     });
 
-    it("Should revert due to caller not pilot", async () => {
+    it("should revert due to caller not pilot", async () => {
         expect((await factory.getDeployedContracts()).length).to.equal(0);
 
         // Magics happens
@@ -170,7 +170,7 @@ describe("DroneFlightFactory", function () {
         await expect(result).to.be.revertedWith("Access Refused");
     });
 
-    it("Should deploy 2 new DroneDelivery contract", async () => {
+    it("should deploy 2 new DroneDelivery contract", async () => {
         await delivery.newDelivery(deliverySample);
         await delivery.newDelivery(deliverySample);
 
