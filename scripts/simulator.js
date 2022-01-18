@@ -66,25 +66,6 @@ let drone2;
 const deliveryStatusLabel = ["No Info", "Registered", "At Hub", "Planned", "In Delivery", "Arrived", "Delivered"];
 const flightStateLabel = ["PreFlight", "Canceled", "Flying", "Paused", "Aborted", "Ended"];
 
-// Events
-// conopsManagerContract.connect(provider).on("ConopsCreated", (conopsID, name) => {
-//     console.log(`EVENT - CONOPS ${conopsID} created: ${name}.`);
-// });
-// deliveryManagerContract.connect(provider).on("DeliveryCreated", (deliveryId) => {
-//     console.log(`EVENT - Delivery ${deliveryId} created.`);
-// });
-// deliveryManagerContract.connect(provider).on("DeliveryStatusUpdated", (deliveryId, oldStatus, newStatus) => {
-//     console.log(
-//         `EVENT - Delivery ${deliveryId} status updated from ${deliveryStatusLabel[oldStatus]} to ${deliveryStatusLabel[newStatus]}.`
-//     );
-// });
-// starwingsMasterContract.connect(provider).on("PilotAdded", (pilotAddress) => {
-//     console.log(`EVENT - Pilot ${pilotAddress} added.`);
-// });
-// starwingsMasterContract.connect(provider).on("DroneAdded", (droneAddress) => {
-//     console.log(`EVENT - Drone ${droneAddress} added.`);
-// });
-
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -242,17 +223,6 @@ async function getDroneDeliveryContract(pilotWallet, deliveryId, droneDeliveryDa
 }
 
 async function simuleFlight(pilotWallet, droneWallet, droneDeliveryContract, deliveryId) {
-    // Listening Events
-    // droneDeliveryContract.connect(provider).on("ParcelPickedUp", () => {
-    //     console.log(`EVENT - Parcel has been picked up.`);
-    // });
-    // droneDeliveryContract.connect(provider).on("ParcelDelivered", () => {
-    //     console.log(`EVENT - Parcel has been delivered.`);
-    // });
-    // droneDeliveryContract.connect(provider).on("CheckpointAdded", (checkpoint) => {
-    //     console.log(`EVENT - Checkpoint (lat, long, time) ${checkpoint} added.`);
-    // });
-
     // Pre-flight checks
     await droneDeliveryContract.connect(pilotWallet).preFlightChecks(0);
     console.log(`DeliveryID ${deliveryId}: Pre-flight Check motor OK`);
