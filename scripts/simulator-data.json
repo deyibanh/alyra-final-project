@@ -1,0 +1,76 @@
+{
+   "pilots": [
+        {
+            "name": "Pilot Simulator 1",
+            "address": "0xfd0cc8b0a53c0ee688d4b8f6dd8b8e6853446eae"
+        },
+        {
+            "name": "Pilot Simulator 2",
+            "address": "0x32f32610a2093443812451528aad4794b63c48a2"
+        }
+    ],
+    "drones": [
+        {
+            "id": "DRONE-SIMULATOR-ID-1",
+            "type": "Drone Simulator",
+            "address": "0x58dd19b1be64427743c1418069a72e358e3e33c3"
+        },
+        {
+            "id": "DRONE-SIMULATOR-ID-2",
+            "type": "Drone Simulator",
+            "address": "0xcd397c8d4e88d2107739f35487ba27468e2dfb2c"
+        }
+    ],
+    "deliveries": [
+        {
+            "deliveryId": "",
+            "supplierOrderId": "0000001",
+            "state": 0,
+            "from": "Simulator Sender",
+            "fromAddr": "0xf7a7d83abeea9648c2aacadacddaf7209cc22144",
+            "to": "Simulator Receiver 1",
+            "toAddr": "0xcb91f83417711a6f5d5a3559b22357070eb8f5b8",
+            "fromHubId": 100,
+            "toHubId": 200
+        },
+        {
+            "deliveryId": "",
+            "supplierOrderId": "0000002",
+            "state": 0,
+            "from": "Simulator Sender",
+            "fromAddr": "0xf7a7d83abeea9648c2aacadacddaf7209cc22144",
+            "to": "Simulator Receiver 2",
+            "toAddr": "0xa8acf37641d34f61dc9ea48b02b7fe05cd6cb7b3",
+            "fromHubId": 100,
+            "toHubId": 300
+        }
+    ],
+    "conopsList": [
+        {
+            "name": "Simulator CONOPS 1",
+            "startingPoint": "Simulator HUB ID#100",
+            "endPoint": "Simulator HUB ID#200",
+            "crossRoad": "None",
+            "exclusionZone": "None",
+            "airRisks": [
+                { "validated": false, "name": "Aerodrome 1", "riskType": 0 },
+                { "validated": false, "name": "CHU 1", "riskType": 1 }
+            ],
+            "grc": 4,
+            "arc": 0
+        },
+        {
+            "name": "Simulator CONOPS 2",
+            "startingPoint": "Simulator HUB ID#100",
+            "endPoint": "Simulator HUB ID#300",
+            "crossRoad": "None",
+            "exclusionZone": "None",
+            "airRisks": [
+                { "validated": false, "name": "Aerodrome 1", "riskType": 0 },
+                { "validated": false, "name": "CHU 1", "riskType": 1 }
+            ],
+            "grc": 4,
+            "arc": 0
+        }
+    ]
+}

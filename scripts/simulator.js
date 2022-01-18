@@ -1,345 +1,303 @@
 require("dotenv").config();
 const ethers = require("ethers");
 const hardhat = require("hardhat");
-const StarwingsMasterArtifact = require("../client/src/artifacts/contracts/StarwingsMaster.sol/StarwingsMaster.json");
-const DeliveryManagerArtifact = require("../client/src/artifacts/contracts/DeliveryManager.sol/DeliveryManager.json");
-const ConopsManagerArtifact = require("../client/src/artifacts/contracts/ConopsManager.sol/ConopsManager.json");
-const DroneFlightFactoryArtifact = require("../client/src/artifacts/contracts/DroneFlightFactory.sol/DroneFlightFactory.json");
-const SWAccessControlArtifact = require("../client/src/artifacts/contracts/SWAccessControl.sol/SWAccessControl.json");
-const DroneDeliveryArtifact = require("../client/src/artifacts/contracts/DroneDelivery.sol/DroneDelivery.json");
+const simulatorData = require("./simulator-data.json");
+// Contracts Artifacts
+const conopsManagerArtifact = require("../client/src/artifacts/contracts/ConopsManager.sol/ConopsManager.json");
+const deliveryManagerArtifact = require("../client/src/artifacts/contracts/DeliveryManager.sol/DeliveryManager.json");
+const droneFlightFactoryArtifact = require("../client/src/artifacts/contracts/DroneFlightFactory.sol/DroneFlightFactory.json");
+const starwingsMasterArtifact = require("../client/src/artifacts/contracts/StarwingsMaster.sol/StarwingsMaster.json");
+const swAccessControlArtifact = require("../client/src/artifacts/contracts/SWAccessControl.sol/SWAccessControl.json");
+// Contracts Addresses
 const contractAddresses = require("../client/src/contractAddresses.json");
-const StarwingsMasterAddress = contractAddresses.StarwingsMaster;
-const DeliveryManagerAddress = contractAddresses.DeliveryManager;
-const ConopsManagerAddress = contractAddresses.ConopsManager;
-const DroneFlightFactoryAddress = contractAddresses.DroneFlightFactory;
-const SWAccessControlAddress = contractAddresses.SWAccessControl;
-
+const conopsManagerContractAddress = contractAddresses.ConopsManager;
+const deliveryManagerContractAddress = contractAddresses.DeliveryManager;
+const droneFlightFactoryContractAddress = contractAddresses.DroneFlightFactory;
+const starwingsMasterContractAddress = contractAddresses.StarwingsMaster;
+const swAccessControlContractAddress = contractAddresses.SWAccessControl;
 // Contracts
 const provider = ethers.getDefaultProvider("http://localhost:8545");
-const StarwingsMaster = new ethers.Contract(StarwingsMasterAddress, StarwingsMasterArtifact.abi);
-const DeliveryManager = new ethers.Contract(DeliveryManagerAddress, DeliveryManagerArtifact.abi);
-const ConopsManager = new ethers.Contract(ConopsManagerAddress, ConopsManagerArtifact.abi);
-const DroneFlightFactory = new ethers.Contract(DroneFlightFactoryAddress, DroneFlightFactoryArtifact.abi);
-const SWAccessControl = new ethers.Contract(SWAccessControlAddress, SWAccessControlArtifact.abi);
-
-const DeliveryStatusLabel = ["No Info", "Registered", "At Hub", "Planned", "In Delivery", "Arrived", "Delivered"];
-
-const flightStateLabel = ["PreFlight", "Canceled", "Flying", "Paused", "Aborted", "Ended"];
-
-// Events
-StarwingsMaster.connect(provider).on("PilotAdded", (pilotAddress) => {
-    console.log(`EVENT - Pilot ${pilotAddress} added.`);
-});
-
-StarwingsMaster.connect(provider).on("DroneAdded", (droneAddress) => {
-    console.log(`EVENT - Drone ${droneAddress} added.`);
-});
-
-DeliveryManager.connect(provider).on("DeliveryCreated", (deliveryId) => {
-    console.log(`EVENT - Delivery ${deliveryId} created.`);
-});
-
-DeliveryManager.connect(provider).on("DeliveryStatusUpdated", (deliveryId, oldStatus, newStatus) => {
-    console.log(
-        `EVENT - Delivery ${deliveryId} status updated from ${DeliveryStatusLabel[oldStatus]} to ${DeliveryStatusLabel[newStatus]}.`
-    );
-});
-
-ConopsManager.connect(provider).on("ConopsCreated", (conopsID, name) => {
-    console.log(`EVENT - CONOPS ${conopsID} created: ${name}.`);
-});
+const conopsManagerContract = new ethers.Contract(conopsManagerContractAddress, conopsManagerArtifact.abi, provider);
+const deliveryManagerContract = new ethers.Contract(
+    deliveryManagerContractAddress,
+    deliveryManagerArtifact.abi,
+    provider
+);
+const droneFlightFactoryContract = new ethers.Contract(
+    droneFlightFactoryContractAddress,
+    droneFlightFactoryArtifact.abi
+);
+const starwingsMasterContract = new ethers.Contract(
+    starwingsMasterContractAddress,
+    starwingsMasterArtifact.abi,
+    provider
+);
+const swAccessControlContract = new ethers.Contract(
+    swAccessControlContractAddress,
+    swAccessControlArtifact.abi,
+    provider
+);
 
 // Wallets
+//
+// Simulator signers.
+// Admin:   0x74b890e6ADbBF8770904aA4d258760a755b43FE6 (0)
+// Pilot 1: 0xfd0cc8b0a53c0ee688d4b8f6dd8b8e6853446eae (11)
+// Pilot 2: 0x32f32610a2093443812451528aad4794b63c48a2 (12)
+// Drone 1: 0x58dd19b1be64427743c1418069a72e358e3e33c3 (13)
+// Drone 2: 0xcd397c8d4e88d2107739f35487ba27468e2dfb2c (14)
+// From:    0xf7a7d83abeea9648c2aacadacddaf7209cc22144 (15)
+// To 1:    0xcb91f83417711a6f5d5a3559b22357070eb8f5b8 (16)
+// To 2:    0xa8acf37641d34f61dc9ea48b02b7fe05cd6cb7b3 (17)
 const mnemonic = process.env.MNEMONIC;
 const adminWallet = ethers.Wallet.fromMnemonic(mnemonic, "m/44'/60'/0'/0/0").connect(provider);
 const pilot1Wallet = ethers.Wallet.fromMnemonic(mnemonic, "m/44'/60'/0'/0/11").connect(provider);
 const pilot2Wallet = ethers.Wallet.fromMnemonic(mnemonic, "m/44'/60'/0'/0/12").connect(provider);
 const drone1Wallet = ethers.Wallet.fromMnemonic(mnemonic, "m/44'/60'/0'/0/13").connect(provider);
 const drone2Wallet = ethers.Wallet.fromMnemonic(mnemonic, "m/44'/60'/0'/0/14").connect(provider);
+// const fromWallet = ethers.Wallet.fromMnemonic(mnemonic, "m/44'/60'/0'/0/15").connect(provider);
+// const to1Wallet = ethers.Wallet.fromMnemonic(mnemonic, "m/44'/60'/0'/0/16").connect(provider);
+// const to2Wallet = ethers.Wallet.fromMnemonic(mnemonic, "m/44'/60'/0'/0/17").connect(provider);
+let pilot1;
+let pilot2;
+let drone1;
+let drone2;
 
-const pilotsData = [
-    {
-        name: "Pilot Simulator 1",
-        address: pilot1Wallet.address,
-    },
-    {
-        name: "Pilot Simulator 2",
-        address: pilot2Wallet.address,
-    },
-];
-const dronesData = [
-    {
-        id: "DRONE-SIMULATOR-1",
-        type: "Drone Simulator",
-        address: drone1Wallet.address,
-    },
-    {
-        id: "DRONE-SIMULATOR-2",
-        type: "Drone Simulator",
-        address: drone2Wallet.address,
-    },
-];
-const deliveriesData = [
-    {
-        deliveryId: "",
-        supplierOrderId: "0000001",
-        state: 0,
-        from: "Simulator Sender",
-        fromAddr: "0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc",
-        to: "Simulator Receiver",
-        toAddr: "0x976ea74026e726554db657fa54763abd0c3a0aa9",
-        fromHubId: 100,
-        toHubId: 300,
-    },
-    {
-        deliveryId: "",
-        supplierOrderId: "0000002",
-        state: 0,
-        from: "Simulator Sender",
-        fromAddr: "0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc",
-        to: "Simulator Receiver",
-        toAddr: "0x976ea74026e726554db657fa54763abd0c3a0aa9",
-        fromHubId: 100,
-        toHubId: 300,
-    },
-    {
-        deliveryId: "",
-        supplierOrderId: "0000003",
-        state: 0,
-        from: "Simulator Sender",
-        fromAddr: "0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc",
-        to: "Simulator Receiver",
-        toAddr: "0x976ea74026e726554db657fa54763abd0c3a0aa9",
-        fromHubId: 100,
-        toHubId: 300,
-    },
-];
-const conopsListData = [
-    {
-        name: "Paris 1 km",
-        startingPoint: "Simul HUB Paris 1",
-        endPoint: "Simul HUB Paris 2",
-        crossRoad: "None",
-        exclusionZone: "None",
-        airRisks: [
-            { validated: false, name: "Aerodrome 1", riskType: 0 },
-            { validated: false, name: "CHU 1", riskType: 1 },
-        ],
-        grc: 4,
-        arc: 0,
-    },
-    {
-        name: "Paris 3 km",
-        startingPoint: "Simul HUB Paris 1",
-        endPoint: "Simul HUB Paris 3",
-        crossRoad: "None",
-        exclusionZone: "None",
-        airRisks: [
-            { validated: false, name: "Aerodrome 1", riskType: 0 },
-            { validated: false, name: "CHU 1", riskType: 1 },
-        ],
-        grc: 4,
-        arc: 0,
-    },
-];
+const deliveryStatusLabel = ["No Info", "Registered", "At Hub", "Planned", "In Delivery", "Arrived", "Delivered"];
+const flightStateLabel = ["PreFlight", "Canceled", "Flying", "Paused", "Aborted", "Ended"];
 
-async function simulate() {
-    try {
-        const droneDeliveryFactory = await hardhat.ethers.getContractFactory("DroneDelivery");
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    const result = Math.floor(Math.random() * (max - min + 1)) + min;
 
-        const rolePilot = await SWAccessControl.connect(adminWallet).PILOT_ROLE();
-        const roleDrone = await SWAccessControl.connect(adminWallet).DRONE_ROLE();
+    return result;
+}
 
-        console.log("1) Assigning Access");
-        for (const pilot of pilotsData) {
-            console.log(`Adding Pilot: ${pilot.name} (${pilot.address})...`);
-            await StarwingsMaster.connect(adminWallet).addPilot(pilot.address, pilot.name);
-            await SWAccessControl.connect(adminWallet).grantRole(rolePilot, pilot.address);
-        }
+async function createAccesses() {
+    console.log("##############################");
+    console.log("# 1) Create Accesses");
+    console.log("##############################");
+    const rolePilot = await swAccessControlContract.connect(adminWallet).PILOT_ROLE();
+    const roleDrone = await swAccessControlContract.connect(adminWallet).DRONE_ROLE();
 
-        for (const drone of dronesData) {
-            console.log(`Adding Drone: ${drone.id} (${drone.address})...`);
-            await StarwingsMaster.connect(adminWallet).addDrone(drone.address, drone.id, drone.type);
-            await SWAccessControl.connect(adminWallet).grantRole(roleDrone, drone.address);
-        }
+    for (const pilotData of simulatorData.pilots) {
+        console.log(`Creating Pilot: ${pilotData.name} (${pilotData.address})...`);
+        await starwingsMasterContract.connect(adminWallet).addPilot(pilotData.address, pilotData.name);
+        await swAccessControlContract.connect(adminWallet).grantRole(rolePilot, pilotData.address);
+    }
 
-        console.log("2) Create Delivery");
-        for (const delivery of deliveriesData) {
-            console.log(`Adding Delivery: ${delivery.supplierOrderId}...`);
-            await DeliveryManager.connect(adminWallet).newDelivery(delivery);
-        }
+    for (const droneData of simulatorData.drones) {
+        console.log(`Creating Drone (ID/Type): ${droneData.id}/${droneData.type} (${droneData.address})...`);
+        await starwingsMasterContract.connect(adminWallet).addDrone(droneData.address, droneData.id, droneData.type);
+        await swAccessControlContract.connect(adminWallet).grantRole(roleDrone, droneData.address);
+    }
 
-        console.log("3) Create CONOPS");
-        for (const conops of conopsListData) {
-            console.log(`Adding CONOPS: ${conops.name}...`);
-            await ConopsManager.connect(adminWallet).addConops(
-                conops.name,
-                conops.startingPoint,
-                conops.endPoint,
-                conops.crossRoad,
-                conops.exclusionZone,
-                conops.airRisks,
-                conops.grc,
-                conops.arc
+    pilot1 = await starwingsMasterContract.connect(pilot1Wallet).getPilot(pilot1Wallet.address);
+    pilot2 = await starwingsMasterContract.connect(pilot2Wallet).getPilot(pilot2Wallet.address);
+    drone1 = await starwingsMasterContract.connect(pilot1Wallet).getDrone(drone1Wallet.address);
+    drone2 = await starwingsMasterContract.connect(pilot2Wallet).getDrone(drone2Wallet.address);
+}
+
+async function createDeliveries() {
+    console.log("##############################");
+    console.log("# 2) Create Deliveries");
+    console.log("##############################");
+
+    for (const deliveryData of simulatorData.deliveries) {
+        console.log(`Creating Delivery (Order ID): ${deliveryData.supplierOrderId}...`);
+        await deliveryManagerContract.connect(adminWallet).newDelivery(deliveryData);
+    }
+}
+
+async function createConops() {
+    console.log("##############################");
+    console.log("# 3) Create CONOPS");
+    console.log("##############################");
+
+    for (const conopsData of simulatorData.conopsList) {
+        console.log(`Creating CONOPS: ${conopsData.name}...`);
+        await conopsManagerContract
+            .connect(adminWallet)
+            .addConops(
+                conopsData.name,
+                conopsData.startingPoint,
+                conopsData.endPoint,
+                conopsData.crossRoad,
+                conopsData.exclusionZone,
+                conopsData.airRisks,
+                conopsData.grc,
+                conopsData.arc
             );
-        }
+    }
+}
 
-        console.log("4) Create DroneDelivery");
-        const deliveries = await DeliveryManager.connect(pilot1Wallet).getAllDeliveries();
-        const conopsList = await ConopsManager.connect(pilot1Wallet).viewAllConops();
-        const conops1 = conopsList[2];
-        const delivery1 = deliveries[2];
+async function createDroneDeliveries() {
+    console.log("##############################");
+    console.log("# 4) Create DroneDeliveries");
+    console.log("##############################");
 
-        console.log(`Creating DroneDelivery for deliveryId: ${delivery1.deliveryId}...`);
+    const deliveries = await deliveryManagerContract.connect(pilot1Wallet).getAllDeliveries();
+    const conopsList = await conopsManagerContract.connect(pilot1Wallet).viewAllConops();
 
-        const pilot1 = await StarwingsMaster.connect(pilot1Wallet).getPilot(pilot1Wallet.address);
-        const drone1 = await StarwingsMaster.connect(pilot1Wallet).getDrone(drone1Wallet.address);
-        const droneFlightDataSample = {
-            pilot: pilot1,
-            drone: drone1,
-            conopsId: 2,
-            flightDatetime: new Date("01/02/2022") / 1000,
-            flightDuration: 1,
-            depart: conops1.startingPoint,
-            destination: conops1.endPoint,
-        };
-        // console.log(droneFlightDataSample);
-        const salt = Date.now();
+    // Delivery 1
+    const delivery1 = deliveries[2];
+    const conopsId1 = 2;
+    const conops1 = conopsList[conopsId1];
+    const droneDelivery1 = {
+        pilot: pilot1,
+        drone: drone1,
+        conopsId: conopsId1,
+        flightDatetime: new Date().getTime(),
+        flightDuration: 1,
+        depart: conops1.startingPoint,
+        destination: conops1.endPoint,
+    };
+    const droneDeliveryContract1 = await getDroneDeliveryContract(
+        pilot1Wallet,
+        delivery1.deliveryId,
+        droneDelivery1,
+        conops1
+    );
 
-        const bytecode = ethers.utils.arrayify(
-            ethers.utils.hexConcat([
-                droneDeliveryFactory.bytecode,
-                droneDeliveryFactory.interface.encodeDeploy([
-                    DeliveryManagerAddress,
-                    "TEST",
-                    ConopsManagerAddress,
-                    SWAccessControlAddress,
-                    StarwingsMasterAddress,
-                ]),
-            ])
-        );
-        const result = await DroneFlightFactory.connect(pilot1Wallet).deploy(bytecode, salt, {
-            gasLimit: 9000000,
+    // Delivery 2
+    const delivery2 = deliveries[3];
+    const conopsId2 = 3;
+    const conops2 = conopsList[conopsId2];
+    const droneDelivery2 = {
+        pilot: pilot2,
+        drone: drone2,
+        conopsId: conopsId2,
+        flightDatetime: new Date().getTime(),
+        flightDuration: 2,
+        depart: conops2.startingPoint,
+        destination: conops2.endPoint,
+    };
+    const droneDeliveryContract2 = await getDroneDeliveryContract(
+        pilot2Wallet,
+        delivery2.deliveryId,
+        droneDelivery2,
+        conops2
+    );
+
+    console.log("##############################");
+    console.log("# 5) Simule Flight");
+    console.log("##############################");
+    await simuleFlight(pilot1Wallet, drone1Wallet, droneDeliveryContract1, delivery1.deliveryId);
+    console.log("##############################");
+    await simuleFlight(pilot2Wallet, drone2Wallet, droneDeliveryContract2, delivery2.deliveryId);
+}
+
+async function getDroneDeliveryContract(pilotWallet, deliveryId, droneDeliveryData, conops) {
+    console.log(`Creating Drone Delivery for Delivery ID#${deliveryId} / Pilot ${pilotWallet.address}...`);
+    const salt = Date.now();
+    const droneDeliveryArtifact = await hardhat.ethers.getContractFactory("DroneDelivery");
+    const bytecode = hardhat.ethers.utils.arrayify(
+        hardhat.ethers.utils.hexConcat([
+            droneDeliveryArtifact.bytecode,
+            droneDeliveryArtifact.interface.encodeDeploy([
+                deliveryManagerContractAddress,
+                deliveryId,
+                conopsManagerContractAddress,
+                swAccessControlContractAddress,
+                starwingsMasterContractAddress,
+            ]),
+        ])
+    );
+    const result = await droneFlightFactoryContract.connect(pilotWallet).deploy(bytecode, salt, {
+        gasLimit: 9000000,
+    });
+    const temp = await result.wait();
+    const droneDeliveryContractAddress = temp.events?.filter((x) => {
+        return x.event === "Deployed";
+    })[0].args.addr;
+    const droneDeliveryContract = new ethers.Contract(droneDeliveryContractAddress, droneDeliveryArtifact.interface);
+    await droneDeliveryContract.connect(pilotWallet).initDelivery(droneDeliveryData);
+    console.log(`Validating Drone Delivery ID#${deliveryId} Air Risks...`);
+
+    for (let i = 0; i < conops.airRiskList.length; i++) {
+        await droneDeliveryContract.connect(pilotWallet).validateAirRisk(i);
+    }
+
+    return droneDeliveryContract;
+}
+
+async function simuleFlight(pilotWallet, droneWallet, droneDeliveryContract, deliveryId) {
+    // Pre-flight checks
+    await droneDeliveryContract.connect(pilotWallet).preFlightChecks(0);
+    console.log(`DeliveryID ${deliveryId}: Pre-flight Check motor OK`);
+    await droneDeliveryContract.connect(pilotWallet).preFlightChecks(1);
+    console.log(`DeliveryID ${deliveryId}: Pre-flight Check battery OK`);
+    await droneDeliveryContract.connect(pilotWallet).preFlightChecks(2);
+    console.log(`DeliveryID ${deliveryId}: Pre-flight Check control station OK`);
+
+    // Pick-up parcel
+    await droneDeliveryContract.connect(droneWallet).pickUp();
+    console.log(`DeliveryID ${deliveryId}: Parcel picked up OK`);
+
+    // Change Status to Flying
+    let pilotFlightStatus = await droneDeliveryContract.connect(pilotWallet).viewPilotFlightstatus();
+    let droneFlightStatus = await droneDeliveryContract.connect(pilotWallet).viewDroneFlightstatus();
+    console.log(`DeliveryID ${deliveryId}: Pilot Flight Status ${flightStateLabel[pilotFlightStatus]}`);
+    console.log(`DeliveryID ${deliveryId}: Drone Flight Status ${flightStateLabel[droneFlightStatus]}`);
+    await droneDeliveryContract.connect(pilotWallet).changeFlightStatus(2);
+    await droneDeliveryContract.connect(droneWallet).changeFlightStatus(2);
+    pilotFlightStatus = await droneDeliveryContract.connect(pilotWallet).viewPilotFlightstatus();
+    droneFlightStatus = await droneDeliveryContract.connect(pilotWallet).viewDroneFlightstatus();
+    console.log(`DeliveryID ${deliveryId}: Pilot Flight Status ${flightStateLabel[pilotFlightStatus]}`);
+    console.log(`DeliveryID ${deliveryId}: Drone Flight Status ${flightStateLabel[droneFlightStatus]}`);
+
+    // Checkpoints
+    for (let i = 0; i < 10; i++) {
+        const time = new Date().getTime();
+        const latitude = getRandomInt(1, 100);
+        const longitude = getRandomInt(1, 100);
+        await droneDeliveryContract.connect(droneWallet).addCheckpoint(time, {
+            latitude: latitude,
+            longitude: longitude,
         });
-
-        // // Get event values
-        const temp = await result.wait();
-        const droneDeliveryAddr = temp.events?.filter((x) => {
-            return x.event === "Deployed";
-        })[0].args.addr;
-
-        // Create contract object with deployed address
-        const DroneDelivery = new ethers.Contract(droneDeliveryAddr, droneDeliveryFactory.interface);
-
-        await DroneDelivery.connect(pilot1Wallet).initDelivery(droneFlightDataSample);
-
-        console.log("5) Validate AirRisk");
-        await DroneDelivery.connect(pilot1Wallet).validateAirRisk(0);
-        await DroneDelivery.connect(pilot1Wallet).validateAirRisk(1);
-
-        console.log("6) Pre-Flight Checks");
-        const droneDeliveryAddresses = await DroneFlightFactory.connect(pilot1Wallet).getDeployedContracts();
-        // const droneDelivery1 = new ethers.Contract(
-        //     droneDeliveryAddresses[0],
-        //     DroneDeliveryArtifact.abi
-        // );
-
-        DroneDelivery.connect(provider).on("ParcelPickedUp", () => {
-            console.log(`EVENT - Parcel has been picked up.`);
-        });
-        DroneDelivery.connect(provider).on("ParcelDelivered", () => {
-            console.log(`EVENT - Parcel has been delivered.`);
-        });
-        DroneDelivery.connect(provider).on("CheckpointAdded", (checkpoint) => {
-            console.log(`EVENT - Checkpoint (lat, long, time) ${checkpoint} added.`);
-        });
-
-        await DroneDelivery.connect(pilot1Wallet).preFlightChecks(0);
-        const preFlightCheckMotor = await DroneDelivery.connect(pilot1Wallet).getPreFlightChecks(0);
-        console.log(`Pre-flight for deliveryId: ${delivery1.deliveryId} - Check motor ${preFlightCheckMotor}`);
-        await DroneDelivery.connect(pilot1Wallet).preFlightChecks(1);
-        const preFlightCheckBattery = await DroneDelivery.connect(pilot1Wallet).getPreFlightChecks(1);
-        console.log(`Pre-flight for deliveryId: ${delivery1.deliveryId} - Check battery ${preFlightCheckBattery}`);
-        await DroneDelivery.connect(pilot1Wallet).preFlightChecks(2);
-        const preFlightCheckControlStation = await DroneDelivery.connect(pilot1Wallet).getPreFlightChecks(2);
         console.log(
-            `Pre-flight for deliveryId: ${delivery1.deliveryId} - Check control station ${preFlightCheckControlStation}`
+            `DeliveryID ${deliveryId}: Adding checkpoint time(${time}); latitude:${latitude}; longitude:${longitude}`
         );
+    }
 
-        console.log("7) Drone pick up parcel");
-        await DroneDelivery.connect(drone1Wallet).pickUp();
-        const droneParcelPickedUp = await DroneDelivery.connect(drone1Wallet).isParcelPickedUp();
-        console.log(`Parcel pick up status: ${droneParcelPickedUp}`);
+    // newRiskEvent(Event memory _event)
+    // viewRiskEvent(uint256 _eventId)
+    // cancelFlight
 
-        console.log("8) Flight status");
-        let pilotFlightStatus = await DroneDelivery.connect(pilot1Wallet).viewPilotFlightstatus();
-        let droneFlightStatus = await DroneDelivery.connect(pilot1Wallet).viewDroneFlightstatus();
-        console.log(`Pilot Flight Status: ${flightStateLabel[pilotFlightStatus]}`);
-        console.log(`Drone Flight Status: ${flightStateLabel[droneFlightStatus]}`);
+    // Deliver parcel
+    await droneDeliveryContract.connect(droneWallet).deliver();
+    console.log(`DeliveryID ${deliveryId}: Parcel delivered OK`);
 
-        await DroneDelivery.connect(pilot1Wallet).changeFlightStatus(2);
-        await DroneDelivery.connect(drone1Wallet).changeFlightStatus(2);
+    // Change Status to Ended
+    await droneDeliveryContract.connect(pilotWallet).changeFlightStatus(5);
+    await droneDeliveryContract.connect(droneWallet).changeFlightStatus(5);
+    pilotFlightStatus = await droneDeliveryContract.connect(pilotWallet).viewPilotFlightstatus();
+    droneFlightStatus = await droneDeliveryContract.connect(pilotWallet).viewDroneFlightstatus();
+    console.log(`DeliveryID ${deliveryId}: Pilot Flight Status ${flightStateLabel[pilotFlightStatus]}`);
+    console.log(`DeliveryID ${deliveryId}: Drone Flight Status ${flightStateLabel[droneFlightStatus]}`);
 
-        pilotFlightStatus = await DroneDelivery.connect(pilot1Wallet).viewPilotFlightstatus();
-        droneFlightStatus = await DroneDelivery.connect(pilot1Wallet).viewDroneFlightstatus();
-        console.log(`Pilot Flight Status: ${flightStateLabel[pilotFlightStatus]}`);
-        console.log(`Drone Flight Status: ${flightStateLabel[droneFlightStatus]}`);
+    // Post-flight checks
+    await droneDeliveryContract.connect(pilotWallet).postFlightChecks(0);
+    console.log(`DeliveryID ${deliveryId}: Post-flight Check motor OK`);
+    await droneDeliveryContract.connect(pilotWallet).postFlightChecks(1);
+    console.log(`DeliveryID ${deliveryId}: Post-flight Check battery OK`);
+    await droneDeliveryContract.connect(pilotWallet).postFlightChecks(2);
+    console.log(`DeliveryID ${deliveryId}: Post-flight Check control station OK`);
+}
 
-        // newRiskEvent(Event memory _event)
-        // function viewRiskEvent(uint256 _eventId)
-        // newRiskEvent(Event memory _event)
-        // function viewRiskEvent(uint256 _eventId)
-        // newRiskEvent(Event memory _event)
-        // function viewRiskEvent(uint256 _eventId)
-        // cancelFlight
-        // DroneFlight.changeFlightStatus(uint256 _status)
-        console.log(`Adding checkpoint lat:23; long:27`);
-        await DroneDelivery.connect(drone1Wallet).addCheckpoint(new Date().getTime(), {
-            latitude: 23,
-            longitude: 27,
-        });
-        console.log(`Adding checkpoint lat:24; long:27`);
-        await DroneDelivery.connect(drone1Wallet).addCheckpoint(new Date().getTime(), {
-            latitude: 24,
-            longitude: 27,
-        });
-        console.log(`Adding checkpoint lat:25; long:27`);
-        await DroneDelivery.connect(drone1Wallet).addCheckpoint(new Date().getTime(), {
-            latitude: 25,
-            longitude: 27,
-        });
-
-        console.log("9) Drone deliver parcel");
-        await DroneDelivery.connect(drone1Wallet).deliver();
-        const droneParcelDelivered = await DroneDelivery.connect(drone1Wallet).isParcelDelivered();
-        console.log(`Parcel delivered status: ${droneParcelDelivered}`);
-
-        console.log("10) Post-Flight Checks");
-        await DroneDelivery.connect(pilot1Wallet).postFlightChecks(0);
-        const postFlightCheckMotor = await DroneDelivery.connect(pilot1Wallet).getPostFlightChecks(0);
-        console.log(`Post-flight for deliveryId: ${delivery1.deliveryId} - Check motor ${postFlightCheckMotor}`);
-        await DroneDelivery.connect(pilot1Wallet).postFlightChecks(1);
-        const postFlightCheckBattery = await DroneDelivery.connect(pilot1Wallet).getPostFlightChecks(1);
-        console.log(`Post-flight for deliveryId: ${delivery1.deliveryId} - Check battery ${postFlightCheckBattery}`);
-        await DroneDelivery.connect(pilot1Wallet).postFlightChecks(2);
-        const postFlightCheckControlStation = await DroneDelivery.connect(pilot1Wallet).getPostFlightChecks(2);
-        console.log(
-            `Post-flight for deliveryId: ${delivery1.deliveryId} - Check control station ${postFlightCheckControlStation}`
-        );
-
-        await DroneDelivery.connect(pilot1Wallet).changeFlightStatus(5);
-        await DroneDelivery.connect(drone1Wallet).changeFlightStatus(5);
-
-        pilotFlightStatus = await DroneDelivery.connect(pilot1Wallet).viewPilotFlightstatus();
-        droneFlightStatus = await DroneDelivery.connect(pilot1Wallet).viewDroneFlightstatus();
-        console.log(`Pilot Flight Status: ${flightStateLabel[pilotFlightStatus]}`);
-        console.log(`Drone Flight Status: ${flightStateLabel[droneFlightStatus]}`);
+async function main() {
+    try {
+        await createAccesses();
+        await createDeliveries();
+        await createConops();
+        await createDroneDeliveries();
     } catch (error) {
         console.error(error);
     }
 }
 
-simulate().catch((error) => {
+main().catch((error) => {
     console.error(error);
     process.exitCode = 1;
 });
