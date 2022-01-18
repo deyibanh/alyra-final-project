@@ -148,8 +148,6 @@ function FlightCard({ flight, changeVisibility, id, state }) {
         }
     };
 
-    console.log(ethers);
-    console.log(state.provider._network.chainId);
     return (
         <>
             <Card>

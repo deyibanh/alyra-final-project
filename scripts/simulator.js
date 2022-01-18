@@ -1,4 +1,5 @@
 require("dotenv").config();
+const sleep = require("util").promisify(setTimeout);
 const ethers = require("ethers");
 const hardhat = require("hardhat");
 const simulatorData = require("./simulator-data.json");
@@ -16,7 +17,7 @@ const droneFlightFactoryContractAddress = contractAddresses.DroneFlightFactory;
 const starwingsMasterContractAddress = contractAddresses.StarwingsMaster;
 const swAccessControlContractAddress = contractAddresses.SWAccessControl;
 // Contracts
-const provider = ethers.getDefaultProvider("http://localhost:8545");
+const provider = ethers.getDefaultProvider(hardhat.network.config.url);
 const conopsManagerContract = new ethers.Contract(conopsManagerContractAddress, conopsManagerArtifact.abi, provider);
 const deliveryManagerContract = new ethers.Contract(
     deliveryManagerContractAddress,
@@ -226,14 +227,18 @@ async function simuleFlight(pilotWallet, droneWallet, droneDeliveryContract, del
     // Pre-flight checks
     await droneDeliveryContract.connect(pilotWallet).preFlightChecks(0);
     console.log(`DeliveryID ${deliveryId}: Pre-flight Check motor OK`);
+    await sleep(3000);
     await droneDeliveryContract.connect(pilotWallet).preFlightChecks(1);
     console.log(`DeliveryID ${deliveryId}: Pre-flight Check battery OK`);
+    await sleep(3000);
     await droneDeliveryContract.connect(pilotWallet).preFlightChecks(2);
     console.log(`DeliveryID ${deliveryId}: Pre-flight Check control station OK`);
+    await sleep(3000);
 
     // Pick-up parcel
     await droneDeliveryContract.connect(droneWallet).pickUp();
     console.log(`DeliveryID ${deliveryId}: Parcel picked up OK`);
+    await sleep(3000);
 
     // Change Status to Flying
     let pilotFlightStatus = await droneDeliveryContract.connect(pilotWallet).viewPilotFlightstatus();
@@ -242,6 +247,7 @@ async function simuleFlight(pilotWallet, droneWallet, droneDeliveryContract, del
     console.log(`DeliveryID ${deliveryId}: Drone Flight Status ${flightStateLabel[droneFlightStatus]}`);
     await droneDeliveryContract.connect(pilotWallet).changeFlightStatus(2);
     await droneDeliveryContract.connect(droneWallet).changeFlightStatus(2);
+    await sleep(3000);
     pilotFlightStatus = await droneDeliveryContract.connect(pilotWallet).viewPilotFlightstatus();
     droneFlightStatus = await droneDeliveryContract.connect(pilotWallet).viewDroneFlightstatus();
     console.log(`DeliveryID ${deliveryId}: Pilot Flight Status ${flightStateLabel[pilotFlightStatus]}`);
@@ -268,6 +274,7 @@ async function simuleFlight(pilotWallet, droneWallet, droneDeliveryContract, del
     // Deliver parcel
     await droneDeliveryContract.connect(droneWallet).deliver();
     console.log(`DeliveryID ${deliveryId}: Parcel delivered OK`);
+    await sleep(3000);
 
     // Change Status to Ended
     await droneDeliveryContract.connect(pilotWallet).changeFlightStatus(5);
@@ -276,14 +283,18 @@ async function simuleFlight(pilotWallet, droneWallet, droneDeliveryContract, del
     droneFlightStatus = await droneDeliveryContract.connect(pilotWallet).viewDroneFlightstatus();
     console.log(`DeliveryID ${deliveryId}: Pilot Flight Status ${flightStateLabel[pilotFlightStatus]}`);
     console.log(`DeliveryID ${deliveryId}: Drone Flight Status ${flightStateLabel[droneFlightStatus]}`);
+    await sleep(3000);
 
     // Post-flight checks
     await droneDeliveryContract.connect(pilotWallet).postFlightChecks(0);
     console.log(`DeliveryID ${deliveryId}: Post-flight Check motor OK`);
+    await sleep(3000);
     await droneDeliveryContract.connect(pilotWallet).postFlightChecks(1);
     console.log(`DeliveryID ${deliveryId}: Post-flight Check battery OK`);
+    await sleep(3000);
     await droneDeliveryContract.connect(pilotWallet).postFlightChecks(2);
     console.log(`DeliveryID ${deliveryId}: Post-flight Check control station OK`);
+    await sleep(3000);
 }
 
 async function main() {
