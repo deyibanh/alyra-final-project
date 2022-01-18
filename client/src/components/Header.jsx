@@ -18,16 +18,14 @@ function Header(props) {
                     <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                     <Navbar.Collapse id="responsive-navbar-nav">
                         <Nav className="me-auto" activeKey={location.pathname}>
-                            {state.roles &&
-                                (state.roles.hasDefaultAdminRole ||
-                                    state.roles.hasAdminRole ) && (
+                            {state.roles && (state.roles.hasDefaultAdminRole || state.roles.hasAdminRole) && (
                                 <Nav.Link href="/admin-panel">Admin Panel</Nav.Link>
                             )}
-                            {state.roles &&
+                            {/* {state.roles &&
                                 (state.roles.hasDefaultAdminRole ||
                                     state.roles.hasAdminRole ) && (
                                 <Nav.Link href="/dashboard">Dashboard</Nav.Link>
-                            )}
+                            )} */}
                             {state.roles &&
                                 (state.roles.hasDefaultAdminRole ||
                                     state.roles.hasAdminRole ||

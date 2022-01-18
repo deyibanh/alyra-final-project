@@ -8,6 +8,9 @@ The purpose of this project is to offer certification on drones flights data for
 
 /!\ Project is still under development /!\
 
+Dapp preview (deployed on Optimism testnet) is available here : https://starwings.netlify.app/ <br />
+Contracts addresses are available [here](./docs/developers/deployed_addresses.md)
+
 ## <u>Team</u>
 
 Managers:
