@@ -150,7 +150,7 @@ function FlightCard({ flight, changeVisibility, id, state }) {
 
     return (
         <>
-            <Card>
+            <Card style={{ backgroundColor: "#00000005" }}>
                 <Card.Body>
                     <Card.Title className="text-start d-flex align-items-center">
                         <Col sm={3}>

@@ -5,7 +5,7 @@ import { Container, Nav, Navbar, Image } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import NavWalletStatus from "./NavWalletStatus.jsx";
 import "./Header.css";
-import SWLogo from "../img/logo-sw 1.png";
+import SWLogo from "../img/logo-sw2.png";
 
 function Header(props) {
     const location = useLocation();

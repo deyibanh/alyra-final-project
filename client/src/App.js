@@ -14,6 +14,7 @@ import getEthersProvider from "./utils/getEthers";
 import "./App.css";
 import { Container } from "react-bootstrap";
 import Home from "./pages/Home";
+import backgroundImg from "./img/02.jpg";
 const contractAddresses = require("./contractAddresses.json");
 
 const StarwingsMasterAddress = contractAddresses.StarwingsMaster;
@@ -105,7 +106,14 @@ function App() {
 
     return (
         <BrowserRouter>
-            <div className="App">
+            <div
+                className="App vh-100"
+                style={{
+                    background: `url(${backgroundImg})`,
+                    backgroundSize: "cover",
+                    boxShadow: "inset 0 0 0 1000px rgba(0,0,0,.2)",
+                }}
+            >
                 <Header state={state} />
                 <Container>
                     <Routes>

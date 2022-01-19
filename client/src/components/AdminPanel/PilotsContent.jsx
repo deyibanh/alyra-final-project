@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Button, Col, Form, FormControl, Badge, Modal, Row, Toast, ToastContainer } from "react-bootstrap";
-import DataTable from "react-data-table-component";
+import DataTable, { createTheme } from "react-data-table-component";
 import "./PilotsContent.css";
+import "../../utils/table-themes.js";
+
+createTheme(
+    "solarized",
+    {
+        background: {
+            default: "#00000005",
+        },
+    },
+    "light"
+);
 
 function PilotsContent(props) {
     const StarwingsMasterSigner = props.StarwingsMasterSigner;
@@ -84,6 +95,16 @@ function PilotsContent(props) {
         await StarwingsMasterSigner.deletePilot(state.target.id);
     };
 
+    // createTheme(
+    //     "light-transparency",
+    //     {
+    //         background: {
+    //             default: "#00000005",
+    //         },
+    //     },
+    //     "light"
+    // );
+
     const columns = [
         {
             name: "Index",
@@ -144,7 +165,12 @@ function PilotsContent(props) {
                     ) : (
                         <span>There is no pilots yet.</span>
                     )} */}
-                    <DataTable columns={columns} data={pilotAddressList} progressPending={pending} />
+                    <DataTable
+                        columns={columns}
+                        data={pilotAddressList}
+                        progressPending={pending}
+                        theme="light-transparency"
+                    />
                 </Col>
             </Row>
 

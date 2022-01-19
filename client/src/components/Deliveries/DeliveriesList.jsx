@@ -5,6 +5,7 @@ import { Button, Col, Modal, Row, Toast, ToastContainer } from "react-bootstrap"
 import DataTable from "react-data-table-component";
 import DeliveryForm from "./DeliveryForm";
 import FactoryModal from "./FactoryModal";
+import "../../utils/table-themes.js";
 
 const contractAddresses = require("../../contractAddresses.json");
 
@@ -208,7 +209,12 @@ function DeliveriesList(props) {
                     </Row>
                     <Row className="g-2 mt-2">
                         <Col>
-                            <DataTable columns={columns} data={deliveriesList} progressPending={pending} />
+                            <DataTable
+                                columns={columns}
+                                data={deliveriesList}
+                                progressPending={pending}
+                                theme="light-transparency"
+                            />
                         </Col>
                     </Row>
                 </Fragment>
