@@ -17,7 +17,7 @@ function AdminPanel(props) {
             <div className="AdminMenu">
                 <Tab.Container id="left-tabs-example" defaultActiveKey="pilots">
                     <Row>
-                        <Col sm={3}>
+                        <Col sm={2}>
                             <Nav variant="pills" className="flex-column">
                                 <Nav.Item>
                                     <Nav.Link eventKey="pilots">Pilots</Nav.Link>
@@ -30,7 +30,7 @@ function AdminPanel(props) {
                                 </Nav.Item>
                             </Nav>
                         </Col>
-                        <Col sm={9}>
+                        <Col sm={10}>
                             <Tab.Content>
                                 <Tab.Pane eventKey="pilots">
                                     <PilotsContent
