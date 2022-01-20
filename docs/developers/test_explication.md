@@ -85,6 +85,15 @@
 -   should get the list of DroneFlight address.
 -   should not get the list of DroneFlight address if sender has not the admin role.
 -   should not get the DroneFlight address if sender has not the admin role.
+-   should not get the DroneFlight address if DroneFlight index out of the list size.
+
+### Add DroneFlight
+
+-   should add a DroneFlight.
+-   should not add a DroneFlight if Pilot index out of the list size.
+-   should not add a DroneFlight if Pilot not exist.
+-   should not add a DroneFlight if Drone index out of the list size.
+-   should not add a DroneFlight if Drone not exist.
 
 ### Pilot
 

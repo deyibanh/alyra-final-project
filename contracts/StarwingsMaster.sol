@@ -182,6 +182,8 @@ contract StarwingsMaster is IStarwingsMaster {
         onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address)
     {
+        require(_droneFlightId < droneFlightAddressList.length, "Out of size index.");
+
         return droneFlightAddressList[_droneFlightId];
     }
 
