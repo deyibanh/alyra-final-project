@@ -6,12 +6,12 @@ import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "./interfaces/IConopsManager.sol";
 import "./interfaces/IDeliveryManager.sol";
 import "./interfaces/IStarwingsMaster.sol";
-import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
+import { StarwingsDataLib } from "./librairies/StarwingsDataLib.sol";
 
 /**
  * @title The StarwingsMaster contract.
  *
- * @author Dé Yi Banh (@deyibanh)
+ * @author Starwings
  *
  * @notice This contract manages drone flights creation from CONOPS.
  */
@@ -94,6 +94,8 @@ contract StarwingsMaster is IStarwingsMaster {
 
     /**
      * @dev Check the msg.sender's role.
+     *
+     * @param _role The role.
      */
     modifier onlyRole(bytes32 _role) {
         require(accessControl.hasRole(_role, msg.sender), "Access refused");
@@ -180,7 +182,37 @@ contract StarwingsMaster is IStarwingsMaster {
         onlyRole(StarwingsDataLib.ADMIN_ROLE)
         returns (address)
     {
+        require(_droneFlightId < droneFlightAddressList.length, "Out of size index.");
+
         return droneFlightAddressList[_droneFlightId];
+    }
+
+    /**
+     * @inheritdoc IStarwingsMaster
+     */
+    function addDroneFlight(
+        address _droneFlightAddress,
+        address _pilotAddress,
+        address _droneAddress
+    ) external {
+        uint256 pilotIndex = pilotIndexMap[_pilotAddress];
+        require(pilotIndex < pilotList.length, "Out of size index.");
+        require(
+            pilotList[pilotIndex].pilotAddress != address(0) &&
+                pilotList[pilotIndex].pilotAddress == _pilotAddress,
+            "Pilot not found."
+        );
+        uint256 droneIndex = droneIndexMap[_droneAddress];
+        require(droneIndex < droneList.length, "Out of size index.");
+        require(
+            droneList[droneIndex].droneAddress != address(0) &&
+                droneList[droneIndex].droneAddress == _droneAddress,
+            "Drone not found."
+        );
+
+        droneFlightAddressList.push(_droneFlightAddress);
+        pilotList[pilotIndex].flightAddresses.push(_droneFlightAddress);
+        droneList[droneIndex].flightAddresses.push(_droneFlightAddress);
     }
 
     /**
@@ -198,11 +230,7 @@ contract StarwingsMaster is IStarwingsMaster {
     }
 
     /**
-     * @notice Get the pilot information for a given address.
-     *
-     * @param _pilotAddress The pilot address.
-     *
-     * @return The pilot information.
+     * @inheritdoc IStarwingsMaster
      */
     function getPilot(address _pilotAddress)
         external
@@ -332,11 +360,7 @@ contract StarwingsMaster is IStarwingsMaster {
     }
 
     /**
-     * @notice Get the drone information for a given address.
-     *
-     * @param _droneAddress The drone address.
-     *
-     * @return The drone information.
+     * @inheritdoc IStarwingsMaster
      */
     function getDrone(address _droneAddress)
         external
@@ -451,64 +475,23 @@ contract StarwingsMaster is IStarwingsMaster {
     }
 
     /**
-     * @notice Get the AccessControl address.
-     *
-     * @return The AccessControl address.
+     * @inheritdoc IStarwingsMaster
      */
     function getAccessControlAddress() external view returns (address) {
         return address(accessControl);
     }
 
     /**
-     * @notice Get the ConopsManager address.
-     *
-     * @return The ConopsManager address.
+     * @inheritdoc IStarwingsMaster
      */
     function getConopsManager() external view returns (address) {
         return address(conopsManager);
     }
 
     /**
-     * @notice Get the DeliveryManager address.
-     *
-     * @return The DeliveryManager address.
+     * @inheritdoc IStarwingsMaster
      */
     function getDeliveryManager() external view returns (address) {
         return address(deliveryManager);
-    }
-
-    /**
-     * @notice Add a DroneFlight from the address.
-     *
-     * @dev Only DroneFlightFactory contract is allowed to add a contract.
-     *
-     * @param _droneFlightAddress The DroneFlight address.
-     * @param _pilotAddress The pilot address.
-     * @param _droneAddress The drone address.
-     */
-    function addDroneFlight(
-        address _droneFlightAddress,
-        address _pilotAddress,
-        address _droneAddress
-    ) external {
-        //require(msg.sender == droneFlightFactoryAddress, "not allowed");
-        uint256 pilotIndex = pilotIndexMap[_pilotAddress];
-        require(pilotIndex < pilotList.length, "Out of size index.");
-        require(
-            pilotList[pilotIndex].pilotAddress != address(0) &&
-                pilotList[pilotIndex].pilotAddress == _pilotAddress,
-            "Pilot not found."
-        );
-        uint256 droneIndex = droneIndexMap[_droneAddress];
-        require(droneIndex < droneList.length, "Out of size index.");
-        require(
-            droneList[droneIndex].droneAddress != address(0) &&
-                droneList[droneIndex].droneAddress == _droneAddress,
-            "Drone not found."
-        );
-
-        droneFlightAddressList.push(_droneFlightAddress);
-        pilotList[pilotIndex].flightAddresses.push(_droneFlightAddress);
-        droneList[droneIndex].flightAddresses.push(_droneFlightAddress);
     }
 }

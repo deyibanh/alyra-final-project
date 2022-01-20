@@ -5,6 +5,7 @@ import { Button, Col, Modal, Row, Toast, ToastContainer } from "react-bootstrap"
 import DataTable from "react-data-table-component";
 import DeliveryForm from "./DeliveryForm";
 import FactoryModal from "./FactoryModal";
+import "../../utils/table-themes.js";
 
 const contractAddresses = require("../../contractAddresses.json");
 
@@ -60,7 +61,6 @@ function DeliveriesList(props) {
     };
 
     const getDeliveries = async () => {
-        //console.log("getDeliveries start !");
         setPending(true);
         toggleTooltip(false);
         try {
@@ -71,7 +71,6 @@ function DeliveriesList(props) {
         }
 
         setPending(false);
-        //console.log("getDeliveries end !");
     };
 
     const hideModal = () => {
@@ -108,7 +107,6 @@ function DeliveriesList(props) {
             await tx;
             showTooltip("Transaciton sent !", tx.hash, "success");
         } catch (error) {
-            //console.log(error);
             showTooltip("Error", error?.data?.message, "danger");
         }
 
@@ -116,10 +114,8 @@ function DeliveriesList(props) {
     };
 
     const handleButtonClick = (state) => {
-        //console.log("clicked");
         setSelectedDeliveryId(state.target.id);
         setFactoryModalIsShown(true);
-        //console.log(state.target.id);
     };
 
     const columns = [
@@ -181,7 +177,7 @@ function DeliveriesList(props) {
             button: true,
         },
     ];
-    //console.log(props);
+
     return (
         <div>
             {deliveriesList.length === 0 ? (
@@ -208,7 +204,12 @@ function DeliveriesList(props) {
                     </Row>
                     <Row className="g-2 mt-2">
                         <Col>
-                            <DataTable columns={columns} data={deliveriesList} progressPending={pending} />
+                            <DataTable
+                                columns={columns}
+                                data={deliveriesList}
+                                progressPending={pending}
+                                theme="light-transparency"
+                            />
                         </Col>
                     </Row>
                 </Fragment>

@@ -67,7 +67,6 @@ function ConopsContent({ state }) {
     const getConops = async () => {
         try {
             toggleTooltip(false);
-            //console.log(conopsManager.signer);
             const conopsList = await conopsManager.signer.viewAllConops();
             setConops(conopsList);
         } catch (error) {
@@ -90,7 +89,6 @@ function ConopsContent({ state }) {
             await tx;
             showTooltip("Transaciton sent !", tx.hash, "success");
         } catch (error) {
-            //console.log(error);
             showTooltip("Error", error?.data?.message, "danger");
         }
 

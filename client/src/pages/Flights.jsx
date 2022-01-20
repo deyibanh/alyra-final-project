@@ -15,14 +15,14 @@ function Flights(props) {
             <div className="FlightsMenu">
                 <Tab.Container id="left-tabs-example" defaultActiveKey="flights">
                     <Row>
-                        <Col sm={3}>
+                        <Col sm={2}>
                             <Nav variant="pills" className="flex-column">
                                 <Nav.Item>
                                     <Nav.Link eventKey="flights">Flights</Nav.Link>
                                 </Nav.Item>
                             </Nav>
                         </Col>
-                        <Col sm={9}>
+                        <Col sm={10}>
                             <Tab.Content>
                                 <Tab.Pane eventKey="flights">
                                     <FlightsContent state={state} />

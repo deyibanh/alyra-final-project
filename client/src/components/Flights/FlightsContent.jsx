@@ -39,7 +39,7 @@ function FlightsContent({ state }) {
 
     useInterval(() => {
         getFlights();
-    }, 10000);
+    }, 800);
 
     useEffect(() => {
         if (state.provider) {
@@ -88,8 +88,6 @@ function FlightsContent({ state }) {
             console.error(error);
         }
     };
-
-    //console.log("flightINFO:", flights);
 
     const changeVisibility = (i) => {
         i === -1 ? setCardGroupSize(3) : setCardGroupSize(1);

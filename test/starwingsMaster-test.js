@@ -13,6 +13,8 @@ let pilot;
 let pilot2;
 let drone;
 let drone2;
+let rolePilot;
+let roleDrone;
 
 async function deploy() {
     [owner, notAdmin, pilot, pilot2, drone, drone2] = await ethers.getSigners();
@@ -37,6 +39,9 @@ async function deploy() {
     await StarwingsMaster.deployed();
     DroneFlightFactory = await DroneFlightFactoryArtifact.deploy(SWAccessControl.address, StarwingsMaster.address);
     await DroneFlightFactory.deployed();
+
+    rolePilot = await SWAccessControl.PILOT_ROLE();
+    roleDrone = await SWAccessControl.DRONE_ROLE();
 }
 
 describe("StarwingsMaster", function () {
@@ -85,143 +90,76 @@ describe("StarwingsMaster", function () {
                 "Access refused"
             );
         });
+
+        it("should not get the DroneFlight address if DroneFlight index out of the list size.", async function () {
+            await expect(StarwingsMaster.getDroneFlightAddress(0)).to.be.revertedWith("Out of size index.");
+        });
     });
 
-    // @todo: Tests not pass `require(msg.sender == droneFlightFactoryAddress, "not allowed");` in addDroneFlight method.
-    // context("Add DroneFlight", function () {
-    //     let DroneDelivery;
+    context("Add DroneFlight", function () {
+        it("should add a DroneFlight.", async function () {
+            await StarwingsMaster.addPilot(pilot.address, "Pilot Name");
+            await SWAccessControl.grantRole(rolePilot, pilot.address);
 
-    //     beforeEach(async () => {
-    //         const DroneDeliveryArtifact = await ethers.getContractFactory(
-    //             "DroneDelivery"
-    //         );
-    //         const flightData = {
-    //             piloteAddr: pilot.address,
-    //             droneAddr: drone.address,
-    //             conopsId: 0,
-    //             flightDatetime: 57875,
-    //             flightDuration: 10,
-    //             pilotName: "john",
-    //             droneType: "azer",
-    //             droneId: "45",
-    //             depart: "Terre",
-    //             destination: "Moon",
-    //         };
-    //         await ConopsManager.addConops(
-    //             "test1",
-    //             "with 4 plots",
-    //             "with 5 plots",
-    //             "with flag",
-    //             "with 1 person",
-    //             [
-    //                 { name: "CHU A", riskType: 0 },
-    //                 { name: "BASE B", riskType: 2 },
-    //             ],
-    //             4,
-    //             5
-    //         );
-    //         DroneDelivery = await DroneDeliveryArtifact.deploy(
-    //             DeliveryManager.address,
-    //             44,
-    //             ConopsManager.address,
-    //             SWAccessControl.address,
-    //             flightData
-    //         );
-    //         await DroneDelivery.deployed();
-    //     });
+            await StarwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type");
+            await SWAccessControl.grantRole(roleDrone, drone.address);
 
-    //     it("should add a DroneFlight.", async function () {
-    //         await expect(
-    //             StarwingsMaster.addPilot(pilot.address, "Pilot Name")
-    //         ).to.emit(StarwingsMaster, "PilotAdded");
-    //         await expect(
-    //             StarwingsMaster.addDrone(
-    //                 drone.address,
-    //                 "Drone ID",
-    //                 "Drone Type"
-    //             )
-    //         ).to.emit(StarwingsMaster, "DroneAdded");
-    //         await StarwingsMaster.setDroneFlightFactoryAddress(
-    //             DroneFlightFactory.address
-    //         );
+            let expectResult = [];
+            let result = await StarwingsMaster.getDroneFlightAddressList();
+            expect(result).to.eql(expectResult);
 
-    //         let expectResult = [];
-    //         let result = await StarwingsMaster.getDroneFlightAddressList();
-    //         expect(result).to.eql(expectResult);
+            expectResult = [];
+            result = await StarwingsMaster.getPilot(pilot.address);
+            expect(result.flightAddresses).to.eql(expectResult);
 
-    //         expectResult = [];
-    //         result = await StarwingsMaster.getPilot(pilot.address);
-    //         expect(result.flightAddresses).to.eql(expectResult);
+            expectResult = [];
+            result = await StarwingsMaster.getDrone(drone.address);
+            expect(result.flightAddresses).to.eql(expectResult);
 
-    //         expectResult = [];
-    //         result = await StarwingsMaster.getDrone(drone.address);
-    //         expect(result.flightAddresses).to.eql(expectResult);
+            await StarwingsMaster.addDroneFlight(StarwingsMaster.address, pilot.address, drone.address);
 
-    //         await StarwingsMaster.addDroneFlight(
-    //             DroneDelivery.address,
-    //             pilot.address,
-    //             drone.address
-    //         );
+            expectResult = [StarwingsMaster.address];
+            result = await StarwingsMaster.getDroneFlightAddressList();
+            expect(result).to.eql(expectResult);
 
-    //         expectResult = [DroneDelivery.address];
-    //         result = await StarwingsMaster.getDroneFlightAddressList();
-    //         expect(result).to.eql(expectResult);
+            result = await StarwingsMaster.getPilot(pilot.address);
+            expect(result.flightAddresses).to.eql(expectResult);
 
-    //         result = await StarwingsMaster.getPilot(pilot.address);
-    //         expect(result.flightAddresses).to.eql(expectResult);
+            result = await StarwingsMaster.getDrone(drone.address);
+            expect(result.flightAddresses).to.eql(expectResult);
 
-    //         result = await StarwingsMaster.getDrone(drone.address);
-    //         expect(result.flightAddresses).to.eql(expectResult);
-    //     });
+            result = await StarwingsMaster.getDroneFlightAddress(0);
+            expect(result).to.equal(StarwingsMaster.address);
+        });
 
-    //     it("should not add a DroneFlight if Pilot index out of the list size.", async function () {
-    //         await expect(
-    //             StarwingsMaster.addDroneFlight(
-    //                 DroneDelivery.address,
-    //                 pilot.address,
-    //                 drone.address
-    //             )
-    //         ).to.be.revertedWith("Out of size index.");
-    //     });
+        it("should not add a DroneFlight if Pilot index out of the list size.", async function () {
+            await expect(
+                StarwingsMaster.addDroneFlight(ethers.constants.AddressZero, pilot.address, drone.address)
+            ).to.be.revertedWith("Out of size index.");
+        });
 
-    //     it("should not add a DroneFlight if Pilot not exist.", async function () {
-    //         await StarwingsMaster.addPilot(pilot.address, "Pilot Name");
-    //         await expect(
-    //             StarwingsMaster.addDroneFlight(
-    //                 DroneDelivery.address,
-    //                 pilot2.address,
-    //                 drone.address
-    //             )
-    //         ).to.be.revertedWith("Pilot not found.");
-    //     });
+        it("should not add a DroneFlight if Pilot not exist.", async function () {
+            await StarwingsMaster.addPilot(pilot.address, "Pilot Name");
+            await expect(
+                StarwingsMaster.addDroneFlight(ethers.constants.AddressZero, pilot2.address, drone.address)
+            ).to.be.revertedWith("Pilot not found.");
+        });
 
-    //     it("should not add a DroneFlight if Drone index out of the list size.", async function () {
-    //         await StarwingsMaster.addPilot(pilot.address, "Pilot Name");
-    //         await expect(
-    //             StarwingsMaster.addDroneFlight(
-    //                 DroneDelivery.address,
-    //                 pilot.address,
-    //                 drone.address
-    //             )
-    //         ).to.be.revertedWith("Out of size index.");
-    //     });
+        it("should not add a DroneFlight if Drone index out of the list size.", async function () {
+            await StarwingsMaster.addPilot(pilot.address, "Pilot Name");
+            await expect(
+                StarwingsMaster.addDroneFlight(ethers.constants.AddressZero, pilot.address, drone.address)
+            ).to.be.revertedWith("Out of size index.");
+        });
 
-    //     it("should not add a DroneFlight if Drone not exist.", async function () {
-    //         await StarwingsMaster.addPilot(pilot.address, "Pilot Name");
-    //         await StarwingsMaster.addDrone(
-    //             drone.address,
-    //             "Drone ID",
-    //             "Drone Type"
-    //         );
-    //         await expect(
-    //             StarwingsMaster.addDroneFlight(
-    //                 DroneDelivery.address,
-    //                 pilot.address,
-    //                 drone2.address
-    //             )
-    //         ).to.be.revertedWith("Drone not found.");
-    //     });
-    // });
+        it("should not add a DroneFlight if Drone not exist.", async function () {
+            await StarwingsMaster.addPilot(pilot.address, "Pilot Name");
+            await StarwingsMaster.addDrone(drone.address, "Drone ID", "Drone Type");
+            await expect(
+                StarwingsMaster.addDroneFlight(ethers.constants.AddressZero, pilot.address, drone2.address)
+            ).to.be.revertedWith("Drone not found.");
+        });
+    });
 
     context("Pilot", function () {
         it("should not get the list of Pilot if sender has not the admin role.", async function () {
