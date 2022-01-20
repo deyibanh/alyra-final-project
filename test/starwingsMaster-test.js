@@ -106,7 +106,6 @@ describe("StarwingsMaster", function () {
 
             let expectResult = [];
             let result = await StarwingsMaster.getDroneFlightAddressList();
-            console.log(result);
             expect(result).to.eql(expectResult);
 
             expectResult = [];

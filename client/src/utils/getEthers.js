@@ -22,7 +22,7 @@ const getEthersProvider = () =>
             // Fallback to localhost; use dev console port by default...
             else {
                 const provider = new ethers.providers.JsonRpcProvider();
-                console.log("No web3 instance injected, using Local web3.");
+                console.error("No web3 instance injected, using Local web3.");
                 resolve(provider);
             }
         });

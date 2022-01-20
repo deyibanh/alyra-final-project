@@ -17,16 +17,6 @@ const deploy = async () => {
 
     await accessControl.grantRole(await libDeployed.ADMIN_ROLE(), owner.address);
 
-    // const hasRoleAdmin = await accessControl.hasRole(
-    //     await libDeployed.ADMIN_ROLE(),
-    //     owner.address
-    // );
-    // console.log(`Owner has role admin:${hasRoleAdmin}`);
-
-    // Deploy deliveryManager
-    // deliveryManager = await deployContract(owner, DeliveryManager, [
-    //     accessControl.address,
-    // ]);
     const DeliveryManager = await ethers.getContractFactory("DeliveryManager");
     deliveryManager = await DeliveryManager.deploy(accessControl.address);
     await deliveryManager.deployed();
@@ -71,16 +61,6 @@ describe("DeliveryManager", function () {
         })[0].args.deliveryId;
 
         expect(result).to.emit(deliveryManager, "DeliveryCreated").withArgs(currentDeliveryId);
-
-        // result = await result.wait();
-        // console.log(
-        //     result.events?.filter((x) => {
-        //         return x.event === "DeliveryCreated";
-        //     })[0].args.deliveryId
-        // );
-
-        // console.log(deliveryId);
-        // console.log(`newDelivery created with ID:${deliveryId}`);
     });
 
     it("should get delivery", async () => {

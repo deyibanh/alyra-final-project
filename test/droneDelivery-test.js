@@ -101,12 +101,9 @@ const deploy = async () => {
 
     // ADD PILOTE AND DRONE
     droneSample._droneAddress = drone.address;
-    // console.log(`======= Adding Drone [${droneSample._droneAddress}]`);
 
     await starwingsMaster.addDrone(droneSample._droneAddress, droneSample._droneId, droneSample._droneType);
     pilotSample._pilotAddress = pilot.address;
-
-    // console.log(`======= Adding Pilot [${pilotSample._pilotAddress}]`);
 
     await starwingsMaster.addPilot(pilotSample._pilotAddress, pilotSample._pilotName);
 

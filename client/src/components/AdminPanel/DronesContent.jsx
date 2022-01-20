@@ -78,7 +78,6 @@ function DronesContent(props) {
         try {
             const droneAddressListResult = await StarwingsMasterSigner.getDroneList();
             setDroneAddressList(droneAddressListResult);
-            //console.log(droneAddressList);
         } catch (error) {
             console.error(error);
         }
@@ -87,7 +86,6 @@ function DronesContent(props) {
     };
 
     const handleDeleteDroneClick = async (state) => {
-        console.log(state.target.id);
         await StarwingsMasterSigner.deleteDrone(state.target.id);
     };
 

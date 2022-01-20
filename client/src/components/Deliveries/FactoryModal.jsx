@@ -21,7 +21,6 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
     const [conopsManager, setConopsManager] = useState({ provider: null, signer: null });
     const [flightFactory, setFlightFactory] = useState({ provider: null, signer: null });
     const [drones, setDrones] = useState();
-    // const [pilot, setPilot] = useState();
 
     useEffect(() => {
         (async () => {
@@ -38,14 +37,10 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
                     const dronesList = await StarwingsMasterSigner.getDroneList();
                     setDrones(dronesList);
                 }
-                // console.log("signer:", state.signer);
-                // const pilot = await StarwingsMasterProvider.getPilot(state.accounts[0]);
-                // setPilot(pilot);
             }
         })();
     }, [state]);
-    // console.log(StarwingsMasterSigner);
-    // console.log(drones);
+
     useEffect(() => {
         if (conopsManager.provider) {
             getConops();
@@ -55,7 +50,6 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
     useEffect(() => {
         setConops(-1);
         if (show) {
-            // const data = { deliveryId: deliveryId, pilot: pilot };
             const data = { deliveryId: deliveryId };
             updateFormData(data);
         } else {
@@ -170,8 +164,6 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
         flightData.depart = formData.depart;
         flightData.destination = formData.destination;
 
-        console.log(flightData);
-
         // Now initialize droneDelivery contract with data
         let droneDeliverySigner = new ethers.Contract(computedAddr, DroneDeliveryArtifact.abi, state.signer);
         const tx = await droneDeliverySigner.initDelivery(flightData);
@@ -182,8 +174,6 @@ function FactoryModal({ state, show, onHide, deliveryId, StarwingsMasterSigner }
     const handleFormChange = (event) => {
         setFormData({ ...formData, [event.target.name]: event.target.value });
     };
-
-    //console.log(formData);
 
     return (
         <Modal show={show} onHide={onHide} keyboard={false} aria-labelledby="contained-modal-title-vcenter" size="lg">
