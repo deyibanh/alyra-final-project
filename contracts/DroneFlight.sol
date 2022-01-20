@@ -1,45 +1,122 @@
 //SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.9;
 
-import "./interfaces/IConopsManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
-import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
+import "./interfaces/IConopsManager.sol";
+import { StarwingsDataLib } from "./librairies/StarwingsDataLib.sol";
 
 /**
- *   @title DroneFlight
- *   @author Starwings
- *  @notice This abstract contract is the base class for all droneXXX flight
+ * @title The DroneFlight contract.
+ * 
+ * @author Starwings
+ *
+ * @notice This abstract contract is the base class for all droneXXX flight.
  */
 abstract contract DroneFlight {
     using StarwingsDataLib for StarwingsDataLib.FlightData;
 
+    /**
+     * @dev The ConopsManager contract.
+     */
     IConopsManager private conopsManager;
+
+    /**
+     * @dev The IAccessControl contract.
+     */
     IAccessControl private accessControl;
 
+    /**
+     * @dev A list of Event.
+     */
     Event[] internal riskEvent;
-    // Drone checkpoints
+    
+    /**
+     * @dev A list of Checkpoint.
+     */
     Checkpoint[] internal checkpoints;
+
+    /**
+     * @dev A list of AirRisk.
+     */
     StarwingsDataLib.AirRisk[] internal airRisks;
+
+    /**
+     * @dev The FlightData.
+     */
     StarwingsDataLib.FlightData internal datas;
+
+    /**
+     * @dev The drone FlightState.
+     */
     FlightState internal droneFlightState;
+
+    /**
+     * @dev The pilot FlightState.
+     */
     FlightState internal pilotFlightState;
+
+    /**
+     * @dev The pre-checks.
+     */
     Check internal preChecks;
+
+    /**
+     * @dev The post-checks.
+     */
     Check internal postChecks;
+
+    /**
+     * @dev Boolean that show if the drone is allowed to flight.
+     */
     bool internal allowedToFlight;
 
+    /**
+     * @notice Preflight check event.
+     */
     event PreFlightCheck(CheckType _checkType);
+
+    /**
+     * @notice Postflight check event.
+     */
     event PostFlightCheck(CheckType _checkType);
+
+    /**
+     * @notice AirRisk validated event.
+     */
     event AirRiskValidated(uint256 _airRiskId);
+
+    /**
+     * @notice AirRisk canceled event.
+     */
     event AirRiskCanceled(uint256 _airRiskId);
+
+    /**
+     * @notice Cancel flight event.
+     */
     event CancelFlight();
+
+    /**
+     * @notice Flight status change event.
+     */
     event ChangeFlightStatus(FlightState _status);
+
+    /**
+     * @notice RiskEvent event.
+     */
     event RiskEvent(Event _status);
+
+    /**
+     * @notice Checkpoint added event.
+     */
     event CheckpointAdded(Checkpoint checkpoint);
 
     /**
-     *  @notice Modifier to restrict function to specific role
-     *  @dev Use the library to retrieve bytes32 values when calling the modifier
-     *  @param _role The role authorize to access the function
+     * @notice Modifier to restrict function to specific role.
+     *
+     * @dev Use the library to retrieve bytes32 values when calling the modifier.
+     *
+     * @param _role The role authorize to access the function.
      */
     modifier onlyRole(bytes32 _role) {
         require(accessControl.hasRole(_role, msg.sender), "Access Refused");
@@ -47,7 +124,7 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Modifier to restrict function to the owner (for flight session it is the pilot)
+     * @notice Modifier to restrict function to the owner (for flight session it is the pilot).
      */
     modifier onlyOwner() {
         require(datas.pilot.pilotAddress == msg.sender, "Only owner");
@@ -55,7 +132,7 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Modifier to restrict function to the owner (for flight session it is the pilot)
+     * @notice Modifier to restrict function to the owner (for flight session it is the pilot).
      */
     modifier onlyDrone() {
         require(datas.drone.droneAddress == msg.sender, "Only drone");
@@ -63,12 +140,14 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  PreFlight : flight is not started
-     *  Canceled : flight canceled (only if in Preflight state)
-     *  Flying : In flight ( only if in Preflight state and allowedToFlight)
-     *  Paused : In pause/wait (only if in Flying state)
-     *  Aborted : Flight aborted (only if Flying / Paused)
-     *  Ended : Flight Ended correctly (only if Flying/Pause)
+     * @dev FlightState enum.
+     *
+     * PreFlight : Flight is not started
+     * Canceled : Flight canceled (only if in Preflight state)
+     * Flying : In flight (only if in Preflight state and allowedToFlight)
+     * Paused : In pause/wait (only if in Flying state)
+     * Aborted : Flight aborted (only if Flying / Paused)
+     * Ended : Flight Ended correctly (only if Flying/Pause)
      */
     enum FlightState {
         PreFlight,
@@ -79,45 +158,70 @@ abstract contract DroneFlight {
         Ended
     }
 
+    /**
+     * @dev RiskType enum.
+     */
     enum RiskType {
         Engine,
         Gps,
         Telecom
     }
 
+    /**
+     * @dev CheckType enum.
+     */
     enum CheckType {
         Engine,
         Battery,
         ControlStation
     }
 
+    /**
+     * @dev Check struct.
+     */
     struct Check {
         mapping(CheckType => bool) checkType;
     }
 
+    /**
+     * @dev Event struct.
+     */
     struct Event {
         uint256 dateTime; // timespan
         RiskType risk;
     }
 
+    /**
+     * @dev Coordinate struct.
+     */
     struct Coordinate {
         uint256 latitude;
         uint256 longitude;
     }
 
+    /**
+     * @dev Checkpoint struct.
+     */
     struct Checkpoint {
         Coordinate coordo;
         uint256 time;
     }
 
-    constructor(address _conopsManager, address _accessControlAddress) {
-        conopsManager = IConopsManager(_conopsManager);
+    /**
+     * @notice The constructor.
+     *
+     * @param _conopsManagerAddress The ConopsManager address.
+     * @param _accessControlAddress The IAccessControl address.
+     */
+    constructor(address _conopsManagerAddress, address _accessControlAddress) {
+        conopsManager = IConopsManager(_conopsManagerAddress);
         accessControl = IAccessControl(_accessControlAddress);
     }
 
     /**
-     *  @notice Do the preflight checks of a certain type
-     *  @param _checkType The Checktype to check
+     * @notice Do the preflight checks of a certain type.
+     *
+     * @param _checkType The Checktype to check.
      */
     function preFlightChecks(CheckType _checkType)
         external
@@ -132,8 +236,9 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Do the postflight checks of a certain type
-     *  @param _checkType The Checktype to check
+     * @notice Do the postflight checks of a certain type.
+     *
+     * @param _checkType The Checktype to check.
      */
     function postFlightChecks(CheckType _checkType)
         external
@@ -147,8 +252,9 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Return if a specific preflight check has been done
-     *  @param _checkType The Checktype to check
+     * @notice Return if a specific preflight check has been done.
+     *
+     * @param _checkType The Checktype to check.
      */
     function getPreFlightChecks(CheckType _checkType)
         external
@@ -159,8 +265,9 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Return if a specific postflight check has been done
-     *  @param _checkType The Checktype to check
+     * @notice Return if a specific postflight check has been done.
+     *
+     * @param _checkType The Checktype to check.
      */
     function getPostFlightChecks(CheckType _checkType)
         external
@@ -199,8 +306,9 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Add a new risk event
-     *  @param _event The event to be add
+     * @notice Add a new risk event
+     * 
+     * @param _event The event to be add.
      */
     function newRiskEvent(Event memory _event)
         external
@@ -213,8 +321,11 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Return the specified risk event
-     *  @param _eventId The id of event
+     * @notice Return the specified risk event.
+     *
+     * @param _eventId The id of event.
+     *
+     * @return The risk event.
      */
     function viewRiskEvent(uint256 _eventId)
         external
@@ -225,8 +336,9 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Validate the air Risk of specified id
-     *  @param _airRiskId The id of airRisk
+     * @notice Validate the air Risk of specified id.
+     *
+     * @param _airRiskId The id of airRisk.
      */
     function validateAirRisk(uint256 _airRiskId)
         external
@@ -241,8 +353,9 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Cancel the air Risk of specified id
-     *  @param _airRiskId The id of airRisk
+     * @notice Cancel the air Risk of specified id.
+     * 
+     * @param _airRiskId The id of airRisk.
      */
     function cancelAirRisk(uint256 _airRiskId)
         external
@@ -257,7 +370,7 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Return all air Risk
+     * @notice Return all air Risk.
      */
     function viewAirRisks()
         external
@@ -268,9 +381,10 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Cancel the flight
-     *  @dev This function has to be call to cancel the flight.
-     *  Using changeFlightStatus is not possible
+     * @notice Cancel the flight.
+     * 
+     * @dev This function has to be call to cancel the flight.
+     * Using changeFlightStatus is not possible.
      */
     function cancelFlight()
         external
@@ -290,11 +404,12 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Change the status of the flight
-     *  @dev Only Pilot and Drone can call this function
-     *       droneFlightState or pilotFlightState will be
-     *       called depending of the msg.sender
-     *  @param _status The uint of the FlightState
+     * @notice Change the status of the flight.
+     *
+     * @dev Only Pilot and Drone can call this function.
+     * droneFlightState or pilotFlightState will be called depending of the msg.sender.
+     *
+     * @param _status The uint of the FlightState.
      */
     function changeFlightStatus(uint256 _status) external {
         bool isPilot = accessControl.hasRole(
@@ -341,26 +456,29 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @notice Return the flight status for the drone
+     * @notice Return the flight status for the drone.
+     *
+     * @return The drone flight state.
      */
     function viewDroneFlightstatus() external view returns (FlightState) {
         return droneFlightState;
     }
 
     /**
-     *  @notice Return the flight status for the pilot
+     * @notice Return the flight status for the pilot.
+     *
+     * @return The pilot flight state.
      */
     function viewPilotFlightstatus() external view returns (FlightState) {
         return pilotFlightState;
     }
 
-    // 8. Public visible functions
-    // 9. Internal visible functions
-
     /**
-     *  @notice Setup the data for the flight
-     *  @dev Check the StarwingsLibrary to view the struture
-     *  @param _data A FlightData structure,
+     * @notice Setup the data for the flight.
+     *
+     * @dev Check the StarwingsLibrary to view the struture.
+     *
+     * @param _data A FlightData structure,
      */
     function setFlightData(StarwingsDataLib.FlightData memory _data) internal {
         datas.pilot = _data.pilot;
@@ -375,7 +493,7 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @dev Retrieve air AirRisk from the conops and store them
+     * @dev Retrieve air AirRisk from the conops and store them.
      */
     function _setupAirRisk() internal {
         StarwingsDataLib.SimpleConops memory conops = conopsManager.viewConops(
@@ -389,23 +507,25 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @dev Change the droneFlightState
-     *  @param _value The new FlightState
+     * @dev Change the droneFlightState.
+     *
+     * @param _value The new FlightState.
      */
     function _changeDroneFlightState(FlightState _value) internal {
         droneFlightState = _value;
     }
 
     /**
-     *  @dev Change the pilotFlightState
-     *  @param _value The new FlightState
+     * @dev Change the pilotFlightState.
+     *
+     * @param _value The new FlightState
      */
     function _changePilotFlightState(FlightState _value) internal {
         pilotFlightState = _value;
     }
 
     /**
-     *  @dev call this function if a state change can authorize or not a fly
+     * @dev Call this function if a state change can authorize or not a fly.
      */
     function _allowToFlight() internal {
         bool standardAllowed = _standardAllowToFlight();
@@ -415,7 +535,9 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @dev internal control to see if flying can start
+     * @dev Internal control to see if flying can start.
+     *
+     * @return True if the fly can start.
      */
     function _standardAllowToFlight() internal view returns (bool) {
         bool allowed = true;
@@ -439,9 +561,11 @@ abstract contract DroneFlight {
     }
 
     /**
-     *  @dev this function is called by _allowToFlight()
-     *  It allow each DroneFlight (DroneDelivery, DroneTaxi, ...) to
-     *  have their proper control/authotirzation
+     * @dev This function is called by _allowToFlight().
+     *      It allow each DroneFlight (DroneDelivery, DroneTaxi, ...) to
+     *      have their proper control/authotirzation.
+     *
+     * @return True if the fly can start.
      */
     function _customAllowToFlight() internal virtual returns (bool);
 }

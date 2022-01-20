@@ -1,39 +1,61 @@
 //SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.9;
 
-import "./interfaces/IDeliveryManager.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
+import "./interfaces/IDeliveryManager.sol";
+import { StarwingsDataLib } from "./librairies/StarwingsDataLib.sol";
 
-/**
- *  @title Delivery Master
- *  @author Damien
- *  @notice This contract manage all the deliveries.
+ /**
+ * @title The DeliveryManager contract.
+ *
+ * @author Starwings
+ *
+ * @notice This contract manage all the deliveries.
  */
 contract DeliveryManager is IDeliveryManager {
     using Strings for uint256;
 
+    /**
+     * @dev A map of a delivery ID and the index of the delivery list.
+     */
     mapping(string => uint256) private deliveriesIndex;
+
+    /**
+     * @dev A list of Delivery.
+     */
     Delivery[] private deliveries;
+
+    /**
+     * @dev The IAccessControl contract.
+     */
     IAccessControl private accessControl;
 
-    /// @notice Modifier to restrict function to specific role
-    /// @dev Use the library to retrieve bytes32 values when calling the modifier
-    /// @param _role The role authorize to access the function
+    /**
+     * @notice Modifier to restrict function to specific role.
+     *
+     * @dev Use the library to retrieve bytes32 values when calling the modifier.
+     *
+     * @param _role The role authorize to access the function.
+     */
     modifier onlyRole(bytes32 _role) {
         require(accessControl.hasRole(_role, msg.sender), "Access refused");
         _;
     }
 
-    constructor(address accessControlAddress) {
-        accessControl = IAccessControl(accessControlAddress);
+    /**
+     * @notice The constructor.
+     *
+     * @param _accessControlAddress The IAccessControl address.
+     */
+    constructor(address _accessControlAddress) {
+        accessControl = IAccessControl(_accessControlAddress);
     }
 
-    /// @notice Creates a new delivery
-    /// @dev
-    /// @param _delivery a struct containing delivery information, all properties are required expect deliveryId
-    /// @return Delivery ID
+    /**
+     * @inheritdoc IDeliveryManager
+     */
     function newDelivery(Delivery memory _delivery)
         external
         onlyRole(StarwingsDataLib.ADMIN_ROLE)
@@ -48,12 +70,12 @@ contract DeliveryManager is IDeliveryManager {
         require(_delivery.toHubId != 0, "toHubId:0");
 
         _delivery.state = DeliveryState.noInfo;
-        // Generate pseudo random deliveryID
+        // Generate pseudo random deliveryID.
         _delivery.deliveryId = uint256(
             keccak256(
                 abi.encodePacked(
                     blockhash(block.number - 1),
-                    block.timestamp,
+                    block.timestamp, // solhint-disable-line not-rely-on-time
                     _delivery.fromAddr,
                     _delivery.toAddr,
                     _delivery.supplierOrderId
@@ -69,17 +91,14 @@ contract DeliveryManager is IDeliveryManager {
         return _delivery.deliveryId;
     }
 
-    /// @notice Get delivery by ID
-    /// @dev
-    /// @param _deliveryId Self explanatory
-    /// @return Delivery struct
+    /**
+     * @inheritdoc IDeliveryManager
+     */
     function getDelivery(string memory _deliveryId)
         external
         view
         returns (Delivery memory)
     {
-        //console.log("[Contract Debug] get DeliveryId:%s", _deliveryId);
-
         uint256 tabIndex = deliveriesIndex[_deliveryId];
 
         require(tabIndex < deliveries.length, "Out of size index");
@@ -88,22 +107,13 @@ contract DeliveryManager is IDeliveryManager {
             "Delivery does not exist"
         );
 
-        // console.log(
-        //     "[Contract Debug] get toAddr:%s",
-        //     deliveries[tabIndex].toAddr
-        // );
-
         return deliveries[tabIndex];
     }
 
-    /// @notice Update the delivery state
-    /// @dev
-    /// @param _deliveryId The delivery ID to update
-    /// @param _deliveryState The new state, using DeliveryState enum
-    function setDeliveryState(
-        string memory _deliveryId,
-        DeliveryState _deliveryState
-    ) external {
+    /**
+     * @inheritdoc IDeliveryManager
+     */
+    function setDeliveryState(string memory _deliveryId, DeliveryState _deliveryState) external {
         uint256 tabIndex = deliveriesIndex[_deliveryId];
 
         require(tabIndex < deliveries.length, "Out of size index");
@@ -114,6 +124,7 @@ contract DeliveryManager is IDeliveryManager {
 
         DeliveryState oldState = deliveries[tabIndex].state;
         deliveries[tabIndex].state = _deliveryState;
+
         emit DeliveryStatusUpdated(
             deliveries[tabIndex].deliveryId,
             oldState,
@@ -121,9 +132,9 @@ contract DeliveryManager is IDeliveryManager {
         );
     }
 
-    /// @notice Get all deliveries ID to be able to query the map after
-    /// @dev
-    /// @return All deliveries id
+    /**
+     * @inheritdoc IDeliveryManager
+     */
     function getAllDeliveries() external view returns (Delivery[] memory) {
         return deliveries;
     }
