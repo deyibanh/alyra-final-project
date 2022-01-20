@@ -27,6 +27,11 @@
 
 ## `DroneFlight`
 
+### Info
+
+-   should get the delivery id
+-   should get the flightInfoDisplay
+
 ### Checks
 
 -   should revert with Acces Refused message
@@ -174,22 +179,22 @@
 -   a role's previous admins no longer grant roles
 -   a role's previous admins no longer revoke roles
 
-85 passing
+93 passing
 
-| File                   | % Stmts   | % Branch  | % Funcs   | % Lines   | Uncovered Lines |
-| ---------------------- | --------- | --------- | --------- | --------- | --------------- |
-| contracts/             | 98.77     | 73.48     | 95.89     | 98.81     |                 |
-| ConopsManager.sol      | 100       | 60        | 100       | 100       |                 |
-| DeliveryManager.sol    | 100       | 50        | 100       | 100       |                 |
-| DroneDelivery.sol      | 90.48     | 75        | 77.78     | 90.48     | 110,186         |
-| DroneFlight.sol        | 100       | 77.78     | 100       | 100       |                 |
-| DroneFlightFactory.sol | 100       | 100       | 100       | 100       |                 |
-| SWAccessControl.sol    | 100       | 100       | 100       | 100       |                 |
-| StarwingsMaster.sol    | 98.75     | 82.69     | 95        | 98.77     | 185             |
-| contracts/interfaces/  | 100       | 100       | 100       | 100       |                 |
-| IConopsManager.sol     | 100       | 100       | 100       | 100       |                 |
-| IDeliveryManager.sol   | 100       | 100       | 100       | 100       |                 |
-| IStarwingsMaster.sol   | 100       | 100       | 100       | 100       |                 |
-| contracts/librairies/  | 100       | 100       | 100       | 100       |                 |
-| StarwingsDataLib.sol   | 100       | 100       | 100       | 100       |                 |
-| **All files**          | **98.77** | **73.48** | **95.89** | **98.81** |                 |
+| File                   | % Stmts | % Branch  | % Funcs | % Lines | Uncovered Lines |
+| ---------------------- | ------- | --------- | ------- | ------- | --------------- |
+| contracts/             | 100     | 76.87     | 100     | 100     |                 |
+| ConopsManager.sol      | 100     | 60        | 100     | 100     |                 |
+| DeliveryManager.sol    | 100     | 50        | 100     | 100     |                 |
+| DroneDelivery.sol      | 100     | 75        | 100     | 100     |                 |
+| DroneFlight.sol        | 100     | 77.78     | 100     | 100     |                 |
+| DroneFlightFactory.sol | 100     | 100       | 100     | 100     |                 |
+| SWAccessControl.sol    | 100     | 100       | 100     | 100     |                 |
+| StarwingsMaster.sol    | 100     | 90.74     | 100     | 100     |                 |
+| contracts/interfaces/  | 100     | 100       | 100     | 100     |                 |
+| IConopsManager.sol     | 100     | 100       | 100     | 100     |                 |
+| IDeliveryManager.sol   | 100     | 100       | 100     | 100     |                 |
+| IStarwingsMaster.sol   | 100     | 100       | 100     | 100     |                 |
+| contracts/librairies/  | 100     | 100       | 100     | 100     |                 |
+| StarwingsDataLib.sol   | 100     | 100       | 100     | 100     |                 |
+| **All files**          | **100** | **76.87** | **100** | **100** |                 |
