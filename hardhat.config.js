@@ -32,55 +32,37 @@ module.exports = {
         hardhat: {
             chainId: 1337,
             accounts: {
-                mnemonic:
-                    process.env.MNEMONIC !== undefined
-                        ? process.env.MNEMONIC
-                        : "",
+                mnemonic: process.env.MNEMONIC !== undefined ? process.env.MNEMONIC : "",
             },
         },
         ropsten: {
             url: process.env.INFURA_ROPSTEN_URL || "",
             accounts: {
-                mnemonic:
-                    process.env.MNEMONIC !== undefined
-                        ? process.env.MNEMONIC
-                        : "",
+                mnemonic: process.env.MNEMONIC !== undefined ? process.env.MNEMONIC : "",
             },
         },
         fantom_testnet: {
             url: process.env.FANTOM_TESTNET_URL || "",
             accounts: {
-                mnemonic:
-                    process.env.MNEMONIC !== undefined
-                        ? process.env.MNEMONIC
-                        : "",
+                mnemonic: process.env.MNEMONIC !== undefined ? process.env.MNEMONIC : "",
             },
         },
         arbitrum_testnet: {
             url: process.env.ARBITRUM_TESTNET_URL || "",
             accounts: {
-                mnemonic:
-                    process.env.MNEMONIC !== undefined
-                        ? process.env.MNEMONIC
-                        : "",
+                mnemonic: process.env.MNEMONIC !== undefined ? process.env.MNEMONIC : "",
             },
         },
         polygon_testnet: {
             url: process.env.POLYGON_TESTNET_URL || "",
             accounts: {
-                mnemonic:
-                    process.env.MNEMONIC !== undefined
-                        ? process.env.MNEMONIC
-                        : "",
+                mnemonic: process.env.MNEMONIC !== undefined ? process.env.MNEMONIC : "",
             },
         },
         optimism_testnet: {
             url: process.env.OPTIMISM_TESTNET_URL || "",
             accounts: {
-                mnemonic:
-                    process.env.MNEMONIC !== undefined
-                        ? process.env.MNEMONIC
-                        : "",
+                mnemonic: process.env.MNEMONIC !== undefined ? process.env.MNEMONIC : "",
             },
         },
     },

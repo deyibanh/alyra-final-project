@@ -104,12 +104,9 @@ const deploy = async () => {
     await starwingsMaster.setDroneFlightFactoryAddress(factory.address);
 
     droneSample._droneAddress = drone.address;
-    // console.log(`======= Adding Drone [${droneSample._droneAddress}]`);
 
     await starwingsMaster.addDrone(droneSample._droneAddress, droneSample._droneId, droneSample._droneType);
     pilotSample._pilotAddress = pilot.address;
-
-    // console.log(`======= Adding Pilot [${pilotSample._pilotAddress}]`);
 
     await starwingsMaster.addPilot(pilotSample._pilotAddress, pilotSample._pilotName);
 
@@ -155,8 +152,6 @@ describe("DroneFlightFactory", function () {
         const deliveries = await delivery.getAllDeliveries();
         expect((await factory.getDeployedContracts()).length).to.equal(0);
 
-        // ############################ 1st DroneDelivery
-        // // console.log("############################ 1st DroneDelivery");
         // Magics happens
         let salt = 1;
         let bytecode = ethers.utils.arrayify(
@@ -183,32 +178,17 @@ describe("DroneFlightFactory", function () {
             return x.event === "Deployed";
         })[0].args.addr;
 
-        // console.log(`[DroneDelivery] deployed at ${droneDeliveryAddr}`);
-        // console.log(`[DeliveryId] used ${deliveries[0].deliveryId}`);
-
         // Create contract object with deployed address
         let droneDeliveryContract = new ethers.Contract(droneDeliveryAddr, droneDeliveryFactory.interface, pilot);
-
-        // console.log(
-        //     `[Verifiy] DeliveryId in DroneDelivery = ${await droneDeliveryContract.getDeliveryId()}`
-        // );
 
         // Init flightdata for drone delivery
         droneFlightDataSample.pilot.pilotAddress = pilot.address;
         droneFlightDataSample.drone.droneAddress = drone.address;
         await droneDeliveryContract.connect(pilot).initDelivery(droneFlightDataSample);
 
-        // console.log(
-        //     `Deployed contracts = ${
-        //         (await factory.getDeployedContracts()).length
-        //     }`
-        // );
-
         expect((await factory.getDeployedContracts()).length).to.equal(1);
         expect(await factory.deployedContracts(0)).to.not.equal(0);
 
-        // ############################ 2nd DroneDelivery
-        // console.log("############################ 2nd DroneDelivery");
         // Magics happens
         salt = 2;
         bytecode = ethers.utils.arrayify(
@@ -235,15 +215,8 @@ describe("DroneFlightFactory", function () {
             return x.event === "Deployed";
         })[0].args.addr;
 
-        // console.log(`[DroneDelivery] deployed at ${droneDeliveryAddr}`);
-        // console.log(`[DeliveryId] used ${deliveries[1].deliveryId}`);
-
         // Create contract object with deployed address
         droneDeliveryContract = new ethers.Contract(droneDeliveryAddr, droneDeliveryFactory.interface, pilot);
-
-        // console.log(
-        //     `[Verifiy] DeliveryId in DroneDelivery = ${await droneDeliveryContract.getDeliveryId()}`
-        // );
 
         // Init flightdata for drone delivery
         droneFlightDataSample.pilot.pilotAddress = pilot.address;
@@ -251,7 +224,6 @@ describe("DroneFlightFactory", function () {
         await droneDeliveryContract.connect(pilot).initDelivery(droneFlightDataSample);
 
         const addressesFromFactory = await factory.getDeployedContracts();
-        // console.log(`Deployed contracts = ${addressesFromFactory.length}`);
 
         expect((await factory.getDeployedContracts()).length).to.equal(2);
         expect(addressesFromFactory[0]).to.not.equal(0);

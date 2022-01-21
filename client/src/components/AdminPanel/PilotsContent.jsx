@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Button, Col, Form, FormControl, Badge, Modal, Row, Toast, ToastContainer } from "react-bootstrap";
-import DataTable from "react-data-table-component";
+import DataTable, { createTheme } from "react-data-table-component";
 import "./PilotsContent.css";
+import "../../utils/table-themes.js";
+
+createTheme(
+    "solarized",
+    {
+        background: {
+            default: "#00000005",
+        },
+    },
+    "light"
+);
 
 function PilotsContent(props) {
     const StarwingsMasterSigner = props.StarwingsMasterSigner;
@@ -54,10 +65,8 @@ function PilotsContent(props) {
         event.preventDefault();
         try {
             const tx = await StarwingsMasterSigner.addPilot(inputAddPilot, inputAddPilotName);
-            //console.log(tx);
             showTooltip("Transaciton sent !", tx.hash, "success");
         } catch (error) {
-            //console.log(error);
             showTooltip("Error", error?.data?.message, "danger");
         }
 
@@ -80,7 +89,6 @@ function PilotsContent(props) {
     };
 
     const handleDeletePilotClick = async (state) => {
-        console.log(state.target.id);
         await StarwingsMasterSigner.deletePilot(state.target.id);
     };
 
@@ -139,12 +147,12 @@ function PilotsContent(props) {
             </Row>
             <Row style={{ marginTop: "30px" }}>
                 <Col>
-                    {/* {pilotAddressList && pilotAddressList.length > 0 ? (
-                        <span>There is pilots.</span>
-                    ) : (
-                        <span>There is no pilots yet.</span>
-                    )} */}
-                    <DataTable columns={columns} data={pilotAddressList} progressPending={pending} />
+                    <DataTable
+                        columns={columns}
+                        data={pilotAddressList}
+                        progressPending={pending}
+                        theme="light-transparency"
+                    />
                 </Col>
             </Row>
 

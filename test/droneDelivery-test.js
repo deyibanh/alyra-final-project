@@ -15,7 +15,7 @@ const droneSample = {
 };
 
 const deliverySample = {
-    deliveryId: "",
+    deliveryId: "DELIVERYID",
     supplierOrderId: "A47G-78",
     state: 0,
     from: "From1",
@@ -101,12 +101,9 @@ const deploy = async () => {
 
     // ADD PILOTE AND DRONE
     droneSample._droneAddress = drone.address;
-    // console.log(`======= Adding Drone [${droneSample._droneAddress}]`);
 
     await starwingsMaster.addDrone(droneSample._droneAddress, droneSample._droneId, droneSample._droneType);
     pilotSample._pilotAddress = pilot.address;
-
-    // console.log(`======= Adding Pilot [${pilotSample._pilotAddress}]`);
 
     await starwingsMaster.addPilot(pilotSample._pilotAddress, pilotSample._pilotName);
 
@@ -125,7 +122,7 @@ const deploy = async () => {
             droneDeliveryFactory.bytecode,
             droneDeliveryFactory.interface.encodeDeploy([
                 deliveryManager.address,
-                0,
+                "DELIVERYID",
                 conops.address,
                 accessControl.address,
                 starwingsMaster.address,
@@ -156,6 +153,42 @@ const deploy = async () => {
 describe("DroneFlight", function () {
     beforeEach(async () => {
         await deploy();
+    });
+
+    describe("Info", function () {
+        it("should get the delivery id", async () => {
+            expect(await droneDelivery.getDeliveryId()).to.equal("DELIVERYID");
+        });
+
+        it("should get the flightInfoDisplay", async () => {
+            const droneFlightDataExpected = [
+                [ethers.constants.Zero, false, "John Pilot", pilot.address, []],
+                [ethers.constants.Zero, false, "78re2578", "aiir32", drone.address, []],
+                ethers.constants.Zero,
+                ethers.BigNumber.from(57875),
+                ethers.BigNumber.from(10),
+                "Terre",
+                "Moon",
+            ];
+            const expected = [
+                "DELIVERYID",
+                false,
+                false,
+                false,
+                droneFlightDataExpected,
+                0,
+                0,
+                [],
+                [
+                    [false, "CHU A", 0],
+                    [false, "BASE B", 2],
+                ],
+            ];
+            const result = await droneDelivery.flightInfoDisplay();
+            expect(result).to.eql(expected);
+
+            // expect().to.equal("DELIVERYID");
+        });
     });
 
     describe("Checks", function () {

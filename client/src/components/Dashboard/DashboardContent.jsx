@@ -26,7 +26,6 @@ function DashboardContent(props) {
         try {
             const pilotAddressListResult = await StarwingsMasterSigner.getPilotList();
             setPilotAddressList(pilotAddressListResult);
-            console.log(pilotAddressListResult);
         } catch (error) {
             console.error(error);
         }

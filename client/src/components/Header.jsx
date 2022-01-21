@@ -1,10 +1,11 @@
 /* eslint-disable prettier/prettier */
 // @todo: Fix linter/prettier for inline If with Logical && Operator.
 import React from "react";
-import { Container, Nav, Navbar } from "react-bootstrap";
+import { Container, Nav, Navbar, Image } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import NavWalletStatus from "./NavWalletStatus.jsx";
 import "./Header.css";
+import SWLogo from "../img/logo-sw2.png";
 
 function Header(props) {
     const location = useLocation();
@@ -14,7 +15,10 @@ function Header(props) {
         <header>
             <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
                 <Container>
-                    <Navbar.Brand href="/">Starwings</Navbar.Brand>
+                    <Navbar.Brand href="/">
+                        <Image src={SWLogo} alt="" fluid style={{ height: "1.4rem" }} className="me-2"/>
+                        Starwings
+                    </Navbar.Brand>
                     <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                     <Navbar.Collapse id="responsive-navbar-nav">
                         <Nav className="me-auto" activeKey={location.pathname}>

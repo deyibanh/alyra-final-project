@@ -1,51 +1,82 @@
 //SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "./interfaces/IStarwingsMaster.sol";
 import "./interfaces/IDeliveryManager.sol";
-import "./interfaces/IDroneFlight.sol";
-import {StarwingsDataLib} from "./librairies/StarwingsDataLib.sol";
+import { StarwingsDataLib } from "./librairies/StarwingsDataLib.sol";
 
 /**
- *  @title DroneFlightFactory
- *  @author Damien
- *  @notice This contract serve as a factory for deploying new DroneFlight contract of different types.
+ * @title The DroneFlightFactory contract.
+ *
+ * @author Starwings
+ *
+ * @notice This contract serve as a factory for deploying new DroneFlight contract of different types.
  */
 contract DroneFlightFactory {
     using StarwingsDataLib for StarwingsDataLib.FlightData;
 
+    /**
+     * @dev The IAccessControl contract.
+     */
     IAccessControl private accessControl;
+
+    /**
+     * @dev The IAccessControl contract.
+     */
     IStarwingsMaster private starwingsMaster;
 
+    /**
+     * @dev A list of deployed contracts address.
+     */
     address[] public deployedContracts;
+
+    /**
+     * @notice Deployed event.
+     *
+     * @param addr The contract address.
+     * @param salt The salt.
+     */
     event Deployed(address addr, uint256 salt);
 
     /**
-     *  @notice Modifier to restrict function to specific role
-     *  @dev Use the library to retrieve bytes32 values when calling the modifier
-     *  @param _role The role authorize to access the function
+     * @notice Modifier to restrict function to specific role.
+     *
+     * @dev Use the library to retrieve bytes32 values when calling the modifier.
+     *
+     * @param _role The role authorize to access the function.
      */
     modifier onlyRole(bytes32 _role) {
         require(accessControl.hasRole(_role, msg.sender), "Access Refused");
         _;
     }
 
+    /**
+     * @dev FlightType enum.
+     */
     enum FlightType {
         delivery,
         photo,
         taxi
     }
 
-    constructor(address accessControlAddress, address starwingsMasterAddress) {
-        accessControl = IAccessControl(accessControlAddress);
-        starwingsMaster = IStarwingsMaster(starwingsMasterAddress);
+    /**
+     * @notice The constructor.
+     *
+     * @param _accessControlAddress The IAccessControl address.
+     * @param _starwingsMasterAddress The StarwingsManager address.
+     */
+    constructor(address _accessControlAddress, address _starwingsMasterAddress) {
+        accessControl = IAccessControl(_accessControlAddress);
+        starwingsMaster = IStarwingsMaster(_starwingsMasterAddress);
     }
 
     /**
-     *  @notice Deploy a new instance of the contract's bytecode
-     *  @param code The byte code of the contract to deploy
-     *  @param salt Salt
+     * @notice Deploy a new instance of the contract's bytecode.
+     *
+     * @param code The byte code of the contract to deploy.
+     * @param salt The salt.
      */
     function deploy(bytes memory code, uint256 salt)
         external
@@ -65,7 +96,7 @@ contract DroneFlightFactory {
     }
 
     /**
-     *  @notice Return all deployed contrats addresses
+     * @notice Return all deployed contrats addresses.
      */
     function getDeployedContracts() external view returns (address[] memory) {
         return deployedContracts;

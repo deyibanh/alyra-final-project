@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Col, Form, FormControl, Badge, Modal, Row, Toast, ToastContainer } from "react-bootstrap";
 import DataTable from "react-data-table-component";
+import "../../utils/table-themes.js";
 
 function DronesContent(props) {
     const StarwingsMasterSigner = props.StarwingsMasterSigner;
@@ -77,7 +78,6 @@ function DronesContent(props) {
         try {
             const droneAddressListResult = await StarwingsMasterSigner.getDroneList();
             setDroneAddressList(droneAddressListResult);
-            //console.log(droneAddressList);
         } catch (error) {
             console.error(error);
         }
@@ -86,7 +86,6 @@ function DronesContent(props) {
     };
 
     const handleDeleteDroneClick = async (state) => {
-        console.log(state.target.id);
         await StarwingsMasterSigner.deleteDrone(state.target.id);
     };
 
@@ -154,7 +153,12 @@ function DronesContent(props) {
                     ) : (
                         <span>There is no drones yet.</span>
                     )} */}
-                    <DataTable columns={columns} data={droneAddressList} progressPending={pending} />
+                    <DataTable
+                        columns={columns}
+                        data={droneAddressList}
+                        progressPending={pending}
+                        theme="light-transparency"
+                    />
                 </Col>
             </Row>
 

@@ -18,7 +18,7 @@ function Deliveries(props) {
             <div className="FlightsMenu">
                 <Tab.Container id="left-tabs-example" defaultActiveKey="all_deliveries">
                     <Row>
-                        <Col sm={3}>
+                        <Col sm={2}>
                             <Nav variant="pills" className="flex-column">
                                 <Nav.Item>
                                     <Nav.Link eventKey="all_deliveries">All</Nav.Link>
@@ -28,7 +28,7 @@ function Deliveries(props) {
                                 </Nav.Item> */}
                             </Nav>
                         </Col>
-                        <Col sm={9}>
+                        <Col sm={10}>
                             <Tab.Content>
                                 <Tab.Pane eventKey="all_deliveries">
                                     <DeliveriesList

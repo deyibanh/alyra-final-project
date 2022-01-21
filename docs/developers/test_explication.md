@@ -27,6 +27,11 @@
 
 ## `DroneFlight`
 
+### Info
+
+-   should get the delivery id
+-   should get the flightInfoDisplay
+
 ### Checks
 
 -   should revert with Acces Refused message
@@ -85,6 +90,15 @@
 -   should get the list of DroneFlight address.
 -   should not get the list of DroneFlight address if sender has not the admin role.
 -   should not get the DroneFlight address if sender has not the admin role.
+-   should not get the DroneFlight address if DroneFlight index out of the list size.
+
+### Add DroneFlight
+
+-   should add a DroneFlight.
+-   should not add a DroneFlight if Pilot index out of the list size.
+-   should not add a DroneFlight if Pilot not exist.
+-   should not add a DroneFlight if Drone index out of the list size.
+-   should not add a DroneFlight if Drone not exist.
 
 ### Pilot
 
@@ -165,23 +179,22 @@
 -   a role's previous admins no longer grant roles
 -   a role's previous admins no longer revoke roles
 
-85 passing
+93 passing
 
-| File                   | % Stmts   | % Branch | % Funcs   | % Lines   | Uncovered Lines |
-| ---------------------- | --------- | -------- | --------- | --------- | --------------- |
-| contracts/             | 98.74     | 74.6     | 95.77     | 98.78     |                 |
-| ConopsManager.sol      | 100       | 60       | 100       | 100       |                 |
-| DeliveryManager.sol    | 100       | 50       | 100       | 100       |                 |
-| DroneDelivery.sol      | 90        | 83.33    | 77.78     | 90        | 63,119          |
-| DroneFlight.sol        | 100       | 81.25    | 100       | 100       |                 |
-| DroneFlightFactory.sol | 100       | 100      | 100       | 100       |                 |
-| SWAccessControl.sol    | 100       | 100      | 100       | 100       |                 |
-| StarwingsMaster.sol    | 98.75     | 82.69    | 95        | 98.77     | 183             |
-| contracts/interfaces/  | 100       | 100      | 100       | 100       |                 |
-| IConopsManager.sol     | 100       | 100      | 100       | 100       |                 |
-| IDeliveryManager.sol   | 100       | 100      | 100       | 100       |                 |
-| IDroneFlight.sol       | 100       | 100      | 100       | 100       |                 |
-| IStarwingsMaster.sol   | 100       | 100      | 100       | 100       |                 |
-| contracts/librairies/  | 100       | 100      | 100       | 100       |                 |
-| StarwingsDataLib.sol   | 100       | 100      | 100       | 100       |                 |
-| **All files**          | **98.74** | **74.6** | **95.77** | **98.78** |                 |
+| File                   | % Stmts | % Branch  | % Funcs | % Lines | Uncovered Lines |
+| ---------------------- | ------- | --------- | ------- | ------- | --------------- |
+| contracts/             | 100     | 76.87     | 100     | 100     |                 |
+| ConopsManager.sol      | 100     | 60        | 100     | 100     |                 |
+| DeliveryManager.sol    | 100     | 50        | 100     | 100     |                 |
+| DroneDelivery.sol      | 100     | 75        | 100     | 100     |                 |
+| DroneFlight.sol        | 100     | 77.78     | 100     | 100     |                 |
+| DroneFlightFactory.sol | 100     | 100       | 100     | 100     |                 |
+| SWAccessControl.sol    | 100     | 100       | 100     | 100     |                 |
+| StarwingsMaster.sol    | 100     | 90.74     | 100     | 100     |                 |
+| contracts/interfaces/  | 100     | 100       | 100     | 100     |                 |
+| IConopsManager.sol     | 100     | 100       | 100     | 100     |                 |
+| IDeliveryManager.sol   | 100     | 100       | 100     | 100     |                 |
+| IStarwingsMaster.sol   | 100     | 100       | 100     | 100     |                 |
+| contracts/librairies/  | 100     | 100       | 100     | 100     |                 |
+| StarwingsDataLib.sol   | 100     | 100       | 100     | 100     |                 |
+| **All files**          | **100** | **76.87** | **100** | **100** |                 |
